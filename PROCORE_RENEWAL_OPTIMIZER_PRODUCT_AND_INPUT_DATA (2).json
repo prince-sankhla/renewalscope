@@ -1,0 +1,303 @@
+{
+  "version": "1.0",
+  "manual_first": true,
+  "pdf_parser_initial_mvp": false,
+  "product_catalog": [
+    {
+      "Commercial Product / Capability": "Project Management",
+      "Current Procore Presentation": "Product / capability family",
+      "Key Capabilities / Tools": "RFIs, Submittals, Schedule, Punch List, Documents, Photos & Videos and other PM workflows",
+      "MVP Supported": "YES",
+      "Commercial Pricing Evidence": "Customer-specific quote evidence",
+      "Guard": "Do not treat every tool as a separately priced product."
+    },
+    {
+      "Commercial Product / Capability": "Quality & Safety",
+      "Current Procore Presentation": "Commercially marketed product; associated tools are organized under Project Management in Procore navigation",
+      "Key Capabilities / Tools": "Inspections, Incidents, Observations, Deficiency List, Daily Log, Forms",
+      "MVP Supported": "YES",
+      "Commercial Pricing Evidence": "Customer/public quote evidence where available",
+      "Guard": "Commercial product/category/tool hierarchy must stay separate."
+    },
+    {
+      "Commercial Product / Capability": "Project Financials",
+      "Current Procore Presentation": "Financial Management capability/product",
+      "Key Capabilities / Tools": "Budgets, cost management, financial workflows",
+      "MVP Supported": "YES",
+      "Commercial Pricing Evidence": "Customer/public quote evidence",
+      "Guard": "Flag ERP/accounting integrations before removal."
+    },
+    {
+      "Commercial Product / Capability": "Invoice Management",
+      "Current Procore Presentation": "Financial Management capability/product",
+      "Key Capabilities / Tools": "Invoice workflows and billing",
+      "MVP Supported": "YES",
+      "Commercial Pricing Evidence": "Customer/public quote evidence",
+      "Guard": "Line-item spend is not automatically removal savings."
+    },
+    {
+      "Commercial Product / Capability": "Analytics",
+      "Current Procore Presentation": "Capability/product",
+      "Key Capabilities / Tools": "Reporting, dashboards, unified data",
+      "MVP Supported": "YES",
+      "Commercial Pricing Evidence": "Customer/public quote evidence",
+      "Guard": "Do not infer operational-module dependency from analytics alone."
+    },
+    {
+      "Commercial Product / Capability": "Pay",
+      "Current Procore Presentation": "Financial / payments capability",
+      "Key Capabilities / Tools": "Subcontractor payments, compliance and lien-waiver workflows",
+      "MVP Supported": "YES",
+      "Commercial Pricing Evidence": "Limited public pricing evidence",
+      "Guard": "Use UNKNOWN where counterfactual pricing is unsupported."
+    },
+    {
+      "Commercial Product / Capability": "Resource Tracking",
+      "Current Procore Presentation": "Resource Management capability",
+      "Key Capabilities / Tools": "Labor/productivity/resource tracking",
+      "MVP Supported": "YES",
+      "Commercial Pricing Evidence": "Limited public pricing evidence",
+      "Guard": "Do not apply ACV formula to FTE-priced products without evidence."
+    },
+    {
+      "Commercial Product / Capability": "Estimating",
+      "Current Procore Presentation": "Preconstruction capability",
+      "Key Capabilities / Tools": "Estimating / takeoff workflows",
+      "MVP Supported": "YES",
+      "Commercial Pricing Evidence": "Limited public pricing evidence",
+      "Guard": "Validate industry/product eligibility."
+    },
+    {
+      "Commercial Product / Capability": "Bid Management",
+      "Current Procore Presentation": "Preconstruction capability",
+      "Key Capabilities / Tools": "Bid distribution, collection and coverage",
+      "MVP Supported": "YES",
+      "Commercial Pricing Evidence": "Limited public pricing evidence",
+      "Guard": "Validate industry/product eligibility."
+    },
+    {
+      "Commercial Product / Capability": "Field Productivity",
+      "Current Procore Presentation": "Resource Management / FTE-priced exception",
+      "Key Capabilities / Tools": "Field productivity tracking",
+      "MVP Supported": "CONDITIONAL",
+      "Commercial Pricing Evidence": "FTE pricing evidence",
+      "Guard": "Do not calculate with ACV pricing logic unless contract evidence supports it."
+    },
+    {
+      "Commercial Product / Capability": "Other Procore capabilities",
+      "Current Procore Presentation": "Current catalog evolves",
+      "Key Capabilities / Tools": "Use official current catalog as source of truth",
+      "MVP Supported": "CONDITIONAL",
+      "Commercial Pricing Evidence": "Research required",
+      "Guard": "If evidence is insufficient, return UNKNOWN rather than inventing."
+    }
+  ],
+  "user_input_schema": [
+    {
+      "Section": "Commercial",
+      "Field": "Current annual renewal / subscription spend",
+      "Required": "YES",
+      "Input Type": "Numeric",
+      "Allowed / Suggested Options": "USD amount",
+      "Why Brain Needs It": "Baseline current cost",
+      "Free-text?": "NO"
+    },
+    {
+      "Section": "Commercial",
+      "Field": "Current Procore products/capabilities",
+      "Required": "YES",
+      "Input Type": "Multi-select",
+      "Allowed / Suggested Options": "Controlled current catalog",
+      "Why Brain Needs It": "Build current configuration",
+      "Free-text?": "NO"
+    },
+    {
+      "Section": "Commercial",
+      "Field": "Annual Construction Volume (ACV)",
+      "Required": "YES",
+      "Input Type": "Numeric / band",
+      "Allowed / Suggested Options": "USD amount or predefined bands",
+      "Why Brain Needs It": "Commercial comparability",
+      "Free-text?": "NO"
+    },
+    {
+      "Section": "Commercial",
+      "Field": "Contract term",
+      "Required": "YES",
+      "Input Type": "Select",
+      "Allowed / Suggested Options": "1 year / multi-year / other",
+      "Why Brain Needs It": "Commercial structure",
+      "Free-text?": "NO"
+    },
+    {
+      "Section": "Commercial",
+      "Field": "Product-level annual/net prices",
+      "Required": "YES where known",
+      "Input Type": "Numeric per selected product",
+      "Allowed / Suggested Options": "USD amount",
+      "Why Brain Needs It": "Current attributable spend",
+      "Free-text?": "NO"
+    },
+    {
+      "Section": "Commercial",
+      "Field": "Current discount",
+      "Required": "RECOMMENDED",
+      "Input Type": "Select + numeric",
+      "Allowed / Suggested Options": "% known / $ known / shown in quote / don't know",
+      "Why Brain Needs It": "Reconstruct current net and model scenarios",
+      "Free-text?": "NO"
+    },
+    {
+      "Section": "Commercial",
+      "Field": "Bundle / pooled-volume structure",
+      "Required": "RECOMMENDED",
+      "Input Type": "Select",
+      "Allowed / Suggested Options": "Bundled / pooled / standard / unknown",
+      "Why Brain Needs It": "Avoid false line-item savings",
+      "Free-text?": "NO"
+    },
+    {
+      "Section": "Commercial",
+      "Field": "Credits / adjustments",
+      "Required": "RECOMMENDED",
+      "Input Type": "Numeric",
+      "Allowed / Suggested Options": "USD amount",
+      "Why Brain Needs It": "Correct current commercial baseline",
+      "Free-text?": "NO"
+    },
+    {
+      "Section": "Usage",
+      "Field": "Usage per selected product",
+      "Required": "YES",
+      "Input Type": "Select",
+      "Allowed / Suggested Options": "Critical / Regular / Occasional / Rarely / Not used / Not sure",
+      "Why Brain Needs It": "Candidate generation",
+      "Free-text?": "NO"
+    },
+    {
+      "Section": "Requirements",
+      "Field": "Is capability required?",
+      "Required": "YES for candidate products",
+      "Input Type": "Select",
+      "Allowed / Suggested Options": "Business-critical / Client-contract / Internal-policy / Not required / Not sure",
+      "Why Brain Needs It": "Removal eligibility",
+      "Free-text?": "NO"
+    },
+    {
+      "Section": "Replacement",
+      "Field": "How would work be handled if removed?",
+      "Required": "RECOMMENDED",
+      "Input Type": "Select",
+      "Allowed / Suggested Options": "Another tool / Internal process / Workflow not needed / No replacement / Not sure",
+      "Why Brain Needs It": "Alternative validity",
+      "Free-text?": "NO"
+    },
+    {
+      "Section": "Dependencies",
+      "Field": "Known dependency / integration",
+      "Required": "RECOMMENDED",
+      "Input Type": "Select",
+      "Allowed / Suggested Options": "Yes / No / Not sure",
+      "Why Brain Needs It": "Prevent invalid candidates",
+      "Free-text?": "NO"
+    },
+    {
+      "Section": "Renewal",
+      "Field": "Did Procore propose a new tier/package?",
+      "Required": "RECOMMENDED",
+      "Input Type": "Select",
+      "Allowed / Suggested Options": "Yes / No / Not sure",
+      "Why Brain Needs It": "Detect renewal configuration change",
+      "Free-text?": "NO"
+    },
+    {
+      "Section": "Renewal",
+      "Field": "Did a feature become a-la-carte or change packaging?",
+      "Required": "OPTIONAL",
+      "Input Type": "Select",
+      "Allowed / Suggested Options": "Yes / No / Not sure",
+      "Why Brain Needs It": "Detect commercial opportunity",
+      "Free-text?": "NO"
+    },
+    {
+      "Section": "Evidence",
+      "Field": "Previous renewal information",
+      "Required": "OPTIONAL",
+      "Input Type": "Select / numeric",
+      "Allowed / Suggested Options": "Upload later; initial MVP manual entry",
+      "Why Brain Needs It": "Historical comparison",
+      "Free-text?": "NO"
+    },
+    {
+      "Section": "Evidence",
+      "Field": "Alternative quote already received",
+      "Required": "OPTIONAL",
+      "Input Type": "Select / numeric",
+      "Allowed / Suggested Options": "Yes / No",
+      "Why Brain Needs It": "Can convert estimate into direct evidence",
+      "Free-text?": "NO"
+    },
+    {
+      "Section": "Goal",
+      "Field": "Target annual savings",
+      "Required": "OPTIONAL",
+      "Input Type": "Select",
+      "Allowed / Suggested Options": "5% / 10% / 15% / 20%+ / No target",
+      "Why Brain Needs It": "Negotiation target",
+      "Free-text?": "NO"
+    },
+    {
+      "Section": "Profile",
+      "Field": "Primary construction type",
+      "Required": "OPTIONAL",
+      "Input Type": "Select",
+      "Allowed / Suggested Options": "Commercial / Industrial / Civil & Infrastructure / Other",
+      "Why Brain Needs It": "Product relevance filtering",
+      "Free-text?": "NO"
+    }
+  ],
+  "web_updates_2026": [
+    {
+      "Update": "Current Procore capabilities catalog",
+      "Status": "CONFIRMED",
+      "Implementation Impact": "Refresh product/capability inventory from current official catalog; do not assume every capability is separately purchasable.",
+      "Source": "Procore current capabilities page"
+    },
+    {
+      "Update": "Quality & Safety presentation",
+      "Status": "CONFIRMED",
+      "Implementation Impact": "Keep Q&S as a commercial/product concept while separately modeling its tools under PM where applicable.",
+      "Source": "Procore support + current product page"
+    },
+    {
+      "Update": "Q&S tool relationships",
+      "Status": "CONFIRMED",
+      "Implementation Impact": "Model tool-level capabilities such as Inspections, Incidents, Observations, Forms and Daily Log.",
+      "Source": "Procore support"
+    },
+    {
+      "Update": "ACV pricing basis",
+      "Status": "CONFIRMED IN EXISTING BRAIN",
+      "Implementation Impact": "Use ACV as a commercial input; do not substitute annual company revenue.",
+      "Source": "Existing pricing evidence + official Procore sources"
+    },
+    {
+      "Update": "FTE pricing exception",
+      "Status": "CONFIRMED IN EXISTING BRAIN",
+      "Implementation Impact": "Keep Field Productivity separate from generic ACV logic unless customer contract evidence supports otherwise.",
+      "Source": "Existing pricing evidence"
+    },
+    {
+      "Update": "Product catalog evolution",
+      "Status": "CONFIRMED",
+      "Implementation Impact": "Treat official current catalog as source of truth and maintain historical names separately.",
+      "Source": "Procore current capabilities page"
+    },
+    {
+      "Update": "AI Digital Coworker packages",
+      "Status": "NEW / CURRENT",
+      "Implementation Impact": "Do not automatically include as a renewal optimization target until commercial pricing/evidence is collected; track as current catalog evolution.",
+      "Source": "Procore What's New, July 2026"
+    }
+  ]
+}

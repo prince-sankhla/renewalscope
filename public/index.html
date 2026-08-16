@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RenewalScope — Evidence-Backed Renewal Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --forest:   #123B2A;
+      --green:    #1F8A5B;
+      --green2:   #1a7a50;
+      --mint:     #EAF7F0;
+      --mint2:    #d1f0e1;
+      --page-bg:  #F8FAF9;
+      --white:    #FFFFFF;
+      --border:   #E5E7EB;
+      --border2:  #D1D5DB;
+      --text:     #111827;
+      --text2:    #374151;
+      --muted:    #6B7280;
+      --amber:    #D97706;
+      --amber-bg: #FEF3C7;
+      --red:      #DC2626;
+      --red-bg:   #FEE2E2;
+      --nav-h:    72px;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--page-bg); color: var(--text);
+      line-height: 1.6; min-height: 100vh; font-feature-settings: 'tnum';
+    }
+
+    /* ── NAVBAR ── */
+    .navbar {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--forest); height: var(--nav-h);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+    }
+    .nav-inner {
+      max-width: 1200px; margin: 0 auto; padding: 0 24px;
+      height: 100%; display: flex; align-items: center; gap: 0;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; flex-shrink: 0; margin-right: 40px;
+    }
+    .nav-logo-text { display: flex; flex-direction: column; }
+    .nav-wordmark { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+    .nav-renewal { color: #fff; }
+    .nav-scope { color: #4ADE80; }
+    .nav-tagline-sm { font-size: 0.625rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.55); margin-top: 1px; }
+    .nav-links { display: flex; align-items: center; gap: 4px; flex: 1; }
+    .nav-link {
+      color: rgba(255,255,255,0.82); text-decoration: none;
+      font-size: 0.9375rem; font-weight: 500; padding: 8px 14px;
+      border-radius: 6px; transition: all 0.15s;
+    }
+    .nav-link:hover { color: #fff; background: rgba(255,255,255,0.1); }
+    .nav-actions { display: flex; align-items: center; gap: 10px; }
+    .btn-nav-ghost {
+      color: rgba(255,255,255,0.82); background: transparent;
+      border: 1px solid rgba(255,255,255,0.28); border-radius: 7px;
+      padding: 8px 18px; font-size: 0.875rem; font-weight: 500;
+      cursor: pointer; transition: all 0.15s; font-family: inherit;
+    }
+    .btn-nav-ghost:hover { color: #fff; border-color: rgba(255,255,255,0.6); }
+    .btn-nav-primary {
+      background: var(--green); color: #fff; border: none; border-radius: 7px;
+      padding: 10px 22px; font-size: 0.9375rem; font-weight: 700;
+      cursor: pointer; transition: all 0.15s; font-family: inherit; white-space: nowrap;
+    }
+    .btn-nav-primary:hover { background: #17704a; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(31,138,91,0.35); }
+    .hamburger {
+      display: none; flex-direction: column; justify-content: center; gap: 5px;
+      background: none; border: none; cursor: pointer; padding: 8px; margin-left: auto;
+    }
+    .hamburger span { display: block; width: 22px; height: 2px; background: #fff; border-radius: 2px; transition: all 0.25s; }
+    .mobile-menu {
+      background: var(--forest); border-top: 1px solid rgba(255,255,255,0.1);
+      padding: 16px 24px 20px; display: none; flex-direction: column; gap: 4px;
+    }
+    .mobile-menu[hidden] { display: none; }
+    .mobile-nav-link {
+      color: rgba(255,255,255,0.85); text-decoration: none;
+      font-size: 1rem; font-weight: 500; padding: 12px 4px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .mobile-nav-link:last-of-type { border-bottom: none; }
+    .btn-mobile-primary {
+      margin-top: 12px; background: var(--green); color: #fff; border: none;
+      border-radius: 8px; padding: 14px; font-size: 1rem; font-weight: 700;
+      cursor: pointer; font-family: inherit; width: 100%;
+    }
+    @media (max-width: 900px) {
+      .nav-links, .nav-actions { display: none; }
+      .hamburger { display: flex; }
+      .mobile-menu:not([hidden]) { display: flex; }
+    }
+    @media (min-width: 901px) {
+      .mobile-menu { display: none !important; }
+    }
+
+    /* ── HERO SECTION ── */
+    .hero-section {
+      background: linear-gradient(160deg, var(--forest) 0%, #1a5c3c 55%, #0e2e1e 100%);
+      padding: 80px 0 0; overflow: hidden; position: relative;
+    }
+    .hero-inner {
+      max-width: 1200px; margin: 0 auto; padding: 0 24px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;
+    }
+    .hero-left { padding-bottom: 80px; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(74,222,128,0.15); color: #4ADE80;
+      border: 1px solid rgba(74,222,128,0.3); border-radius: 24px;
+      padding: 6px 16px; font-size: 0.8125rem; font-weight: 600;
+      letter-spacing: 0.02em; margin-bottom: 24px;
+    }
+    .hero-headline {
+      font-size: 3rem; font-weight: 800; line-height: 1.12;
+      letter-spacing: -0.03em; color: #fff; margin-bottom: 20px;
+    }
+    .hero-highlight { color: #4ADE80; display: block; }
+    .hero-sub {
+      font-size: 1.0625rem; color: rgba(255,255,255,0.75);
+      line-height: 1.7; margin-bottom: 32px; max-width: 480px;
+    }
+    .hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 32px; }
+    .btn-hero {
+      background: var(--green); color: #fff; border: none; border-radius: 8px;
+      padding: 15px 32px; font-size: 1.0625rem; font-weight: 700;
+      cursor: pointer; transition: all 0.15s; font-family: inherit;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-hero:hover { background: #17704a; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(31,138,91,0.4); }
+    .btn-hero-ghost {
+      background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 8px; padding: 14px 28px; font-size: 0.9375rem; font-weight: 600;
+      cursor: pointer; transition: all 0.15s; font-family: inherit;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-hero-ghost:hover { border-color: rgba(255,255,255,0.8); background: rgba(255,255,255,0.06); }
+    .hero-trust { display: flex; flex-wrap: wrap; gap: 20px; }
+    .trust-item { display: flex; align-items: center; gap: 6px; font-size: 0.875rem; color: rgba(255,255,255,0.75); font-weight: 500; }
+    .trust-icon { width: 18px; height: 18px; background: rgba(74,222,128,0.2); border: 1px solid rgba(74,222,128,0.4); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.625rem; color: #4ADE80; flex-shrink: 0; }
+    /* Hero right — visual */
+    .hero-right { position: relative; padding-bottom: 80px; }
+    .hero-visual { position: relative; z-index: 1; }
+    .hero-bg-shape {
+      position: absolute; right: -80px; top: -80px; width: 500px; height: 500px;
+      background: linear-gradient(135deg, rgba(31,138,91,0.25) 0%, rgba(18,59,42,0.4) 100%);
+      clip-path: polygon(30% 0%, 100% 0%, 100% 100%, 0% 100%);
+      border-radius: 0 0 40px 0; z-index: 0;
+    }
+    .hero-construction {
+      background: linear-gradient(135deg, #1a4a30 0%, #0e2e1e 50%, #1c3a28 100%);
+      border-radius: 16px; height: 340px; position: relative; overflow: hidden;
+      border: 1px solid rgba(74,222,128,0.15);
+    }
+    .hero-construction::before {
+      content: ''; position: absolute; inset: 0;
+      background: repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,0.02) 20px, rgba(255,255,255,0.02) 21px);
+    }
+    .hero-crane {
+      position: absolute; right: 24px; top: 20px; width: 100px; height: 200px;
+      opacity: 0.3;
+    }
+    .hero-cards-stack { position: absolute; left: -20px; bottom: -20px; display: flex; flex-direction: column; gap: 12px; z-index: 2; }
+    .hero-card {
+      background: #fff; border-radius: 12px; padding: 16px 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2); min-width: 220px;
+      animation: float 4s ease-in-out infinite;
+    }
+    .hero-card:nth-child(2) { animation-delay: -2s; margin-left: 40px; }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+    .hc-label { font-size: 0.75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+    .hc-value { font-size: 1.625rem; font-weight: 800; color: var(--forest); letter-spacing: -0.02em; font-feature-settings: 'tnum'; margin-bottom: 6px; }
+    .hc-badge { display: inline-flex; align-items: center; gap: 4px; background: var(--mint); color: var(--green); font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 12px; }
+    .hc-disclaimer { font-size: 0.6875rem; color: var(--muted); margin-top: 4px; font-style: italic; }
+    .hc-bars { display: flex; align-items: flex-end; gap: 4px; height: 48px; margin: 6px 0; }
+    .mini-bar { width: 10px; background: var(--border); border-radius: 2px 2px 0 0; transition: background 0.2s; }
+    .mini-bar.active { background: var(--green); }
+    .mini-bar.above { background: var(--red); }
+    .hc-your-rate { font-size: 0.75rem; color: var(--muted); font-weight: 500; }
+    @media (max-width: 900px) {
+      .hero-inner { grid-template-columns: 1fr; }
+      .hero-right { display: none; }
+      .hero-left { padding-bottom: 60px; }
+      .hero-headline { font-size: 2.25rem; }
+    }
+    @media (max-width: 640px) { .hero-headline { font-size: 1.875rem; } }
+
+    /* ── VALUE STRIP ── */
+    .value-strip { background: var(--white); border-bottom: 1px solid var(--border); padding: 48px 0; }
+    .section-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    .value-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 32px; }
+    .value-item { display: flex; flex-direction: column; gap: 10px; }
+    .value-icon-wrap { width: 48px; height: 48px; background: var(--mint); border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .value-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+    .value-desc { font-size: 0.875rem; color: var(--muted); line-height: 1.6; }
+    @media (max-width: 900px) { .value-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 500px) { .value-grid { grid-template-columns: 1fr; } }
+
+    /* ── SECTION SHARED ── */
+    .section { padding: 80px 0; }
+    .section-alt { background: var(--white); }
+    .section-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--green); margin-bottom: 12px; }
+    .section-title { font-size: 2.25rem; font-weight: 800; letter-spacing: -0.03em; color: var(--text); line-height: 1.2; margin-bottom: 16px; }
+    .section-sub { font-size: 1.0625rem; color: var(--muted); line-height: 1.7; max-width: 640px; }
+    .section-header { margin-bottom: 56px; }
+
+    /* ── HOW IT WORKS ── */
+    .steps-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 24px; }
+    .step-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 28px 24px; position: relative; }
+    .step-card::before { content: attr(data-step); position: absolute; top: -14px; left: 24px; background: var(--green); color: #fff; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8125rem; font-weight: 700; }
+    .step-icon { font-size: 1.5rem; margin-bottom: 14px; }
+    .step-title { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .step-desc { font-size: 0.875rem; color: var(--muted); line-height: 1.6; }
+    @media (max-width: 900px) { .steps-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 500px) { .steps-grid { grid-template-columns: 1fr; } }
+
+    /* ── FEATURES ── */
+    .features-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+    .feature-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 28px; transition: box-shadow 0.2s, border-color 0.2s; }
+    .feature-card:hover { border-color: var(--green); box-shadow: 0 4px 20px rgba(31,138,91,0.1); }
+    .feat-icon { width: 44px; height: 44px; background: var(--mint); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; font-size: 1.25rem; }
+    .feat-title { font-size: 1.0625rem; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .feat-desc { font-size: 0.875rem; color: var(--muted); line-height: 1.6; }
+    @media (max-width: 900px) { .features-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 500px) { .features-grid { grid-template-columns: 1fr; } }
+
+    /* ── EVIDENCE / METHODOLOGY ── */
+    .evidence-section { background: var(--forest); color: #fff; padding: 80px 0; }
+    .evidence-section .section-title { color: #fff; }
+    .evidence-section .section-sub { color: rgba(255,255,255,0.72); }
+    .evidence-section .section-label { color: #4ADE80; }
+    .result-levels { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 48px; }
+    .level-card { border-radius: 12px; padding: 20px; border: 1px solid rgba(255,255,255,0.12); }
+    .level-card.verified { background: rgba(74,222,128,0.12); border-color: rgba(74,222,128,0.3); }
+    .level-card.evidence { background: rgba(31,138,91,0.15); border-color: rgba(31,138,91,0.3); }
+    .level-card.potential { background: rgba(217,119,6,0.12); border-color: rgba(217,119,6,0.3); }
+    .level-card.unknown { background: rgba(156,163,175,0.12); border-color: rgba(156,163,175,0.25); }
+    .level-pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.6875rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+    .level-pill.verified { background: #4ADE80; color: var(--forest); }
+    .level-pill.evidence { background: var(--green); color: #fff; }
+    .level-pill.potential { background: var(--amber); color: #fff; }
+    .level-pill.unknown { background: #6B7280; color: #fff; }
+    .level-desc { font-size: 0.875rem; color: rgba(255,255,255,0.72); line-height: 1.5; }
+    .evidence-example { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 28px; }
+    .ev-ex-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #4ADE80; margin-bottom: 16px; }
+    .ev-ex-finding { font-size: 1.625rem; font-weight: 800; color: #fff; margin-bottom: 8px; font-feature-settings: 'tnum'; }
+    .ev-ex-warning { background: rgba(217,119,6,0.15); border: 1px solid rgba(217,119,6,0.35); border-radius: 8px; padding: 12px 16px; font-size: 0.875rem; color: rgba(255,255,255,0.85); line-height: 1.5; margin-bottom: 12px; }
+    .ev-ex-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+    .ev-ex-list li { font-size: 0.875rem; color: rgba(255,255,255,0.65); padding-left: 16px; position: relative; line-height: 1.5; }
+    .ev-ex-list li::before { content: '×'; position: absolute; left: 0; color: #F87171; font-weight: 700; }
+    @media (max-width: 900px) { .result-levels { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 500px) { .result-levels { grid-template-columns: 1fr; } }
+
+    /* ── SAMPLE ANALYSIS ── */
+    .sample-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+    .sample-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .sample-stat { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+    .ss-label { font-size: 0.75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+    .ss-value { font-size: 1.625rem; font-weight: 800; color: var(--text); font-feature-settings: 'tnum'; }
+    .ss-value.green { color: var(--green); }
+    .ss-note { font-size: 0.75rem; color: var(--muted); margin-top: 4px; font-style: italic; }
+    .sample-note { font-size: 0.8125rem; color: var(--muted); font-style: italic; margin-top: 16px; line-height: 1.5; }
+    @media (max-width: 900px) { .sample-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 500px) { .sample-stats { grid-template-columns: 1fr; } }
+
+    /* ── FAQ ── */
+    .faq-list { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--white); }
+    .faq-item { border-bottom: 1px solid var(--border); }
+    .faq-item:last-child { border-bottom: none; }
+    .faq-q { width: 100%; background: none; border: none; cursor: pointer; padding: 20px 24px; text-align: left; font-size: 1rem; font-weight: 600; color: var(--text); display: flex; justify-content: space-between; align-items: center; gap: 12px; font-family: inherit; transition: background 0.15s; }
+    .faq-q:hover { background: var(--page-bg); }
+    .faq-q.open { color: var(--green); }
+    .faq-chevron { font-size: 0.875rem; color: var(--muted); transition: transform 0.2s; flex-shrink: 0; }
+    .faq-q.open .faq-chevron { transform: rotate(180deg); color: var(--green); }
+    .faq-a { padding: 0 24px 20px; font-size: 0.9375rem; color: var(--muted); line-height: 1.7; display: none; }
+    .faq-a.open { display: block; }
+
+    /* ── FINAL CTA ── */
+    .final-cta { background: linear-gradient(135deg, var(--forest) 0%, #1a5c3c 100%); padding: 80px 0; text-align: center; }
+    .final-cta .section-title { color: #fff; }
+    .final-cta .section-sub { color: rgba(255,255,255,0.72); margin: 0 auto 32px; }
+
+    /* ── FOOTER ── */
+    .site-footer { background: var(--forest); color: rgba(255,255,255,0.72); padding: 60px 0 32px; }
+    .footer-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    .footer-top { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+    .footer-brand-col .footer-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .footer-brand-text { font-size: 1.125rem; font-weight: 800; }
+    .footer-brand-renewal { color: #fff; }
+    .footer-brand-scope { color: #4ADE80; }
+    .footer-tagline { font-size: 0.875rem; color: rgba(255,255,255,0.6); line-height: 1.6; max-width: 240px; }
+    .footer-col-title { font-size: 0.8125rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.9); margin-bottom: 16px; }
+    .footer-links { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+    .footer-links a { color: rgba(255,255,255,0.62); text-decoration: none; font-size: 0.9375rem; transition: color 0.15s; }
+    .footer-links a:hover { color: #fff; }
+    .footer-divider { border: none; border-top: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px; }
+    .footer-bottom { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; flex-wrap: wrap; }
+    .footer-legal { font-size: 0.8125rem; color: rgba(255,255,255,0.45); line-height: 1.6; }
+    @media (max-width: 900px) { .footer-top { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 500px) { .footer-top { grid-template-columns: 1fr; } .footer-bottom { flex-direction: column; } }
+
+    /* ── WIZARD WRAPPER ── */
+    .wizard-wrap { max-width: 800px; margin: 0 auto; padding: 40px 24px 80px; }
+    .wizard-header { display: flex; align-items: center; gap: 16px; padding: 20px 24px; background: var(--forest); border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 0; }
+    .wizard-brand { font-size: 1.125rem; font-weight: 800; color: #fff; }
+    .wizard-brand-scope { color: #4ADE80; }
+    .wizard-sub { font-size: 0.8125rem; color: rgba(255,255,255,0.6); margin-left: auto; }
+    .wizard-body { max-width: 800px; margin: 0 auto; padding: 40px 24px 80px; }
+    .progress-row { margin-bottom: 32px; }
+    #progress-bar { background: var(--border); border-radius: 8px; height: 6px; margin-bottom: 8px; }
+    #progress-fill { background: var(--green); height: 100%; border-radius: 8px; transition: width 0.35s ease; width: 20%; }
+    #progress-text { font-size: 0.8125rem; color: var(--muted); font-weight: 500; }
+    .step-heading { font-size: 1.375rem; font-weight: 700; color: var(--forest); margin-bottom: 6px; }
+    .step-sub { font-size: 0.9375rem; color: var(--muted); margin-bottom: 28px; line-height: 1.5; }
+    .card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 28px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+    .card-title { font-size: 0.75rem; font-weight: 700; color: var(--green); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.07em; }
+    .field { margin-bottom: 20px; }
+    label { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 6px; color: var(--text2); }
+    .hint { font-weight: 400; color: var(--muted); font-size: 0.8125rem; display: block; margin-top: 2px; }
+    input[type=number], input[type=text], select {
+      width: 100%; padding: 11px 13px; border: 1px solid var(--border);
+      border-radius: 8px; font-size: 0.9375rem; color: var(--text);
+      background: var(--white); font-family: inherit; transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    input:focus, select:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(31,138,91,0.1); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; background: var(--green); color: white; border: none; border-radius: 8px; padding: 12px 28px; font-size: 0.9375rem; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: inherit; }
+    .btn:hover { background: var(--forest); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(31,138,91,0.2); }
+    .btn:active { transform: translateY(0); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+    .btn-ghost { background: transparent; color: var(--green); border: 1px solid var(--green); }
+    .btn-ghost:hover { background: var(--mint); box-shadow: none; transform: none; }
+    .btn-lg { font-size: 1.0625rem; padding: 15px 36px; }
+    .nav-row { display: flex; gap: 12px; align-items: center; margin-top: 28px; flex-wrap: wrap; }
+    .product-card { border: 2px solid var(--border); border-radius: 10px; padding: 16px; cursor: pointer; transition: all 0.15s; background: var(--white); user-select: none; }
+    .product-card:hover { border-color: var(--green); background: var(--mint); }
+    .product-card.selected { border-color: var(--green); background: var(--mint); box-shadow: 0 0 0 1px var(--green); }
+    .pc-label { font-size: 0.9375rem; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .pc-desc { font-size: 0.8125rem; color: var(--muted); line-height: 1.4; }
+    #product-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px,1fr)); gap: 12px; }
+    .product-detail-block { border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 16px; background: var(--white); }
+    .pd-heading { font-size: 1rem; font-weight: 700; color: var(--forest); margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    .pd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .error-msg { background: var(--red-bg); border: 1px solid #FCA5A5; color: #991B1B; padding: 14px 18px; border-radius: 8px; font-size: 0.875rem; margin-bottom: 16px; }
+    .alert { padding: 14px 18px; border-radius: 8px; font-size: 0.875rem; line-height: 1.6; margin-bottom: 16px; }
+    .alert.warning { background: var(--amber-bg); border: 1px solid #FCD34D; color: #92400E; }
+    .alert.info { background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF; }
+    .review-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .review-table th { text-align:left; font-size:0.8125rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.04em; padding:8px 10px; border-bottom:2px solid var(--border); }
+    .review-table td { padding:10px; border-bottom:1px solid var(--border); color:var(--text); vertical-align:top; }
+    .review-table tr:last-child td { border-bottom:none; }
+    @media (max-width:640px) { .form-row,.pd-grid{grid-template-columns:1fr;} }
+
+    /* ── LOADING ── */
+    .loading-wrap { max-width: 480px; margin: 80px auto; padding: 0 24px; text-align: center; }
+    .loading-logo { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 32px; }
+    .loading-brand { font-size: 1.25rem; font-weight: 800; }
+    .loading-title { font-size: 1.375rem; font-weight: 700; color: var(--forest); margin-bottom: 8px; }
+    .loading-sub { font-size: 0.9375rem; color: var(--muted); margin-bottom: 40px; }
+    .loading-steps { list-style: none; padding: 0; text-align: left; }
+    .ls-item { padding: 12px 0; font-size: 0.9375rem; color: var(--muted); display: flex; align-items: center; gap: 14px; border-bottom: 1px solid var(--border); transition: color 0.3s; }
+    .ls-item:last-child { border-bottom: none; }
+    .ls-item .check { width: 22px; height: 22px; border-radius: 50%; background: var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; transition: all 0.3s; }
+    .ls-item.done { color: var(--text); }
+    .ls-item.done .check { background: var(--green); color: white; }
+
+    /* ── RESULTS WRAP ── */
+    .results-wrap { max-width: 900px; margin: 0 auto; padding: 40px 24px 80px; }
+    .results-header { background: var(--forest); padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .results-header-brand { font-size: 1.125rem; font-weight: 800; color: #fff; }
+    .results-header-brand-scope { color: #4ADE80; }
+    .results-header-sub { font-size: 0.875rem; color: rgba(255,255,255,0.65); }
+
+    /* ── STATUS HERO ── */
+    .status-hero { border-radius: 14px; padding: 32px; margin-bottom: 24px; text-align: center; }
+    .status-hero.verified { background: linear-gradient(135deg,#D1FAE5,#A7F3D0); border: 1px solid var(--green); }
+    .status-hero.uncertain { background: linear-gradient(135deg,var(--amber-bg),#FEF08A); border: 1px solid var(--amber); }
+    .status-hero.none { background: linear-gradient(135deg,#F3F4F6,#E5E7EB); border: 1px solid var(--border2); }
+    .status-badge { display: inline-block; padding: 5px 14px; border-radius: 20px; font-size: 0.8125rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
+    .status-badge.verified { background: var(--green); color: white; }
+    .status-badge.uncertain { background: var(--amber); color: white; }
+    .status-badge.none { background: #6B7280; color: white; }
+    .status-title { font-size: 1.625rem; font-weight: 800; margin-bottom: 8px; color: var(--text); letter-spacing: -0.02em; }
+    .status-subtitle { font-size: 0.9375rem; color: var(--muted); line-height: 1.5; max-width: 520px; margin: 0 auto; }
+    .spend-display { display: flex; justify-content: center; gap: 48px; margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(0,0,0,0.08); flex-wrap: wrap; }
+    .spend-item { text-align: center; }
+    .spend-label { font-size: 0.75rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+    .spend-value { font-size: 2rem; font-weight: 800; color: var(--text); font-feature-settings: 'tnum'; letter-spacing: -0.02em; }
+    .spend-value.savings { color: var(--green); }
+    @media(max-width:640px){.spend-display{flex-direction:column;gap:20px;} .spend-value{font-size:1.5rem;}}
+
+    /* ── BENCHMARK ── */
+    .benchmark-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 22px; }
+    .benchmark-header { font-size: 1rem; font-weight: 700; margin-bottom: 14px; color: var(--text); }
+    .rate-display { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+    .rate-value { font-size: 1.875rem; font-weight: 800; color: var(--green); font-feature-settings: 'tnum'; letter-spacing: -0.02em; }
+    .rate-label { font-size: 0.875rem; color: var(--muted); }
+    .benchmark-position { font-size: 0.875rem; color: var(--muted); margin-bottom: 18px; line-height: 1.5; }
+    .bar-track { height: 10px; background: #F3F4F6; border-radius: 5px; position: relative; overflow: visible; }
+    .bar-fill { height: 100%; border-radius: 5px; background: linear-gradient(90deg,#A7F3D0 0%,var(--green) 100%); }
+    .bar-marker { position: absolute; top:-5px; width:4px; height:20px; background:var(--forest); border-radius:2px; transform:translateX(-50%); box-shadow:0 2px 4px rgba(0,0,0,0.2); }
+    .bar-stats { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted); margin-top: 6px; font-feature-settings: 'tnum'; }
+    .bar-stats strong { color: var(--text); }
+
+    /* ── RESULT ITEMS ── */
+    .result-item { background: var(--white); border: 1px solid var(--border); border-left: 4px solid transparent; border-radius: 8px; padding: 18px 22px; margin-bottom: 14px; }
+    .result-item.VERIFIED_BEFORE_AFTER,.result-item.SAVINGS_IDENTIFIED { border-left-color: var(--green); background: #F0FDF4; }
+    .result-item.COMMERCIAL_OPPORTUNITY,.result-item.OPPORTUNITY_NOT_QUANTIFIABLE { border-left-color: var(--amber); background: var(--amber-bg); }
+    .result-item.WARNING { border-left-color: var(--red); background: var(--red-bg); }
+    .result-item.NO_DEFENSIBLE_SAVINGS_IDENTIFIED { border-left-color: #9CA3AF; background: #F9FAFB; }
+    .result-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+    .result-badge { padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+    .result-badge.VERIFIED_BEFORE_AFTER,.result-badge.SAVINGS_IDENTIFIED { background: var(--green); color: white; }
+    .result-badge.COMMERCIAL_OPPORTUNITY,.result-badge.OPPORTUNITY_NOT_QUANTIFIABLE { background: var(--amber); color: white; }
+    .result-badge.WARNING { background: var(--red); color: white; }
+    .result-badge.NO_DEFENSIBLE_SAVINGS_IDENTIFIED { background: #6B7280; color: white; }
+    .conf-badge { padding: 2px 7px; border-radius: 4px; font-size: 0.6875rem; font-weight: 600; background: rgba(0,0,0,0.06); color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
+    .result-text { font-size: 0.9375rem; font-weight: 500; color: var(--text); margin-bottom: 6px; line-height: 1.5; }
+    .result-explanation { font-size: 0.875rem; color: var(--muted); line-height: 1.6; }
+    .result-saving { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(0,0,0,0.08); font-size: 1rem; font-weight: 700; color: var(--green); font-feature-settings: 'tnum'; }
+    .result-evidence { margin-top: 10px; font-size: 0.75rem; color: var(--muted); }
+    .ev-id { display: inline-block; background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 3px; margin-right: 3px; font-family: monospace; }
+
+    /* ── EXECUTIVE SUMMARY ── */
+    .exec-summary-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(175px,1fr)); gap: 14px; margin-bottom: 20px; }
+    .exec-stat { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center; }
+    .exec-stat-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 6px; }
+    .exec-stat-value { font-size: 1.375rem; font-weight: 800; color: var(--text); font-feature-settings: 'tnum'; }
+    .exec-stat-value.green { color: var(--green); }
+
+    /* ── KNOWN/UNKNOWN ── */
+    .known-unknown-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+    .ku-item { padding: 16px; border-radius: 10px; }
+    .ku-item.known { background: #F0FDF4; border: 1px solid #A7F3D0; }
+    .ku-item.unknown { background: var(--amber-bg); border: 1px solid #FCD34D; }
+    .ku-item.needed { background: var(--mint); border: 1px solid rgba(31,138,91,0.2); }
+    .ku-label { font-size: 0.6875rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
+    .ku-item.known .ku-label { color: #065F46; } .ku-item.unknown .ku-label { color: #92400E; } .ku-item.needed .ku-label { color: var(--green); }
+    .ku-text { font-size: 0.875rem; line-height: 1.5; }
+    @media(max-width:640px){.known-unknown-grid{grid-template-columns:1fr;}}
+
+    /* ── PRO CTA ── */
+    .pro-cta-card { background: linear-gradient(135deg,var(--mint),#c8edd8); border: 1px solid rgba(31,138,91,0.25); border-radius: 14px; padding: 32px; margin-bottom: 20px; }
+    .pro-cta-headline { font-size: 1.375rem; font-weight: 800; color: var(--forest); margin-bottom: 10px; letter-spacing: -0.02em; }
+    .pro-cta-copy { font-size: 0.9375rem; color: var(--text2); margin-bottom: 8px; line-height: 1.6; }
+    .pro-cta-trust { font-size: 0.875rem; color: var(--muted); font-style: italic; margin-bottom: 20px; }
+
+    /* ── COMPARISON TABLE ── */
+    .comparison-table { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+    .comp-col { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 22px; }
+    .comp-col.pro { border-color: var(--green); box-shadow: 0 0 0 1px var(--green); }
+    .comp-header { font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 14px; }
+    .comp-header.free { color: var(--muted); } .comp-header.pro { color: var(--green); }
+    .comp-col ul { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+    .comp-col li { padding: 3px 0; font-size: 0.875rem; color: var(--text2); line-height: 1.5; }
+    @media(max-width:640px){.comparison-table{grid-template-columns:1fr;}}
+
+    /* ── AUDIT TABLE ── */
+    .audit-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    .audit-table th { text-align:left; font-size:0.75rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.04em; padding:8px 10px; border-bottom:2px solid var(--border); }
+    .audit-table td { padding:10px; border-bottom:1px solid var(--border); vertical-align:top; }
+    .audit-table tr:last-child td { border-bottom:none; }
+    .audit-card { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; display: none; }
+    .audit-card-title { font-weight: 700; font-size: 0.9375rem; color: var(--forest); margin-bottom: 8px; }
+    .audit-card-row { display: flex; justify-content: space-between; font-size: 0.875rem; margin-bottom: 4px; gap: 8px; }
+    .audit-card-label { color: var(--muted); flex-shrink: 0; }
+    @media(max-width:640px){ .audit-table{display:none;} .audit-card{display:block;} }
+
+    /* ── CF CARDS ── */
+    .cf-result-card { background: var(--white); border: 1px solid var(--border); border-left: 4px solid var(--border); border-radius: 8px; padding: 18px 22px; margin-bottom: 12px; }
+    .cf-result-card.VERIFIED_BEFORE_AFTER { border-left-color: var(--green); background: #F0FDF4; }
+    .cf-result-card.OPPORTUNITY_NOT_QUANTIFIABLE { border-left-color: var(--amber); background: var(--amber-bg); }
+    .cf-result-card.SAVINGS_IDENTIFIED { border-left-color: var(--green); background: var(--mint); }
+    .cf-result-card.NO_DEFENSIBLE_SAVINGS_IDENTIFIED { border-left-color: #9CA3AF; background: #F9FAFB; }
+    .cf-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+    .cf-product-name { font-weight: 700; font-size: 0.9375rem; color: var(--text); }
+    .cf-explanation { font-size: 0.875rem; color: var(--muted); line-height: 1.6; }
+    .cf-saving { margin-top: 10px; font-size: 0.9375rem; font-weight: 700; color: var(--green); }
+    .cf-opportunity { margin-top: 10px; font-size: 0.875rem; color: var(--amber); font-weight: 600; }
+
+    /* ── EVIDENCE ── */
+    .evidence-item details { border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; margin-bottom: 10px; background: var(--white); }
+    .evidence-item summary { cursor: pointer; font-weight: 600; font-size: 0.9375rem; color: var(--text); user-select: none; list-style: none; display: flex; align-items: center; gap: 8px; }
+    .evidence-item summary::-webkit-details-marker { display: none; }
+    .evidence-item summary::before { content: '▶'; font-size: 0.7rem; color: var(--muted); transition: transform 0.2s; display: inline-block; }
+    details[open] > summary::before { transform: rotate(90deg); }
+    .ev-meta { margin-top: 12px; font-size: 0.875rem; color: var(--muted); line-height: 1.8; }
+    .ev-meta-row { margin-bottom: 4px; }
+    .ev-meta-label { font-weight: 600; color: var(--text); }
+
+    /* ── NEGOTIATION ── */
+    .negotiation-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+    .negotiation-title { font-size: 1.125rem; font-weight: 700; margin-bottom: 18px; color: var(--text); }
+    .neg-section { margin-bottom: 18px; }
+    .neg-section:last-child { margin-bottom: 0; }
+    .neg-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 6px; }
+    .neg-content { font-size: 0.9375rem; color: var(--text); line-height: 1.6; }
+    .neg-list { list-style: none; padding: 0; }
+    .neg-list li { padding-left: 20px; position: relative; margin-bottom: 6px; font-size: 0.9375rem; color: var(--text2); line-height: 1.5; }
+    .neg-list li::before { content: "→"; position: absolute; left: 0; color: var(--green); font-weight: 700; }
+    .price-box { background: var(--mint); border: 2px solid var(--green); border-radius: 8px; padding: 14px 18px; margin-top: 10px; }
+    .price-box-label { font-size: 0.875rem; color: var(--muted); margin-bottom: 4px; }
+    .price-box-value { font-size: 1.5rem; font-weight: 800; color: var(--green); font-feature-settings: 'tnum'; }
+    .price-box-note { font-size: 0.8125rem; color: var(--muted); margin-top: 6px; font-style: italic; }
+
+    /* ── SECTION NOTE / DIVIDER ── */
+    .section-note { font-size: 0.8125rem; color: var(--muted); font-style: italic; margin-bottom: 14px; }
+    hr.divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav id="navbar" class="navbar">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo" id="nav-logo-link">
+      <svg width="36" height="36" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="120" height="120" rx="12" fill="#123B2A"/>
+        <path d="M30 35 L30 85 L35 85 L35 45 L50 45 L50 50 L40 50 L40 85 L45 85 L45 55 L55 55 L55 85 L60 85 L60 40 L35 40 L35 35 Z" fill="#4ADE80"/>
+        <circle cx="75" cy="55" r="18" stroke="#1F8A5B" stroke-width="3" fill="none"/>
+        <path d="M84 64 L95 75" stroke="#1F8A5B" stroke-width="3" stroke-linecap="round"/>
+        <path d="M70 50 L75 55 L82 48" stroke="#4ADE80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="nav-logo-text">
+        <div class="nav-wordmark"><span class="nav-renewal">Renewal</span><span class="nav-scope">Scope</span></div>
+        <div class="nav-tagline-sm">Evidence-Backed Intelligence</div>
+      </div>
+    </a>
+    <div class="nav-links" id="nav-links">
+      <a href="#how-it-works" class="nav-link">How It Works</a>
+      <a href="#features" class="nav-link">Features</a>
+      <a href="#evidence" class="nav-link">Evidence</a>
+      <a href="#faq" class="nav-link">FAQ</a>
+    </div>
+    <div class="nav-actions">
+      <button class="btn-nav-ghost" id="btn-see-how">See How It Works</button>
+      <button class="btn-nav-primary" id="btn-start-nav">Start Free Analysis</button>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="mobile-menu" id="mobile-menu" hidden>
+    <a href="#how-it-works" class="mobile-nav-link">How It Works</a>
+    <a href="#features" class="mobile-nav-link">Features</a>
+    <a href="#evidence" class="mobile-nav-link">Evidence</a>
+    <a href="#faq" class="mobile-nav-link">FAQ</a>
+    <button class="btn-mobile-primary" id="btn-start-mobile">Start Free Analysis</button>
+  </div>
+</nav>
+
+<!-- LANDING PAGE -->
+<div id="landing">
+
+  <!-- HERO SECTION -->
+  <section class="hero-section">
+    <div class="hero-inner">
+      <div class="hero-left">
+        <div class="hero-badge">Evidence-Backed Analysis</div>
+        <h1 class="hero-headline">
+          Understand Your Procore Renewal <span class="hero-highlight">Before You Sign.</span>
+        </h1>
+        <p class="hero-sub">
+          Get a free, evidence-based analysis of your renewal configuration, pricing position, optimization opportunities and negotiation leverage.
+        </p>
+        <div class="hero-ctas">
+          <button id="btn-start" class="btn-hero">Start Free Analysis →</button>
+          <button class="btn-hero-ghost" id="btn-hero-how">▷ See How It Works</button>
+        </div>
+        <div class="hero-trust">
+          <div class="trust-item"><span class="trust-icon">✓</span> Evidence-Backed Analysis</div>
+          <div class="trust-item"><span class="trust-icon">✓</span> No Made-Up Savings</div>
+          <div class="trust-item"><span class="trust-icon">✓</span> Negotiation-Ready Reports</div>
+        </div>
+      </div>
+      <div class="hero-right">
+        <div class="hero-visual">
+          <div class="hero-bg-shape"></div>
+          <div class="hero-construction"></div>
+          <div class="hero-cards-stack">
+            <div class="hero-card">
+              <div class="hc-label">Verified Savings</div>
+              <div class="hc-value">$16,396<span style="font-size:0.875rem;font-weight:600;color:#6B7280;"> / year</span></div>
+              <div class="hc-badge">✓ Evidence-backed</div>
+              <div class="hc-disclaimer">Illustrative example only</div>
+            </div>
+            <div class="hero-card">
+              <div class="hc-label">Cost Benchmark</div>
+              <div class="hc-bars">
+                <div class="mini-bar" style="height:45%"></div>
+                <div class="mini-bar" style="height:65%"></div>
+                <div class="mini-bar" style="height:80%"></div>
+                <div class="mini-bar active" style="height:100%"></div>
+                <div class="mini-bar" style="height:60%"></div>
+                <div class="mini-bar" style="height:40%"></div>
+                <div class="mini-bar" style="height:55%"></div>
+              </div>
+              <div class="hc-your-rate">→ Your Rate (illustrative)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VALUE STRIP -->
+  <section class="value-strip">
+    <div class="section-inner">
+      <div class="value-grid">
+        <div class="value-item">
+          <div class="value-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1F8A5B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          </div>
+          <div class="value-title">Evidence-Backed Analysis</div>
+          <div class="value-desc">Every insight is supported by evidence.</div>
+        </div>
+        <div class="value-item">
+          <div class="value-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1F8A5B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          </div>
+          <div class="value-title">No Made-Up Savings</div>
+          <div class="value-desc">We never invent savings. Only what's defensible.</div>
+        </div>
+        <div class="value-item">
+          <div class="value-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1F8A5B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </div>
+          <div class="value-title">Transparent Methodology</div>
+          <div class="value-desc">Understand exactly how conclusions are reached.</div>
+        </div>
+        <div class="value-item">
+          <div class="value-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1F8A5B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          </div>
+          <div class="value-title">Negotiation-Ready Reports</div>
+          <div class="value-desc">Turn analysis into actionable strategy.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how-it-works" class="section">
+    <div class="section-inner">
+      <div class="section-header">
+        <div class="section-label">How It Works</div>
+        <h2 class="section-title">Evidence-Based Analysis in 4 Steps</h2>
+        <p class="section-sub">From renewal details to negotiation-ready intelligence.</p>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card" data-step="1">
+          <div class="step-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1F8A5B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <line x1="10" y1="9" x2="8" y2="9"></line>
+            </svg>
+          </div>
+          <div class="step-title">Enter Your Renewal Details</div>
+          <div class="step-desc">Annual spend, ACV, products, and commercial terms.</div>
+        </div>
+        <div class="step-card" data-step="2">
+          <div class="step-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1F8A5B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+          </div>
+          <div class="step-title">Analyze Products &amp; Terms</div>
+          <div class="step-desc">Product eligibility, dependencies, and commercial structure.</div>
+        </div>
+        <div class="step-card" data-step="3">
+          <div class="step-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1F8A5B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="20" x2="12" y2="10"></line>
+              <line x1="18" y1="20" x2="18" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="16"></line>
+            </svg>
+          </div>
+          <div class="step-title">Review Evidence-Backed Findings</div>
+          <div class="step-desc">Benchmark position, candidates, and quantified opportunities.</div>
+        </div>
+        <div class="step-card" data-step="4">
+          <div class="step-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1F8A5B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <path d="M9 15l2 2 4-4"></path>
+            </svg>
+          </div>
+          <div class="step-title">Generate Negotiation Report</div>
+          <div class="step-desc">Professional PDF with strategy and evidence trail.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features" class="section section-alt">
+    <div class="section-inner">
+      <div class="section-header">
+        <div class="section-label">Features</div>
+        <h2 class="section-title">What RenewalScope Analyzes</h2>
+        <p class="section-sub">Comprehensive renewal intelligence powered by evidence.</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feat-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1F8A5B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+              <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            </svg>
+          </div>
+          <div class="feat-title">Product Optimization</div>
+          <div class="feat-desc">Identify unused, underutilized, or redundant products based on usage, requirements, and dependencies.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feat-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1F8A5B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="20" x2="12" y2="10"></line>
+              <line x1="18" y1="20" x2="18" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="16"></line>
+            </svg>
+          </div>
+          <div class="feat-title">Benchmark Intelligence</div>
+          <div class="feat-desc">Compare your effective rate against public observations to understand your pricing position.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feat-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1F8A5B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg>
+          </div>
+          <div class="feat-title">Evidence Trail</div>
+          <div class="feat-desc">Every finding links back to its evidence. No invented pricing, no black boxes.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feat-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1F8A5B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+              <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+            </svg>
+          </div>
+          <div class="feat-title">Counterfactual Analysis</div>
+          <div class="feat-desc">Test alternative configurations against evidence to identify defensible opportunities.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feat-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1F8A5B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </svg>
+          </div>
+          <div class="feat-title">Commercial Opportunities</div>
+          <div class="feat-desc">Multi-year structures, rate protection, discount preservation, and renewal leverage.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feat-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1F8A5B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+          <div class="feat-title">Negotiation Strategy</div>
+          <div class="feat-desc">Exact questions to ask, what to confirm in writing, and defensible negotiation targets.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EVIDENCE / METHODOLOGY -->
+  <section id="evidence" class="evidence-section">
+    <div class="section-inner">
+      <div class="section-header">
+        <div class="section-label">Methodology</div>
+        <h2 class="section-title">Know What The Evidence Actually Supports</h2>
+        <p class="section-sub">We classify every finding by the strength of evidence behind it. No invented savings.</p>
+      </div>
+      <div class="result-levels">
+        <div class="level-card verified">
+          <div class="level-pill verified">Verified</div>
+          <div class="level-desc">Quote-to-quote difference from written Procore quotes.</div>
+        </div>
+        <div class="level-card evidence">
+          <div class="level-pill evidence">Evidence-Backed</div>
+          <div class="level-desc">Supported by benchmark or public observations.</div>
+        </div>
+        <div class="level-card potential">
+          <div class="level-pill potential">Potential</div>
+          <div class="level-desc">Eligible candidate — savings not yet quantifiable.</div>
+        </div>
+        <div class="level-card unknown">
+          <div class="level-pill unknown">Unknown</div>
+          <div class="level-desc">Insufficient evidence to establish a defensible claim.</div>
+        </div>
+      </div>
+      <div class="evidence-example">
+        <div class="ev-ex-title">Example: What We Report</div>
+        <div class="ev-ex-finding">Verified quote-to-quote difference: $16,396/year</div>
+        <div class="ev-ex-warning">⚠ This does not automatically mean removing a specific product saves $16,396.</div>
+        <div style="margin-top:16px;font-size:0.875rem;color:rgba(255,255,255,0.75);line-height:1.6;margin-bottom:12px;">We explicitly distinguish:</div>
+        <ul class="ev-ex-list">
+          <li>Current spend is not savings</li>
+          <li>Benchmark difference is not guaranteed savings</li>
+          <li>Negotiation target is not a predicted vendor quote</li>
+          <li>Unknown dependency does not mean a product is removable</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- SAMPLE ANALYSIS PREVIEW -->
+  <section class="section">
+    <div class="section-inner">
+      <div class="section-header">
+        <div class="section-label">Example Output</div>
+        <h2 class="section-title">What You'll See</h2>
+        <p class="section-sub">A preview of RenewalScope analysis output.</p>
+      </div>
+      <div class="sample-grid">
+        <div>
+          <h3 style="font-size:1.0625rem;font-weight:700;color:#123B2A;margin-bottom:16px;">Key Metrics (Illustrative)</h3>
+          <div class="sample-stats">
+            <div class="sample-stat">
+              <div class="ss-label">Current Annual Spend</div>
+              <div class="ss-value">$147,596</div>
+            </div>
+            <div class="sample-stat">
+              <div class="ss-label">Verified Savings</div>
+              <div class="ss-value green">$16,396<span style="font-size:0.75rem;font-weight:500;color:#6B7280;"> / year</span></div>
+            </div>
+            <div class="sample-stat">
+              <div class="ss-label">Optimization Candidates</div>
+              <div class="ss-value">2</div>
+            </div>
+            <div class="sample-stat">
+              <div class="ss-label">Benchmark Position</div>
+              <div class="ss-value" style="font-size:1.125rem;">Above p75</div>
+            </div>
+          </div>
+          <p class="sample-note">Values shown are illustrative examples from a controlled test scenario. Your actual analysis will reflect your specific renewal data.</p>
+        </div>
+        <div style="background:#F8FAF9;border:1px solid #E5E7EB;border-radius:14px;padding:24px;">
+          <h4 style="font-size:0.875rem;font-weight:700;color:#1F8A5B;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px;">What You Get</h4>
+          <ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:8px;">
+            <li style="display:flex;align-items:start;gap:8px;font-size:0.875rem;color:#374151;line-height:1.5;"><span style="color:#1F8A5B;font-weight:700;flex-shrink:0;">✓</span> Primary verdict and verified savings when supported</li>
+            <li style="display:flex;align-items:start;gap:8px;font-size:0.875rem;color:#374151;line-height:1.5;"><span style="color:#1F8A5B;font-weight:700;flex-shrink:0;">✓</span> Effective rate and benchmark position</li>
+            <li style="display:flex;align-items:start;gap:8px;font-size:0.875rem;color:#374151;line-height:1.5;"><span style="color:#1F8A5B;font-weight:700;flex-shrink:0;">✓</span> Product-by-product audit with candidate analysis</li>
+            <li style="display:flex;align-items:start;gap:8px;font-size:0.875rem;color:#374151;line-height:1.5;"><span style="color:#1F8A5B;font-weight:700;flex-shrink:0;">✓</span> Complete evidence trail</li>
+            <li style="display:flex;align-items:start;gap:8px;font-size:0.875rem;color:#374151;line-height:1.5;"><span style="color:#1F8A5B;font-weight:700;flex-shrink:0;">✓</span> Negotiation strategy and exact questions to ask</li>
+            <li style="display:flex;align-items:start;gap:8px;font-size:0.875rem;color:#374151;line-height:1.5;"><span style="color:#1F8A5B;font-weight:700;flex-shrink:0;">✓</span> Downloadable professional PDF report</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="section section-alt">
+    <div class="section-inner">
+      <div class="section-header">
+        <div class="section-label">FAQ</div>
+        <h2 class="section-title">Frequently Asked Questions</h2>
+      </div>
+      <div class="faq-list">
+        <div class="faq-item">
+          <button class="faq-q"><span>How are savings calculated?</span><span class="faq-chevron">▼</span></button>
+          <div class="faq-a">We only report savings when supported by evidence. "Verified" savings come from quote-to-quote differences. "Evidence-backed" savings use benchmark or public observations. If evidence doesn't support quantification, we say so explicitly.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q"><span>What does "Savings not yet quantifiable" mean?</span><span class="faq-chevron">▼</span></button>
+          <div class="faq-a">It means a product may be eligible for optimization, but we don't have the evidence needed to claim a specific dollar amount. We recommend requesting a written Procore quote for the alternative configuration to quantify the impact.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q"><span>Do you invent pricing estimates?</span><span class="faq-chevron">▼</span></button>
+          <div class="faq-a">No. We never generate synthetic pricing. All financial calculations are deterministic and evidence-based. If we don't have evidence for a claim, we explicitly flag it as unknown.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q"><span>What evidence do you use?</span><span class="faq-chevron">▼</span></button>
+          <div class="faq-a">Public customer observations (Reddit, forums), verified documents, and benchmark data from comparable configurations. Every evidence source is cited with its confidence level and what it does and does not support.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q"><span>Is RenewalScope affiliated with Procore?</span><span class="faq-chevron">▼</span></button>
+          <div class="faq-a">No. RenewalScope is an independent analysis tool. Not affiliated with Procore Technologies, Inc.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q"><span>Can I download the report?</span><span class="faq-chevron">▼</span></button>
+          <div class="faq-a">Yes. The Professional Report includes a downloadable PDF with your full analysis, evidence trail, and negotiation strategy.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q"><span>What is included in the Professional Report?</span><span class="faq-chevron">▼</span></button>
+          <div class="faq-a">Everything in the free analysis, plus: full product audit, detailed counterfactual analysis, complete evidence trail, commercial opportunities, negotiation strategy, exact questions to ask, and a downloadable PDF report.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="final-cta">
+    <div class="section-inner">
+      <h2 class="section-title">Know What to Ask Before You Renew</h2>
+      <p class="section-sub">Start with a free evidence-backed analysis of your renewal.</p>
+      <button id="btn-start-final" class="btn-hero btn-lg">Start Free Analysis →</button>
+    </div>
+  </section>
+
+</div>
+<!-- End Landing -->
+
+<!-- WIZARD -->
+<div id="wizard" hidden>
+  <div class="wizard-header">
+    <div class="wizard-brand">Renewal<span class="wizard-brand-scope">Scope</span></div>
+    <div class="wizard-sub">Procore Renewal Analysis</div>
+  </div>
+  <div class="wizard-body">
+    <div class="progress-row">
+      <div id="progress-bar"><div id="progress-fill"></div></div>
+      <span id="progress-text">Step 1 of 5</span>
+    </div>
+
+    <!-- Step 1: Commercial Baseline -->
+    <div id="step-1">
+      <div class="card">
+        <div class="step-heading">Commercial Baseline</div>
+        <div class="step-sub">These core numbers determine your effective rate and benchmark position.</div>
+        <div class="form-row" style="margin-bottom:18px;">
+          <div class="field">
+            <label>Current Annual Spend (USD) <span class="hint">Your Procore annual subscription cost</span></label>
+            <input type="number" id="annual_cost_usd" placeholder="147596" min="1" />
+          </div>
+          <div class="field">
+            <label>Annual Construction Volume (ACV) <span class="hint">Total dollar value of construction work your company manages per year</span></label>
+            <input type="number" id="acv_usd" placeholder="80000000" min="1" />
+          </div>
+        </div>
+        <div class="field" style="max-width:320px;">
+          <label>Contract Term</label>
+          <select id="contract_term">
+            <option value="annual">Annual</option>
+            <option value="multi_year">Multi-year</option>
+            <option value="other">Other / Not sure</option>
+          </select>
+        </div>
+        <div id="step-1-error"></div>
+        <div class="nav-row">
+          <button id="btn-next" class="btn">Continue</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Products -->
+    <div id="step-2" hidden>
+      <div class="card">
+        <div class="step-heading">Your Products</div>
+        <div class="step-sub">Select all Procore products currently in your contract.</div>
+        <div id="product-cards"></div>
+        <div id="step-2-error"></div>
+        <div class="nav-row">
+          <button id="btn-back-2" class="btn btn-ghost">Back</button>
+          <button id="btn-next-2" class="btn">Continue</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Usage & Requirements -->
+    <div id="step-3" hidden>
+      <div class="card">
+        <div class="step-heading">Usage &amp; Requirements</div>
+        <div class="step-sub">Tell us how each product is used. This determines removal eligibility.</div>
+        <div id="product-details"></div>
+        <div id="step-3-error"></div>
+        <div class="nav-row">
+          <button id="btn-back-3" class="btn btn-ghost">Back</button>
+          <button id="btn-next-3" class="btn">Continue</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4: Commercial Terms -->
+    <div id="step-4" hidden>
+      <div class="card">
+        <div class="step-heading">Commercial Terms</div>
+        <div class="step-sub">Optional fields — the more you provide, the more specific our analysis.</div>
+        <div class="form-row" style="margin-bottom:18px;">
+          <div class="field">
+            <label>Discount Status</label>
+            <select id="discount_status">
+              <option value="">Select…</option>
+              <option value="PCT_KNOWN">I know the percentage</option>
+              <option value="USD_KNOWN">I know the dollar amount</option>
+              <option value="SHOWN_IN_QUOTE">It's shown in my quote</option>
+              <option value="DONT_KNOW">I don't know</option>
+            </select>
+          </div>
+          <div class="field" id="discount-pct-field" hidden>
+            <label>Discount Percentage</label>
+            <input type="number" id="discount_pct" placeholder="15" min="0" max="100" step="0.1" />
+          </div>
+          <div class="field" id="discount-usd-field" hidden>
+            <label>Discount Amount (USD)</label>
+            <input type="number" id="discount_usd" placeholder="22000" min="0" />
+          </div>
+        </div>
+        <div class="form-row" style="margin-bottom:18px;">
+          <div class="field">
+            <label>Bundle Structure</label>
+            <select id="bundle_structure">
+              <option value="">Select…</option>
+              <option value="STANDARD">Standard (individual products)</option>
+              <option value="BUNDLED">Bundled contract</option>
+              <option value="POOLED">Pooled contract</option>
+              <option value="UNKNOWN">Not sure</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Rate Protection</label>
+            <select id="rate_protection_status">
+              <option value="">Select…</option>
+              <option value="active">Rate protection active</option>
+              <option value="unclear">Unclear</option>
+              <option value="none">No rate protection</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row" style="margin-bottom:18px;">
+          <div class="field">
+            <label>Renewal Increase (%) <span class="hint">Optional</span></label>
+            <input type="number" id="renewal_increase_pct" placeholder="8.5" min="0" step="0.1" />
+          </div>
+          <div class="field">
+            <label>Expected Next-Year ACV (USD) <span class="hint">Optional</span></label>
+            <input type="number" id="expected_next_year_acv_usd" placeholder="90000000" min="1" />
+          </div>
+        </div>
+        <div class="field" style="max-width:320px;">
+          <label>Savings Target</label>
+          <select id="target_savings_pct">
+            <option value="">No target</option>
+            <option value="5">5%</option>
+            <option value="10">10%</option>
+            <option value="15">15%</option>
+            <option value="20">20%</option>
+          </select>
+        </div>
+        <hr class="divider" />
+        <div class="section-note">If you have two comparable written Procore quotes for different configurations</div>
+        <div class="form-row">
+          <div class="field">
+            <label>Before Quote Amount (USD) <span class="hint">Optional</span></label>
+            <input type="number" id="before_annual_cost_usd" placeholder="147596" min="1" />
+          </div>
+          <div class="field">
+            <label>After Quote Amount (USD) <span class="hint">Optional</span></label>
+            <input type="number" id="after_annual_cost_usd" placeholder="131200" min="1" />
+          </div>
+        </div>
+        <div class="nav-row">
+          <button id="btn-back-4" class="btn btn-ghost">Back</button>
+          <button id="btn-next-4" class="btn">Continue</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5: Review -->
+    <div id="step-5" hidden>
+      <div class="card">
+        <div class="step-heading">Review Your Inputs</div>
+        <div class="step-sub">Confirm everything looks correct before running the analysis.</div>
+        <div id="review-summary"></div>
+        <div id="step-5-error"></div>
+        <div class="nav-row">
+          <button id="btn-back-5" class="btn btn-ghost">Back</button>
+          <button id="btn-analyze" class="btn btn-lg">Analyze My Renewal</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- End Wizard -->
+
+<!-- LOADING -->
+<div id="loading" hidden>
+  <div class="loading-wrap">
+    <div class="loading-logo">
+      <svg width="32" height="32" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="120" height="120" rx="12" fill="#123B2A"/>
+        <path d="M30 35 L30 85 L35 85 L35 45 L50 45 L50 50 L40 50 L40 85 L45 85 L45 55 L55 55 L55 85 L60 85 L60 40 L35 40 L35 35 Z" fill="#4ADE80"/>
+        <circle cx="75" cy="55" r="18" stroke="#1F8A5B" stroke-width="3" fill="none"/>
+        <path d="M84 64 L95 75" stroke="#1F8A5B" stroke-width="3" stroke-linecap="round"/>
+        <path d="M70 50 L75 55 L82 48" stroke="#4ADE80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="loading-brand" style="color:#123B2A;">Renewal<span style="color:#1F8A5B;">Scope</span></span>
+    </div>
+    <div class="loading-title">Analyzing Your Renewal…</div>
+    <div class="loading-sub">This will take just a moment.</div>
+    <ul class="loading-steps">
+      <li id="ls-0" class="ls-item"><span class="check"></span>Checking commercial structure</li>
+      <li id="ls-1" class="ls-item"><span class="check"></span>Checking product eligibility</li>
+      <li id="ls-2" class="ls-item"><span class="check"></span>Comparing evidence</li>
+      <li id="ls-3" class="ls-item"><span class="check"></span>Testing quantifiability</li>
+      <li id="ls-4" class="ls-item"><span class="check"></span>Preparing results…</li>
+    </ul>
+  </div>
+</div>
+<!-- End Loading -->
+
+<!-- RESULTS -->
+<div id="results-container" hidden>
+  <div class="results-header">
+    <div class="results-header-brand">Renewal<span class="results-header-brand-scope">Scope</span></div>
+    <div class="results-header-sub">Procore Renewal Analysis</div>
+  </div>
+  <div class="results-wrap">
+
+    <!-- FREE SECTION -->
+    <div id="results-status-hero"></div>
+    <div id="results-benchmark"></div>
+    <div id="results-executive-summary"></div>
+    <div class="card">
+      <div class="card-title">Analysis Results</div>
+      <div id="results-list"></div>
+    </div>
+    <div id="results-known-unknown"></div>
+
+    <!-- PROFESSIONAL REPORT CTA -->
+    <div id="pro-report-cta" class="pro-cta-card">
+      <div class="pro-cta-headline">Turn This Analysis Into a Negotiation-Ready Report</div>
+      <p class="pro-cta-copy">Get the complete product audit, evidence trail, counterfactual analysis, commercial risks, negotiation strategy, and downloadable PDF report.</p>
+      <p class="pro-cta-trust">Your primary finding is shown above. The Professional Report adds the detailed evidence and negotiation analysis needed for decision-making.</p>
+      <button id="btn-view-pro-report" class="btn btn-lg">View Professional Report</button>
+    </div>
+
+    <!-- FREE VS PRO COMPARISON -->
+    <div class="comparison-table">
+      <div class="comp-col">
+        <div class="comp-header free">Free Analysis</div>
+        <ul>
+          <li>✓ Primary verdict</li>
+          <li>✓ Verified savings when supported</li>
+          <li>✓ Basic benchmark</li>
+          <li>✓ Key warnings</li>
+          <li>✓ Basic product status</li>
+          <li>✓ Key next actions</li>
+        </ul>
+      </div>
+      <div class="comp-col pro">
+        <div class="comp-header pro">Professional Report</div>
+        <ul>
+          <li>✓ Everything in Free</li>
+          <li>✓ Full product-by-product audit</li>
+          <li>✓ Dependency &amp; requirement audit</li>
+          <li>✓ Detailed counterfactual analysis</li>
+          <li>✓ Complete evidence trail</li>
+          <li>✓ Commercial risk analysis</li>
+          <li>✓ Full negotiation strategy</li>
+          <li>✓ Negotiation target when defensible</li>
+          <li>✓ Confirmation checklist</li>
+          <li>✓ Downloadable PDF report</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- PROFESSIONAL SECTION (hidden until CTA clicked) -->
+    <div id="pro-report-section" hidden>
+      <div id="results-product-audit"></div>
+      <div id="results-counterfactual"></div>
+      <div id="results-evidence"></div>
+      <div id="results-warnings"></div>
+      <div id="results-negotiation"></div>
+      <div id="results-confirm"></div>
+      <div style="margin-top:20px;">
+        <button id="btn-download-pdf" class="btn btn-lg" style="background:var(--forest);">Download Professional Report (PDF)</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Disclaimers</div>
+        <p style="font-size:0.9375rem;color:var(--muted);line-height:1.6;margin-bottom:12px;"><strong style="color:var(--text);">Independent analysis.</strong> Not affiliated with Procore Technologies, Inc. All financial calculations are deterministic and evidence-based.</p>
+        <p style="font-size:0.9375rem;color:var(--muted);line-height:1.6;"><strong style="color:var(--text);">No savings are guaranteed.</strong> Always cross-check against your actual Procore renewal quote. Benchmark figures are directional context, not predictions.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;">
+      <button id="btn-new-analysis" class="btn btn-ghost">Start New Analysis</button>
+    </div>
+  </div>
+</div>
+<!-- End Results -->
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand-col">
+        <div class="footer-brand">
+          <svg width="28" height="28" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="120" height="120" rx="12" fill="#1F8A5B"/>
+            <path d="M30 35 L30 85 L35 85 L35 45 L50 45 L50 50 L40 50 L40 85 L45 85 L45 55 L55 55 L55 85 L60 85 L60 40 L35 40 L35 35 Z" fill="#fff"/>
+            <circle cx="75" cy="55" r="18" stroke="#fff" stroke-width="3" fill="none"/>
+            <path d="M84 64 L95 75" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+            <path d="M70 50 L75 55 L82 48" stroke="#4ADE80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <div class="footer-brand-text">
+            <span class="footer-brand-renewal">Renewal</span><span class="footer-brand-scope">Scope</span>
+          </div>
+        </div>
+        <p class="footer-tagline">Evidence-backed renewal intelligence. Independent analysis, transparent methodology.</p>
+      </div>
+      <div>
+        <div class="footer-col-title">Product</div>
+        <ul class="footer-links">
+          <li><a href="#how-it-works">How It Works</a></li>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#evidence">Evidence</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Company</div>
+        <ul class="footer-links">
+          <li><a href="#">About</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">Privacy</a></li>
+          <li><a href="#">Terms</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Resources</div>
+        <ul class="footer-links">
+          <li><a href="#">Documentation</a></li>
+          <li><a href="#">Support</a></li>
+          <li><a href="#">Security</a></li>
+        </ul>
+      </div>
+    </div>
+    <hr class="footer-divider" />
+    <div class="footer-bottom">
+      <div class="footer-legal">
+        <p>© 2026 RenewalScope. All rights reserved.</p>
+        <p style="margin-top:8px;">Independent analysis. Not affiliated with Procore Technologies, Inc. No savings are guaranteed. Benchmark figures are directional context, not predictions. Financial calculations are deterministic; no invented pricing.</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="bundle.js"></script>
+</body>
+</html>
+

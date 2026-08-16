@@ -1,0 +1,253 @@
+{
+  "version": "1.0",
+  "status": "authoritative_mvp",
+  "evidence_types": {
+    "FACT": "Official/primary documented fact",
+    "OBSERVATION": "Direct customer/public procurement observation",
+    "BENCHMARK": "Secondary/aggregated/comparative evidence",
+    "UNKNOWN": "Insufficient evidence"
+  },
+  "result_types": [
+    "VERIFIED_BEFORE_AFTER",
+    "SAVINGS_IDENTIFIED",
+    "OPPORTUNITY_NOT_QUANTIFIABLE",
+    "NO_DEFENSIBLE_SAVINGS_IDENTIFIED"
+  ],
+  "hard_guards": [
+    "Never invent price, discount, dependency, eligibility or savings.",
+    "Never treat current line-item spend as automatic removal savings.",
+    "Never calculate dollar savings from a benchmark alone.",
+    "Never mix company ACV with project-value evidence.",
+    "Unknown commercial removability remains UNKNOWN.",
+    "Unknown discount must not be silently carried into counterfactual pricing.",
+    "Every material financial claim must retain provenance."
+  ],
+  "engine_rules": [
+    {
+      "Stage": "1. Current baseline",
+      "Rule": "Use user-entered current total and product-level prices.",
+      "Output": "Current spend",
+      "Evidence Required": "User-provided commercial data",
+      "Allowed Result": "VERIFIED / USER-REPORTED",
+      "Never Do": "Invent missing prices."
+    },
+    {
+      "Stage": "2. Candidate generation",
+      "Rule": "Only consider products/capabilities that are not required and whose workflow can remain valid.",
+      "Output": "Optimization candidate",
+      "Evidence Required": "Usage + requirement + dependency inputs",
+      "Allowed Result": "POTENTIAL",
+      "Never Do": "Prescribe removal without qualification."
+    },
+    {
+      "Stage": "3. Direct counterfactual",
+      "Rule": "If user has a comparable alternative quote for the proposed configuration, calculate current minus alternative.",
+      "Output": "Savings",
+      "Evidence Required": "Comparable written quote",
+      "Allowed Result": "VERIFIED or POTENTIAL depending on comparability",
+      "Never Do": "Treat a line-item price as automatic savings."
+    },
+    {
+      "Stage": "4. Comparable evidence",
+      "Rule": "Use normalized public/customer quotes only when ACV, product mix, term and commercial structure are sufficiently comparable.",
+      "Output": "Estimated alternative range",
+      "Evidence Required": "Comparable evidence dataset",
+      "Allowed Result": "POTENTIAL",
+      "Never Do": "Turn a benchmark into a guaranteed price."
+    },
+    {
+      "Stage": "5. Scenario model",
+      "Rule": "If evidence supports a bounded scenario but not an exact quote, show a range and assumptions.",
+      "Output": "Potential savings range",
+      "Evidence Required": "Evidence + explicit assumptions",
+      "Allowed Result": "POTENTIAL",
+      "Never Do": "Show false precision."
+    },
+    {
+      "Stage": "6. Target-price fallback",
+      "Rule": "If candidate is valid but alternative price is not defensible, calculate the maximum alternative price that achieves the user's target savings.",
+      "Output": "Negotiation target",
+      "Evidence Required": "Current spend + user target",
+      "Allowed Result": "ACTIONABLE / NOT A SAVINGS CLAIM",
+      "Never Do": "Call the target an expected Procore price."
+    },
+    {
+      "Stage": "7. No quantification",
+      "Rule": "If no defensible counterfactual price exists, do not manufacture a dollar saving.",
+      "Output": "Opportunity found but savings not quantifiable",
+      "Evidence Required": "Candidate evidence only",
+      "Allowed Result": "WARNING / UNKNOWN",
+      "Never Do": "Use current line-item spend as savings."
+    },
+    {
+      "Stage": "8. No opportunity",
+      "Rule": "If no valid optimization candidate is found, report that no defensible savings were identified.",
+      "Output": "Current workflow appears reasonable based on available evidence",
+      "Evidence Required": "Complete enough user inputs",
+      "Allowed Result": "WARNING / NO_SAVINGS_IDENTIFIED",
+      "Never Do": "Claim that savings are impossible in all circumstances."
+    },
+    {
+      "Stage": "9. Confidence",
+      "Rule": "Confidence reflects evidence quality and commercial comparability.",
+      "Output": "High / Medium / Low",
+      "Evidence Required": "Evidence hierarchy",
+      "Allowed Result": "Metadata",
+      "Never Do": "Use confidence to hide uncertainty."
+    }
+  ],
+  "dependency_rules": [
+    {
+      "Source Product / Capability": "Quality & Safety",
+      "Dependent Tool / Workflow": "Inspections",
+      "Dependency Type": "Capability / licensing relationship",
+      "User Confirmation Needed": "YES",
+      "Removal Guard": "If inspections are required, do not recommend removing the commercial capability without validating impact.",
+      "Evidence Status": "FACT / official Procore documentation"
+    },
+    {
+      "Source Product / Capability": "Quality & Safety",
+      "Dependent Tool / Workflow": "Incidents",
+      "Dependency Type": "Capability / workflow",
+      "User Confirmation Needed": "YES",
+      "Removal Guard": "Check active incident workflow before removal.",
+      "Evidence Status": "FACT / official product documentation"
+    },
+    {
+      "Source Product / Capability": "Quality & Safety",
+      "Dependent Tool / Workflow": "Observations",
+      "Dependency Type": "Capability / workflow",
+      "User Confirmation Needed": "YES",
+      "Removal Guard": "Check active observations workflow before removal.",
+      "Evidence Status": "FACT / official product documentation"
+    },
+    {
+      "Source Product / Capability": "Quality & Safety",
+      "Dependent Tool / Workflow": "Forms",
+      "Dependency Type": "Capability / workflow",
+      "User Confirmation Needed": "YES",
+      "Removal Guard": "Check whether forms are used for Q&S-critical processes.",
+      "Evidence Status": "FACT / official product documentation"
+    },
+    {
+      "Source Product / Capability": "Quality & Safety",
+      "Dependent Tool / Workflow": "Daily Log",
+      "Dependency Type": "Capability / workflow",
+      "User Confirmation Needed": "YES",
+      "Removal Guard": "Daily Log can remain part of PM workflows; do not assume removing Q&S removes all PM tools.",
+      "Evidence Status": "FACT / official documentation"
+    },
+    {
+      "Source Product / Capability": "Project Financials",
+      "Dependent Tool / Workflow": "Accounting / ERP integration",
+      "Dependency Type": "Integration",
+      "User Confirmation Needed": "YES",
+      "Removal Guard": "Flag integration and validate replacement before removal.",
+      "Evidence Status": "FACT / official Procore support evidence"
+    },
+    {
+      "Source Product / Capability": "Analytics",
+      "Dependent Tool / Workflow": "Operational modules",
+      "Dependency Type": "Not automatically a hard dependency",
+      "User Confirmation Needed": "NO unless customer workflow indicates one",
+      "Removal Guard": "Do not infer a module dependency merely because analytics consumes data.",
+      "Evidence Status": "FACT / official Procore support evidence"
+    },
+    {
+      "Source Product / Capability": "Any product",
+      "Dependent Tool / Workflow": "Customer-specific workflow",
+      "Dependency Type": "Business dependency",
+      "User Confirmation Needed": "YES",
+      "Removal Guard": "Client contract, compliance, internal policy or required workflow blocks removal.",
+      "Evidence Status": "Customer input"
+    }
+  ],
+  "freemium_outputs": [
+    {
+      "Outcome": "SAVINGS_IDENTIFIED",
+      "Free Scan Headline": "Potential savings identified",
+      "Free Result Content": "Current spend + potential savings amount/range + main opportunity + confidence",
+      "Paid Unlock": "Full configuration comparison, evidence chain, assumptions, negotiation strategy and detailed report",
+      "Savings Display Rule": "Show amount/range only when defensible."
+    },
+    {
+      "Outcome": "NO_DEFENSIBLE_SAVINGS_IDENTIFIED",
+      "Free Scan Headline": "No defensible savings identified",
+      "Free Result Content": "Professional explanation that current configuration appears commercially reasonable based on available evidence",
+      "Paid Unlock": "Detailed evidence review and scenario analysis",
+      "Savings Display Rule": "Do not show invented savings."
+    },
+    {
+      "Outcome": "OPPORTUNITY_NOT_QUANTIFIABLE",
+      "Free Scan Headline": "Optimization opportunity identified — savings not yet quantifiable",
+      "Free Result Content": "Candidate product/capability + current spend if known + reason + what must be confirmed",
+      "Paid Unlock": "Detailed candidate analysis, evidence and negotiation plan",
+      "Savings Display Rule": "Never equate current line-item spend with savings."
+    },
+    {
+      "Outcome": "VERIFIED_BEFORE_AFTER",
+      "Free Scan Headline": "Savings verified",
+      "Free Result Content": "Current vs actual alternative quote/outcome + verified annual difference",
+      "Paid Unlock": "Detailed audit trail and evidence report",
+      "Savings Display Rule": "Use VERIFIED only when comparable evidence supports it."
+    }
+  ],
+  "test_cases": [
+    {
+      "Case": "T1",
+      "Inputs / Scenario": "Invoice Management: Not used; not required; no dependency; no alternative quote.",
+      "Expected Brain Result": "Optimization candidate; savings not yet quantifiable.",
+      "Savings Claim?": "NO",
+      "Reason": "Current line-item spend is not automatically removal savings."
+    },
+    {
+      "Case": "T2",
+      "Inputs / Scenario": "Same as T1 + comparable alternative quote is $131,200 vs current $147,596.",
+      "Expected Brain Result": "Potential/verified savings = $16,396 depending on comparability.",
+      "Savings Claim?": "YES",
+      "Reason": "Direct counterfactual commercial evidence."
+    },
+    {
+      "Case": "T3",
+      "Inputs / Scenario": "Q&S rarely used but client contract requires it.",
+      "Expected Brain Result": "Do not recommend removal; preserve workflow.",
+      "Savings Claim?": "NO",
+      "Reason": "Business requirement blocks candidate."
+    },
+    {
+      "Case": "T4",
+      "Inputs / Scenario": "Q&S not used; not required; comparable public evidence supports only a broad range.",
+      "Expected Brain Result": "Potential savings range with assumptions.",
+      "Savings Claim?": "YES, RANGE",
+      "Reason": "Comparable evidence supports bounded scenario, not exact price."
+    },
+    {
+      "Case": "T5",
+      "Inputs / Scenario": "User has $147,596 renewal and target is 10%; no alternative quote.",
+      "Expected Brain Result": "Maximum acceptable alternative price = $132,836.40; label as negotiation target.",
+      "Savings Claim?": "NO exact saving claim",
+      "Reason": "Target price is not a predicted Procore quote."
+    },
+    {
+      "Case": "T6",
+      "Inputs / Scenario": "No candidate products survive requirement/dependency checks.",
+      "Expected Brain Result": "No defensible savings identified.",
+      "Savings Claim?": "NO",
+      "Reason": "No valid optimization path."
+    },
+    {
+      "Case": "T7",
+      "Inputs / Scenario": "Product line has technical integration with ERP/accounting.",
+      "Expected Brain Result": "Flag integration; ask replacement/dependency question before candidate removal.",
+      "Savings Claim?": "NO until validated",
+      "Reason": "Integration does not prove commercial dependency, but removal risk exists."
+    },
+    {
+      "Case": "T8",
+      "Inputs / Scenario": "Current discount unknown; no quote-level discount evidence.",
+      "Expected Brain Result": "Continue with uncertainty; do not assume discount carries to alternative.",
+      "Savings Claim?": "Only if alternative evidence supports it",
+      "Reason": "Discount is account-specific and can change counterfactual economics."
+    }
+  ]
+}
