@@ -8,28 +8,18 @@ export interface EntitlementStatus {
 /**
  * Check if a user has Pro/Paid access.
  *
- * Current implementation: Dev-mode only (no real payment integration yet)
+ * BETA MODE: All authenticated users get Pro access
  * Future: Check against Supabase entitlements table populated by payment webhooks
  */
 export async function checkEntitlement(userId: string, userEmail?: string): Promise<EntitlementStatus> {
-  // Dev override: Allow access for testing/development emails
-  const devOverrides = [
-    '@renewalscope.com',
-    '@test.com',
-    'dev@',
-  ];
+  // BETA: Grant Pro access to all authenticated users
+  // This will be replaced with real payment/subscription checks later
+  return {
+    hasProAccess: true,
+    reason: 'Beta access granted',
+  };
 
-  if (userEmail) {
-    const isDev = devOverrides.some(pattern => userEmail.includes(pattern));
-    if (isDev) {
-      return {
-        hasProAccess: true,
-        reason: 'Development access granted',
-      };
-    }
-  }
-
-  // TODO: In production, query Supabase:
+  // TODO: In production with payment integration, replace above with:
   // const { data } = await supabase
   //   .from('entitlements')
   //   .select('status')
@@ -41,10 +31,4 @@ export async function checkEntitlement(userId: string, userEmail?: string): Prom
   //   hasProAccess: data !== null,
   //   reason: data ? 'Active subscription' : 'No active subscription',
   // };
-
-  // Default: No paid access (until payment integration is complete)
-  return {
-    hasProAccess: false,
-    reason: 'Pro access requires subscription',
-  };
 }

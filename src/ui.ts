@@ -1812,23 +1812,136 @@ function renderKnownUnknown(output: EngineOutput): void {
 }
 
 function renderResults(output: EngineOutput): void {
+  // Always render free content
+  renderFreeResult(output);
+
+  // Do NOT render Pro content for unauthenticated users
+  // Pro content will be rendered on-demand after auth + entitlement check
+}
+
+function renderFreeResult(output: EngineOutput): void {
   renderExecutiveSummary(output);
   renderStatusHero(output);
   renderBenchmark(output);
   renderResultsList(output);
   renderKnownUnknown(output);
-  // Pro section starts hidden; populated now so it's ready when revealed
+
+  // Show Pro preview/CTA
+  renderProPreview();
+}
+
+function renderProReport(output: EngineOutput): void {
   renderProductAudit(output);
   renderCounterfactualSection(output);
   renderEvidenceSection(output);
   renderWarningsAndAssumptions(output);
   renderNegotiation(output);
   renderWhatToConfirm(output);
-  // Ensure pro section is hidden at the start of each new result render
-  setHidden('pro-report-section', true);
-  const btn = $('btn-view-pro-report');
-  if (btn) btn.textContent = 'View Professional Report';
 }
+
+function renderProPreview(): void {
+  const container = $('pro-preview-section');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div style="margin-top:48px;padding:48px 32px;background:linear-gradient(135deg, #f8faf9 0%, #ffffff 100%);border:2px solid #d4af37;border-radius:16px;box-shadow:0 4px 12px rgba(212,175,55,0.15);">
+      <div style="text-align:center;margin-bottom:40px;">
+        <div style="display:inline-flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="#d4af37" stroke="#b8941f" stroke-width="1.5"/>
+          </svg>
+          <h2 style="font-size:2rem;font-weight:800;color:#123B2A;margin:0;letter-spacing:-0.5px;">
+            Professional Report
+          </h2>
+        </div>
+        <div style="display:inline-block;padding:6px 16px;background:linear-gradient(135deg, #d4af37 0%, #b8941f 100%);color:#fff;border-radius:20px;font-size:0.75rem;font-weight:700;letter-spacing:0.5px;margin-bottom:16px;">
+          PREMIUM RENEWAL INTELLIGENCE
+        </div>
+        <p style="font-size:1.0625rem;color:#4b5563;line-height:1.6;max-width:600px;margin:0 auto;">
+          Unlock the complete analysis with detailed evidence, negotiation strategy, and professional PDF report.
+        </p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;margin-bottom:40px;">
+        <div style="background:#fff;padding:28px;border-radius:12px;border:1px solid #e5e7eb;box-shadow:0 2px 8px rgba(0,0,0,0.04);transition:all 0.2s;">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg, #d4af37 0%, #b8941f 100%);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 5H7C5.89543 5 5 5.89543 5 7V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V7C19 5.89543 18.1046 5 17 5H15M9 5C9 6.10457 9.89543 7 11 7H13C14.1046 7 15 6.10457 15 5M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5M12 12H15M12 16H15M9 12H9.01M9 16H9.01" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3 style="font-size:1.125rem;font-weight:700;color:#123B2A;margin-bottom:10px;">Detailed Product Audit</h3>
+          <p style="font-size:0.9375rem;color:#6b7280;line-height:1.6;margin:0;">See which products are eligible, blocked, or uncertain with full dependency analysis.</p>
+        </div>
+
+        <div style="background:#fff;padding:28px;border-radius:12px;border:1px solid #e5e7eb;box-shadow:0 2px 8px rgba(0,0,0,0.04);transition:all 0.2s;">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg, #d4af37 0%, #b8941f 100%);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 8V12L15 15M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3 style="font-size:1.125rem;font-weight:700;color:#123B2A;margin-bottom:10px;">Counterfactual Analysis</h3>
+          <p style="font-size:0.9375rem;color:#6b7280;line-height:1.6;margin:0;">Understand exactly what each configuration change could mean financially.</p>
+        </div>
+
+        <div style="background:#fff;padding:28px;border-radius:12px;border:1px solid #e5e7eb;box-shadow:0 2px 8px rgba(0,0,0,0.04);transition:all 0.2s;">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg, #d4af37 0%, #b8941f 100%);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 12H15M9 16H15M17 21H7C5.89543 21 5 20.1046 5 19V5C5 3.89543 5.89543 3 7 3H12.5858C12.851 3 13.1054 3.10536 13.2929 3.29289L18.7071 8.70711C18.8946 8.89464 19 9.149 19 9.41421V19C19 20.1046 18.1046 21 17 21Z" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3 style="font-size:1.125rem;font-weight:700;color:#123B2A;margin-bottom:10px;">Evidence Trail</h3>
+          <p style="font-size:0.9375rem;color:#6b7280;line-height:1.6;margin:0;">Review the public quote evidence and sources behind every recommendation.</p>
+        </div>
+
+        <div style="background:#fff;padding:28px;border-radius:12px;border:1px solid #e5e7eb;box-shadow:0 2px 8px rgba(0,0,0,0.04);transition:all 0.2s;">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg, #d4af37 0%, #b8941f 100%);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 12H8.01M12 12H12.01M16 12H16.01M21 12C21 16.9706 16.9706 21 12 21C10.4607 21 9.01171 20.5983 7.76923 19.8942L3 21L4.10577 16.2308C3.40169 14.9883 3 13.5393 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3 style="font-size:1.125rem;font-weight:700;color:#123B2A;margin-bottom:10px;">Negotiation Strategy</h3>
+          <p style="font-size:0.9375rem;color:#6b7280;line-height:1.6;margin:0;">Get a structured renewal negotiation plan with target prices and key questions.</p>
+        </div>
+
+        <div style="background:#fff;padding:28px;border-radius:12px;border:1px solid #e5e7eb;box-shadow:0 2px 8px rgba(0,0,0,0.04);transition:all 0.2s;">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg, #d4af37 0%, #b8941f 100%);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M7 21H17C18.1046 21 19 20.1046 19 19V9.41421C19 9.149 18.8946 8.89464 18.7071 8.70711L13.2929 3.29289C13.1054 3.10536 12.851 3 12.5858 3H7C5.89543 3 5 3.89543 5 5V19C5 20.1046 5.89543 21 7 21Z" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+              <path d="M12 3V8C12 8.55228 12.4477 9 13 9H18" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3 style="font-size:1.125rem;font-weight:700;color:#123B2A;margin-bottom:10px;">Professional PDF</h3>
+          <p style="font-size:0.9375rem;color:#6b7280;line-height:1.6;margin:0;">Download the complete negotiation-ready report with RenewalScope branding.</p>
+        </div>
+
+        <div style="background:#fff;padding:28px;border-radius:12px;border:1px solid #e5e7eb;box-shadow:0 2px 8px rgba(0,0,0,0.04);transition:all 0.2s;">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg, #d4af37 0%, #b8941f 100%);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 9V11M12 15H12.01M5.07183 19H18.9282C20.4678 19 21.4301 17.3333 20.6603 16L13.7321 4C12.9623 2.66667 11.0377 2.66667 10.2679 4L3.33975 16C2.56995 17.3333 3.53223 19 5.07183 19Z" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3 style="font-size:1.125rem;font-weight:700;color:#123B2A;margin-bottom:10px;">Commercial Risks</h3>
+          <p style="font-size:0.9375rem;color:#6b7280;line-height:1.6;margin:0;">Understand the assumptions, limitations, and what to confirm before acting.</p>
+        </div>
+      </div>
+
+      <div style="text-align:center;">
+        <button id="btn-view-pro-report" style="padding:18px 48px;background:linear-gradient(135deg, #1F8A5B 0%, #166d47 100%);color:#fff;border:2px solid #d4af37;border-radius:12px;font-size:1.125rem;font-weight:700;cursor:pointer;transition:all 0.2s;font-family:inherit;box-shadow:0 4px 12px rgba(31,138,91,0.3);">
+          <span style="display:inline-flex;align-items:center;gap:8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 15V3M12 15L8 11M12 15L16 11M2 17L2.621 19.485C2.72915 19.9177 3.11127 20.2388 3.55578 20.2721C8.84782 20.7006 14.1522 20.7006 19.4442 20.2721C19.8887 20.2388 20.2708 19.9177 20.379 19.485L21 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Unlock Professional Report
+          </span>
+        </button>
+      </div>
+    </div>
+  `;
+
+  // Attach event listener
+  $('btn-view-pro-report')?.addEventListener('click', handleViewProReport);
+}
+
 
 // ── Run analysis ──────────────────────────────────────────────────────────────
 
@@ -1955,12 +2068,18 @@ async function handleSignIn(email: string, password: string) {
 
     // If we were trying to view pro report, show it now
     if (hasProAccess && lastOutput) {
-      showProReport();
+      renderProReport(lastOutput);
+      const previewSection = $('pro-preview-section');
+      const proSection = $('pro-report-section');
+      if (previewSection) previewSection.hidden = true;
+      if (proSection) proSection.hidden = false;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
 
   if (btn) btn.disabled = false;
 }
+
 
 async function handleSignUp(email: string, password: string, passwordConfirm: string) {
   const btn = $('signup-btn') as HTMLButtonElement;
@@ -2051,9 +2170,11 @@ async function handleSignOut() {
   hasProAccess = false;
   updateNavbar();
 
-  // Hide pro report if visible
+  // Hide pro report if visible and reload to free result
   const proSection = $('pro-report-section');
+  const previewSection = $('pro-preview-section');
   if (proSection) proSection.hidden = true;
+  if (previewSection) previewSection.hidden = false;
 }
 
 async function handleGoogleSignIn() {
@@ -2077,15 +2198,6 @@ async function handleGoogleSignIn() {
   // User will be redirected back after Google authentication
 }
 
-function showProReport() {
-  const proSection = $('pro-report-section');
-  const proCta = $('pro-report-cta');
-
-  if (proSection) proSection.hidden = false;
-  if (proCta) proCta.hidden = true;
-
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
 
 function requireAuth() {
   if (!authState.authenticated) {
@@ -2100,6 +2212,7 @@ async function handleViewProReport() {
   if (lastInput && lastOutput) {
     sessionStorage.setItem('rs_last_input', JSON.stringify(lastInput));
     sessionStorage.setItem('rs_last_output', JSON.stringify(lastOutput));
+    sessionStorage.setItem('rs_intended_action', 'professional_report');
   }
 
   // Check auth
@@ -2107,14 +2220,21 @@ async function handleViewProReport() {
     return;
   }
 
-  // Check entitlement
-  if (!hasProAccess) {
-    alert('Pro access required. Payment integration coming soon!\n\nFor now, use a dev email (e.g., test@renewalscope.com) to access Pro features.');
-    return;
+  // In beta, all authenticated users have Pro access
+  // Render Pro content immediately
+  if (lastOutput) {
+    renderProReport(lastOutput);
   }
 
-  showProReport();
+  // Hide preview, show Pro section
+  const previewSection = $('pro-preview-section');
+  const proSection = $('pro-report-section');
+  if (previewSection) previewSection.hidden = true;
+  if (proSection) proSection.hidden = false;
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 
@@ -2203,14 +2323,35 @@ document.addEventListener('DOMContentLoaded', () => {
     // Restore session if user came back after auth
     const savedInput = sessionStorage.getItem('rs_last_input');
     const savedOutput = sessionStorage.getItem('rs_last_output');
-    if (savedInput && savedOutput) {
+    const intendedAction = sessionStorage.getItem('rs_intended_action');
+
+    if (savedInput && savedOutput && intendedAction === 'professional_report') {
       try {
         lastInput = JSON.parse(savedInput);
         lastOutput = JSON.parse(savedOutput);
         sessionStorage.removeItem('rs_last_input');
         sessionStorage.removeItem('rs_last_output');
+        sessionStorage.removeItem('rs_intended_action');
+
+        // User was trying to access Pro report, restore and continue
+        if (authState.authenticated && lastOutput && hasProAccess) {
+          // Show results container and render free result first
+          setHidden('landing', true);
+          setHidden('wizard', true);
+          setHidden('results-container', false);
+          renderFreeResult(lastOutput);
+
+          // Then immediately render and show Pro report
+          renderProReport(lastOutput);
+          const previewSection = $('pro-preview-section');
+          const proSection = $('pro-report-section');
+          if (previewSection) previewSection.hidden = true;
+          if (proSection) proSection.hidden = false;
+
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
       } catch (e) {
-        // ignore parse errors
+        console.error('Error restoring session:', e);
       }
     }
   })();
@@ -2392,15 +2533,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // PDF download
   $('btn-download-pdf')?.addEventListener('click', () => {
+    // In beta: Enforce authentication only (all authenticated users have Pro access)
+    if (!authState.authenticated) {
+      alert('Please sign in to download the Professional Report PDF.');
+      showAuthModal();
+      return;
+    }
+
     if (lastOutput && lastInput) generatePDF(lastOutput, lastInput);
   });
 
-  // View Professional Report CTA
-  $('btn-view-pro-report')?.addEventListener('click', () => {
-    setHidden('pro-report-section', false);
-    $('pro-report-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    const btn = $('btn-view-pro-report');
-    if (btn) btn.textContent = 'Professional Report ↓';
+  // "Start New Analysis" button
+  $('btn-new-analysis')?.addEventListener('click', () => {
+    // Clear state and reload
+    lastInput = null;
+    lastOutput = null;
+    sessionStorage.removeItem('rs_last_input');
+    sessionStorage.removeItem('rs_last_output');
+    window.location.reload();
   });
 });
 
