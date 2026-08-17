@@ -4,6 +4,22 @@ import { createClient, type User, type Session, type AuthChangeEvent, type AuthE
 
 // Browser-safe public credentials (anon key, not service-role)
 const SUPABASE_URL = 'https://qzunabrdemvyruvaozer.supabase.co';
+const PRODUCTION_AUTH_REDIRECT_URL = 'https://renewalscope.princesankhala670.workers.dev';
+
+/**
+ * Keeps authentication callbacks on the current local development server while
+ * always directing non-local environments to the live RenewalScope site.
+ */
+export function getAuthRedirectUrl(): string {
+  if (typeof window !== 'undefined') {
+    const { hostname, origin } = window.location;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return origin;
+    }
+  }
+
+  return PRODUCTION_AUTH_REDIRECT_URL;
+}
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6dW5hYnJkZW12eXJ1dmFvemVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5NDU3MDgsImV4cCI6MjEwMjUyMTcwOH0.cE3JVKZt0Y0EO5nS1SdEimVljdudfzKhS2mHhoH0wng';
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -53,6 +69,9 @@ export async function signUp(email: string, password: string): Promise<{ user: U
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: getAuthRedirectUrl(),
+      },
     });
 
     if (error) {
@@ -124,7 +143,7 @@ export async function signOut(): Promise<{ error: AuthError | null }> {
 export async function resetPassword(email: string): Promise<{ error: AuthError | null }> {
   try {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}`,
+      redirectTo: getAuthRedirectUrl(),
     });
 
     if (error) {
@@ -149,7 +168,7 @@ export async function signInWithGoogle(): Promise<{ error: AuthError | null }> {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin,
+        redirectTo: getAuthRedirectUrl(),
       },
     });
 
@@ -174,4 +193,3 @@ export async function signInWithGoogle(): Promise<{ error: AuthError | null }> {
 export function onAuthStateChange(callback: (event: AuthChangeEvent, session: Session | null) => void) {
   return supabase.auth.onAuthStateChange(callback);
 }
-
