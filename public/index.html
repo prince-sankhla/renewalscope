@@ -517,6 +517,113 @@
     /* ── SECTION NOTE / DIVIDER ── */
     .section-note { font-size: 0.8125rem; color: var(--muted); font-style: italic; margin-bottom: 14px; }
     hr.divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+    /* ── AUTH MODAL ── */
+    .auth-modal-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .auth-modal {
+      background: var(--white); border-radius: 16px;
+      max-width: 440px; width: 100%; max-height: 90vh;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow-y: auto;
+    }
+    .auth-modal-header {
+      padding: 32px 32px 24px; border-bottom: 1px solid var(--border);
+      text-align: center;
+    }
+    .auth-modal-logo { font-size: 1.5rem; font-weight: 800; color: var(--forest); margin-bottom: 8px; }
+    .auth-modal-logo-scope { color: var(--green); }
+    .auth-modal-subtitle { font-size: 0.9375rem; color: var(--muted); }
+    .auth-tabs {
+      display: flex; border-bottom: 1px solid var(--border);
+    }
+    .auth-tab {
+      flex: 1; padding: 16px; text-align: center;
+      font-size: 0.9375rem; font-weight: 600; color: var(--muted);
+      cursor: pointer; background: none; border: none;
+      border-bottom: 2px solid transparent; transition: all 0.2s;
+      font-family: inherit;
+    }
+    .auth-tab.active {
+      color: var(--green); border-bottom-color: var(--green);
+    }
+    .auth-tab:hover:not(.active) { color: var(--text); }
+    .auth-modal-body { padding: 32px; }
+    .auth-form { display: none; }
+    .auth-form.active { display: block; }
+    .auth-field { margin-bottom: 20px; }
+    .auth-field label {
+      display: block; font-size: 0.875rem; font-weight: 600;
+      color: var(--text2); margin-bottom: 6px;
+    }
+    .auth-field input {
+      width: 100%; padding: 12px 14px; border: 1px solid var(--border);
+      border-radius: 8px; font-size: 0.9375rem; color: var(--text);
+      background: var(--white); font-family: inherit;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .auth-field input:focus {
+      outline: none; border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(31, 138, 91, 0.1);
+    }
+    .auth-field input::placeholder { color: var(--muted); opacity: 0.6; }
+    .auth-btn {
+      width: 100%; padding: 13px; background: var(--green);
+      color: #fff; border: none; border-radius: 8px;
+      font-size: 1rem; font-weight: 700; cursor: pointer;
+      transition: all 0.15s; font-family: inherit; margin-top: 8px;
+    }
+    .auth-btn:hover { background: var(--green2); transform: translateY(-1px); }
+    .auth-btn:disabled {
+      opacity: 0.5; cursor: not-allowed; transform: none;
+    }
+    .auth-error {
+      background: var(--red-bg); border: 1px solid #FCA5A5;
+      color: #991B1B; padding: 12px 14px; border-radius: 8px;
+      font-size: 0.875rem; margin-bottom: 16px; line-height: 1.5;
+    }
+    .auth-success {
+      background: var(--mint); border: 1px solid rgba(31, 138, 91, 0.3);
+      color: #065F46; padding: 12px 14px; border-radius: 8px;
+      font-size: 0.875rem; margin-bottom: 16px; line-height: 1.5;
+    }
+    .auth-forgot-link {
+      text-align: center; margin-top: 16px;
+    }
+    .auth-forgot-link button {
+      background: none; border: none; color: var(--green);
+      font-size: 0.875rem; font-weight: 500; cursor: pointer;
+      text-decoration: underline; font-family: inherit;
+    }
+    .auth-forgot-link button:hover { color: var(--green2); }
+    .auth-back-link {
+      text-align: center; margin-bottom: 16px;
+    }
+    .auth-back-link button {
+      background: none; border: none; color: var(--green);
+      font-size: 0.875rem; font-weight: 500; cursor: pointer;
+      font-family: inherit; display: inline-flex; align-items: center; gap: 4px;
+    }
+    .auth-back-link button:hover { color: var(--green2); }
+    .auth-modal-close {
+      position: absolute; top: 16px; right: 16px;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--page-bg); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.15s; font-size: 1.25rem;
+      color: var(--muted);
+    }
+    .auth-modal-close:hover {
+      background: var(--border); color: var(--text);
+    }
+    @media (max-width: 500px) {
+      .auth-modal { max-width: 100%; margin: 0; border-radius: 0; }
+      .auth-modal-body { padding: 24px; }
+    }
   </style>
 </head>
 <body>
@@ -545,6 +652,9 @@
     </div>
     <div class="nav-actions">
       <button class="btn-nav-ghost" id="btn-see-how">See How It Works</button>
+      <button class="btn-nav-ghost" id="btn-signin" style="display:none;">Sign In</button>
+      <span id="nav-user-email" style="display:none;color:rgba(255,255,255,0.7);font-size:0.875rem;margin-right:8px;"></span>
+      <button class="btn-nav-ghost" id="btn-signout" style="display:none;">Sign Out</button>
       <button class="btn-nav-primary" id="btn-start-nav">Start Free Analysis</button>
     </div>
     <button class="hamburger" id="hamburger" aria-label="Toggle menu">
@@ -1029,12 +1139,48 @@
             </select>
           </div>
           <div class="field">
+            <label>Procore Credits (USD) <span class="hint">Optional</span></label>
+            <input type="number" id="credits_usd" placeholder="10000" min="0" />
+          </div>
+        </div>
+        <div class="form-row" style="margin-bottom:18px;">
+          <div class="field">
             <label>Rate Protection</label>
             <select id="rate_protection_status">
               <option value="">Select…</option>
               <option value="active">Rate protection active</option>
               <option value="unclear">Unclear</option>
               <option value="none">No rate protection</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Tier Changed Since Last Year? <span class="hint">Optional</span></label>
+            <select id="tier_changed">
+              <option value="">Select…</option>
+              <option value="YES">Yes</option>
+              <option value="NO">No</option>
+              <option value="NOT_SURE">Not sure</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row" style="margin-bottom:18px;">
+          <div class="field">
+            <label>Packaging Changed Since Last Year? <span class="hint">Optional</span></label>
+            <select id="packaging_changed">
+              <option value="">Select…</option>
+              <option value="YES">Yes</option>
+              <option value="NO">No</option>
+              <option value="NOT_SURE">Not sure</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Construction Type <span class="hint">Optional</span></label>
+            <select id="construction_type">
+              <option value="">Select…</option>
+              <option value="commercial">Commercial</option>
+              <option value="industrial">Industrial</option>
+              <option value="civil_infrastructure">Civil Infrastructure</option>
+              <option value="other">Other</option>
             </select>
           </div>
         </div>
@@ -1256,6 +1402,75 @@
     </div>
   </div>
 </footer>
+
+<!-- AUTH MODAL -->
+<div id="auth-modal" class="auth-modal-overlay" hidden>
+  <div class="auth-modal" style="position:relative;">
+    <button class="auth-modal-close" id="auth-modal-close" aria-label="Close">×</button>
+    <div class="auth-modal-header">
+      <div class="auth-modal-logo">Renewal<span class="auth-modal-logo-scope">Scope</span></div>
+      <div class="auth-modal-subtitle">Evidence-backed renewal intelligence</div>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-tab="signin">Sign In</button>
+      <button class="auth-tab" data-tab="signup">Sign Up</button>
+    </div>
+    <div class="auth-modal-body">
+      <!-- Sign In Form -->
+      <form class="auth-form active" id="signin-form">
+        <div id="signin-error" class="auth-error" hidden></div>
+        <div class="auth-field">
+          <label for="signin-email">Email</label>
+          <input type="email" id="signin-email" placeholder="you@company.com" required />
+        </div>
+        <div class="auth-field">
+          <label for="signin-password">Password</label>
+          <input type="password" id="signin-password" placeholder="••••••••" required />
+        </div>
+        <button type="submit" class="auth-btn" id="signin-btn">Sign In</button>
+        <div class="auth-forgot-link">
+          <button type="button" id="forgot-password-link">Forgot password?</button>
+        </div>
+      </form>
+
+      <!-- Sign Up Form -->
+      <form class="auth-form" id="signup-form">
+        <div id="signup-error" class="auth-error" hidden></div>
+        <div id="signup-success" class="auth-success" hidden></div>
+        <div class="auth-field">
+          <label for="signup-email">Email</label>
+          <input type="email" id="signup-email" placeholder="you@company.com" required />
+        </div>
+        <div class="auth-field">
+          <label for="signup-password">Password</label>
+          <input type="password" id="signup-password" placeholder="••••••••" required />
+        </div>
+        <div class="auth-field">
+          <label for="signup-password-confirm">Confirm Password</label>
+          <input type="password" id="signup-password-confirm" placeholder="••••••••" required />
+        </div>
+        <button type="submit" class="auth-btn" id="signup-btn">Create Account</button>
+      </form>
+
+      <!-- Forgot Password Form -->
+      <form class="auth-form" id="forgot-form">
+        <div class="auth-back-link">
+          <button type="button" id="back-to-signin">← Back to Sign In</button>
+        </div>
+        <div id="forgot-error" class="auth-error" hidden></div>
+        <div id="forgot-success" class="auth-success" hidden></div>
+        <p style="font-size:0.9375rem;color:var(--text2);margin-bottom:20px;line-height:1.6;">
+          Enter your email address and we'll send you a password reset link.
+        </p>
+        <div class="auth-field">
+          <label for="forgot-email">Email</label>
+          <input type="email" id="forgot-email" placeholder="you@company.com" required />
+        </div>
+        <button type="submit" class="auth-btn" id="forgot-btn">Send Reset Link</button>
+      </form>
+    </div>
+  </div>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="bundle.js"></script>

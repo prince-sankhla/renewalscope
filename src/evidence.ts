@@ -3,6 +3,9 @@
 
 import type { EvidenceRow } from './types.js';
 import { EvidenceConfidence } from './types.js';
+import { PUBLIC_QUOTE_ROWS, PUBLIC_QUOTES_DATASET_META } from './data/procore_public_quotes.js';
+
+export { PUBLIC_QUOTES_DATASET_META } from './data/procore_public_quotes.js';
 
 export const EVIDENCE_ROWS: EvidenceRow[] = [
   {
@@ -195,5 +198,13 @@ export const EVIDENCE_ROWS: EvidenceRow[] = [
 export function getUniqueRateRows(): EvidenceRow[] {
   return EVIDENCE_ROWS.filter(
     (r) => r.rate_per_1m !== undefined && r.confidence !== EvidenceConfidence.DUPLICATE,
+  );
+}
+
+export const ALL_EVIDENCE_ROWS: EvidenceRow[] = [...EVIDENCE_ROWS, ...PUBLIC_QUOTE_ROWS];
+
+export function getProductQuoteRows(): EvidenceRow[] {
+  return PUBLIC_QUOTE_ROWS.filter(
+    (r) => r.exclude_from_calculations !== true && r.quoted_product_annual_price_usd !== undefined,
   );
 }

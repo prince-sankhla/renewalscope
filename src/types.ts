@@ -27,6 +27,21 @@ export enum EvidenceConfidence {
   DUPLICATE = 'DUPLICATE',
 }
 
+export type EvidenceSourceType =
+  | 'PUBLIC_QUOTE'
+  | 'PUBLIC_CUSTOMER_OBSERVATION'
+  | 'OFFICIAL'
+  | 'USER_SUPPLIED';
+
+export type LimitationFlag =
+  | 'POOLED_CV'
+  | 'MAX_PRICE_QUOTE'
+  | 'BAND_NORMALIZED'
+  | 'ESTIMATE_NOT_FINAL'
+  | 'RESELLER_QUOTE'
+  | 'PROJECT_SPECIFIC_LICENSE'
+  | 'INCOMPLETE_RECORD';
+
 export type AcvType = 'company' | 'project' | 'unknown';
 
 // ── Product questionnaire enums ────────────────────────────────────────────
@@ -144,6 +159,16 @@ export interface EvidenceRow {
   note?: string;
   source_url?: string;
   duplicate_of?: string;
+  source_type?: EvidenceSourceType;
+  source_description?: string;
+  source_date?: string;
+  normalized_product_id?: string;
+  acv_band_min_usd?: number;
+  acv_band_max_usd?: number;
+  quoted_product_annual_price_usd?: number;
+  limitation_flags?: LimitationFlag[];
+  exclude_from_rate_benchmark?: boolean;
+  exclude_from_calculations?: boolean;
 }
 
 // ── User input (commercial baseline + product questionnaire) ───────────────
@@ -263,6 +288,37 @@ export interface CounterfactualResult {
   explanation: string;
 }
 
+export type ProductQuoteComparability = 'HIGH' | 'MEDIUM' | 'LOW';
+
+export interface ProductQuoteMatch {
+  row: EvidenceRow;
+  comparability: ProductQuoteComparability;
+  comparability_reason: string;
+}
+
+export interface QuoteEvidenceRecord {
+  evidence_id: string;
+  source_description: string;
+  product_reported: string;
+  normalized_product_id: string | undefined;
+  acv_context: string;
+  quoted_annual_price_usd: number | null;
+  term: string;
+  limitation_flags: string[];
+  what_it_supports: string;
+  what_it_does_not_support: string;
+  exclude_from_calculations: boolean;
+}
+
+export interface QuoteEvidenceSummary {
+  dataset_name: string;
+  total_records: number;
+  usable_records: number;
+  excluded_records: number;
+  products_covered: string[];
+  records: QuoteEvidenceRecord[];
+}
+
 // ── Negotiation output (populated by negotiation stage) ───────────────────
 
 export interface NegotiationOutput {
@@ -292,6 +348,7 @@ export interface FreeResult {
   explanation: string;
   warnings: string[];
   what_to_confirm: string[];
+  benchmark_evidence_note?: string;
 }
 
 export interface PaidReport {
@@ -309,4 +366,5 @@ export interface PaidReport {
   suggested_questions: string[];
   renewal_strategy: string;
   audit_trail: string[];
+  quote_evidence_summary?: QuoteEvidenceSummary;
 }

@@ -13,6 +13,7 @@ import {
   BundleStructure,
 } from './types.js';
 import type { CandidateGenerationResult } from './candidates.js';
+import { findProductQuoteRows } from './benchmark.js';
 
 export interface TargetPriceResult {
   product_id: string;
@@ -136,18 +137,26 @@ function evaluateSingleCandidate(
     ? ` Your current attributable spend is $${candidate.annual_price_usd.toLocaleString()}/year.`
     : '';
 
+  const pqMatches = findProductQuoteRows(candidate.product_id, input.acv_usd)
+    .filter(m => m.comparability === 'HIGH' || m.comparability === 'MEDIUM');
+  const pqIds = pqMatches.map(m => m.row.evidence_id);
+  const pqNote = pqIds.length > 0
+    ? ` Comparable public quote observations exist for ${candidate.product_id} (${pqIds.length} observation${pqIds.length > 1 ? 's' : ''}, see evidence trail). Directional context only — not a savings guarantee.`
+    : '';
+
   // Uncertain — eligibility not confirmed (dependency or requirement unresolved)
   if (candidate.blocked_reason) {
     return {
       result_class: ResultType.OPPORTUNITY_NOT_QUANTIFIABLE,
       candidate,
       assumptions,
-      evidence_ids: [],
+      evidence_ids: pqIds,
       confidence: ConfidenceLevel.UNKNOWN,
       explanation:
         `${candidate.product_id} may be an optimization candidate, but removal cannot be confirmed safe.${spendNote} ` +
         `Confirmation needed: ${candidate.blocked_reason} ` +
-        'Request a comparable quote before treating this as a dollar saving.',
+        'Request a comparable quote before treating this as a dollar saving.' +
+        pqNote,
     };
   }
 
@@ -163,12 +172,13 @@ function evaluateSingleCandidate(
       result_class: ResultType.OPPORTUNITY_NOT_QUANTIFIABLE,
       candidate,
       assumptions,
-      evidence_ids: [],
+      evidence_ids: pqIds,
       confidence: ConfidenceLevel.UNKNOWN,
       explanation:
         `${candidate.product_id} is reported as not actively used and no known requirement prevents a configuration change.${spendNote} ` +
         'However, commercial structure or discount uncertainty prevents a defensible savings calculation. ' +
-        'Request a comparable written quote before treating this as a dollar saving.',
+        'Request a comparable written quote before treating this as a dollar saving.' +
+        pqNote,
     };
   }
 
@@ -178,12 +188,13 @@ function evaluateSingleCandidate(
     result_class: ResultType.OPPORTUNITY_NOT_QUANTIFIABLE,
     candidate,
     assumptions,
-    evidence_ids: [],
+    evidence_ids: pqIds,
     confidence: ConfidenceLevel.UNKNOWN,
     explanation:
       `${candidate.product_id} is reported as not actively used and no known requirement prevents a configuration change.${spendNote} ` +
       'However, available evidence is insufficient to defensibly determine the resulting renewal price. ' +
-      'Request a comparable quote before treating this as a dollar saving.',
+      'Request a comparable quote before treating this as a dollar saving.' +
+      pqNote,
   };
 }
 

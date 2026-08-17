@@ -1,12 +1,15 @@
 // src/benchmark.ts — rate calculation, comparable matching, benchmark positioning
 
 import type { EvidenceRow, RateStats, BenchmarkResult, RatePosition } from './types.js';
+import type { ProductQuoteMatch } from './types.js';
 import { EvidenceConfidence } from './types.js';
-import { EVIDENCE_ROWS } from './evidence.js';
+import { ALL_EVIDENCE_ROWS } from './evidence.js';
+import { PUBLIC_QUOTE_ROWS } from './data/procore_public_quotes.js';
 
-export function calcEffectiveRate(annual_cost_usd: number, acv_usd: number): number {
+export function calcEffectiveRate(annual_cost_usd: number, acv_usd: number, credits_usd?: number): number {
   if (acv_usd <= 0) throw new Error('acv_usd must be positive');
-  return (annual_cost_usd / acv_usd) * 1_000_000;
+  const netCost = annual_cost_usd - (credits_usd ?? 0);
+  return (netCost / acv_usd) * 1_000_000;
 }
 
 // Returns rows that have a rate_per_1m and whose acvType matches the user's ACV band.
@@ -14,7 +17,7 @@ export function calcEffectiveRate(annual_cost_usd: number, acv_usd: number): num
 export function findComparableRows(
   user_acv: number,
   acvType: 'company' | 'project' | 'unknown',
-  rows: EvidenceRow[] = EVIDENCE_ROWS,
+  rows: EvidenceRow[] = ALL_EVIDENCE_ROWS,
 ): EvidenceRow[] {
   const acvLow = user_acv * 0.1;
   const acvHigh = user_acv * 10;
@@ -72,11 +75,12 @@ export function buildBenchmarkResult(
   user_acv: number,
   user_annual_cost: number,
   acvType: 'company' | 'project' | 'unknown' = 'company',
+  credits_usd?: number,
 ): BenchmarkResult | null {
   const comparables = findComparableRows(user_acv, acvType);
   if (comparables.length === 0) return null;
 
-  const user_rate = calcEffectiveRate(user_annual_cost, user_acv);
+  const user_rate = calcEffectiveRate(user_annual_cost, user_acv, credits_usd);
   const stats = calcRateStats(comparables);
   const position = ratePosition(user_rate, stats);
 
@@ -87,4 +91,47 @@ export function buildBenchmarkResult(
     comparable_evidence_ids: comparables.map((r) => r.evidence_id),
     min_evidence_count_met: comparables.length >= 3,
   };
+}
+
+export function findProductQuoteRows(
+  normalized_product_id: string,
+  user_acv_usd: number,
+  rows?: EvidenceRow[],
+): ProductQuoteMatch[] {
+  const pool = rows ?? PUBLIC_QUOTE_ROWS;
+  const candidates = pool.filter(
+    (r) =>
+      r.normalized_product_id === normalized_product_id &&
+      r.quoted_product_annual_price_usd !== undefined &&
+      r.exclude_from_calculations !== true,
+  );
+
+  const results: ProductQuoteMatch[] = [];
+  for (const row of candidates) {
+    let repAcv: number | undefined;
+    if (row.acv_usd !== undefined) {
+      repAcv = row.acv_usd;
+    } else if (row.acv_band_min_usd !== undefined && row.acv_band_max_usd !== undefined) {
+      repAcv = (row.acv_band_min_usd + row.acv_band_max_usd) / 2;
+    }
+    if (repAcv === undefined) continue;
+
+    const ratio = repAcv / user_acv_usd;
+    let comparability: 'HIGH' | 'MEDIUM' | 'LOW';
+    let comparability_reason: string;
+    if (ratio >= 0.5 && ratio <= 2) {
+      comparability = 'HIGH';
+      comparability_reason = `Representative ACV $${repAcv.toLocaleString()} is within 0.5x-2x of user ACV $${user_acv_usd.toLocaleString()}`;
+    } else if (ratio >= 0.2 && ratio <= 5) {
+      comparability = 'MEDIUM';
+      comparability_reason = `Representative ACV $${repAcv.toLocaleString()} is within 0.2x-5x of user ACV $${user_acv_usd.toLocaleString()}`;
+    } else {
+      comparability = 'LOW';
+      comparability_reason = `Representative ACV $${repAcv.toLocaleString()} is outside 0.2x-5x of user ACV $${user_acv_usd.toLocaleString()}`;
+    }
+    results.push({ row, comparability, comparability_reason });
+  }
+
+  const order = { HIGH: 0, MEDIUM: 1, LOW: 2 };
+  return results.sort((a, b) => order[a.comparability] - order[b.comparability]);
 }

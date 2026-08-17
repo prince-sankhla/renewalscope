@@ -10,10 +10,15 @@ import type {
   BenchmarkResult,
   RatePosition,
   ConfidenceLevel,
+  EvidenceRow,
+  QuoteEvidenceRecord,
+  QuoteEvidenceSummary,
 } from './types.js';
 import { ResultType } from './types.js';
 import type { CandidateGenerationResult } from './candidates.js';
 import type { CounterfactualSummary } from './counterfactual.js';
+import { getProductQuoteRows } from './evidence.js';
+import { PUBLIC_QUOTE_ROWS, PUBLIC_QUOTES_DATASET_META } from './data/procore_public_quotes.js';
 
 function headline(verdict: ResultType): string {
   switch (verdict) {
@@ -78,6 +83,12 @@ export function buildFreeResult(
       ? first.dollar_saving
       : undefined;
 
+  const userProducts = input.product_inputs?.map(p => p.product_id) ?? input.products ?? [];
+  const pqCount = getProductQuoteRows().filter(r => userProducts.includes(r.normalized_product_id ?? '')).length;
+  const benchmark_evidence_note = pqCount > 0
+    ? `${pqCount} public quote observation${pqCount > 1 ? 's' : ''} available for your product mix. Directional context only — not an official Procore price list.`
+    : undefined;
+
   return {
     verdict,
     current_spend: input.annual_cost_usd,
@@ -90,6 +101,7 @@ export function buildFreeResult(
     explanation: headline(verdict),
     warnings: keyWarnings(summary),
     what_to_confirm: whatToConfirm(summary),
+    benchmark_evidence_note,
   };
 }
 
@@ -118,6 +130,14 @@ export function buildPaidReport(
     ...summary.global_assumptions,
     ...summary.counterfactual_results.flatMap((r) => r.assumptions),
   ];
+
+  // Add credits assumption if present
+  if (input.credits_usd != null && input.credits_usd > 0) {
+    assumptions.push(
+      `Credits of $${input.credits_usd.toLocaleString()} applied — effective rate reflects net annual spend after credits.`
+    );
+  }
+
   const seen = new Set<string>();
   const uniqueAssumptions = assumptions.filter((a) => {
     if (seen.has(a)) return false;
@@ -154,6 +174,16 @@ export function buildPaidReport(
       'Bundled/pooled contract: removing a product may not reduce total renewal by the line-item amount.',
     );
   }
+  if (input.tier_changed === 'YES') {
+    commercial_risks.push(
+      'Pricing tier changed since last year — renewal pricing may reflect new tier structure.',
+    );
+  }
+  if (input.packaging_changed === 'YES') {
+    commercial_risks.push(
+      'Packaging structure changed since last year — bundle lock-in risk may apply to current configuration.',
+    );
+  }
 
   const suggested_questions: string[] = [
     `Request a written quote for your current configuration with any candidate products removed.`,
@@ -163,6 +193,16 @@ export function buildPaidReport(
   if (input.contract_term === 'annual') {
     suggested_questions.push(
       'Ask whether a multi-year pooled agreement would provide a renewal rate cap.',
+    );
+  }
+  if (input.rate_protection_status === 'active') {
+    suggested_questions.push(
+      'Invoke your rate protection clause if the renewal increase exceeds the contractual cap.',
+    );
+  }
+  if (input.expected_next_year_acv_usd != null && input.expected_next_year_acv_usd > input.acv_usd * 1.15) {
+    suggested_questions.push(
+      `Expected ACV growth exceeds 15%. Ask whether your renewal can pre-price the additional volume at today's rate.`,
     );
   }
   if (input.target_savings_pct != null && summary.target_prices.length > 0) {
@@ -194,6 +234,46 @@ export function buildPaidReport(
     ),
   ];
 
+  function acvContext(r: EvidenceRow): string {
+    if (r.acv_usd) return `$${(r.acv_usd / 1_000_000).toFixed(0)}M ACV`;
+    if (r.acv_band_min_usd && r.acv_band_max_usd) {
+      return `$${(r.acv_band_min_usd / 1_000_000).toFixed(0)}M–$${(r.acv_band_max_usd / 1_000_000).toFixed(0)}M ACV band`;
+    }
+    return 'ACV not disclosed';
+  }
+
+  const qeRecords: QuoteEvidenceRecord[] = PUBLIC_QUOTE_ROWS.map(r => ({
+    evidence_id: r.evidence_id,
+    source_description: r.source_description ?? '',
+    product_reported: r.products?.[0] ?? r.normalized_product_id ?? 'Platform total',
+    normalized_product_id: r.normalized_product_id,
+    acv_context: acvContext(r),
+    quoted_annual_price_usd: r.quoted_product_annual_price_usd ?? null,
+    term: r.contract_term ?? 'Quote',
+    limitation_flags: r.limitation_flags ?? [],
+    what_it_supports: r.quoted_product_annual_price_usd
+      ? `Observed public quote price for ${r.normalized_product_id ?? 'this product'} at ${acvContext(r)}`
+      : 'Non-calculational context evidence',
+    what_it_does_not_support: 'Universal module price or guaranteed removal saving for any customer',
+    exclude_from_calculations: r.exclude_from_calculations === true,
+  }));
+
+  const usable = qeRecords.filter(r => !r.exclude_from_calculations && r.quoted_annual_price_usd !== null).length;
+  const productsCovered = [...new Set(
+    PUBLIC_QUOTE_ROWS
+      .filter(r => r.normalized_product_id && !r.exclude_from_calculations)
+      .map(r => r.normalized_product_id!)
+  )];
+
+  const quote_evidence_summary: QuoteEvidenceSummary = {
+    dataset_name: PUBLIC_QUOTES_DATASET_META.dataset_name,
+    total_records: PUBLIC_QUOTES_DATASET_META.total_records,
+    usable_records: usable,
+    excluded_records: PUBLIC_QUOTES_DATASET_META.total_records - usable,
+    products_covered: productsCovered,
+    records: qeRecords,
+  };
+
   return {
     current_configuration,
     candidate_configurations,
@@ -212,5 +292,6 @@ export function buildPaidReport(
     suggested_questions,
     renewal_strategy,
     audit_trail,
+    quote_evidence_summary,
   };
 }

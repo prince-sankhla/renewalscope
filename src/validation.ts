@@ -221,6 +221,8 @@ export function validateUserInput(input: unknown): ValidationResult {
   if (u.expected_next_year_acv_usd !== undefined) {
     if (typeof u.expected_next_year_acv_usd !== 'number' || u.expected_next_year_acv_usd <= 0) {
       hardErrors.push(invalid('expected_next_year_acv_usd', 'Must be a positive number'));
+    } else if (typeof u.acv_usd === 'number' && u.expected_next_year_acv_usd < u.acv_usd) {
+      hardErrors.push(invalid('expected_next_year_acv_usd', 'Must be greater than or equal to current ACV'));
     }
   }
 

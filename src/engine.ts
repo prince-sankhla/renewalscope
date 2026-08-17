@@ -68,7 +68,7 @@ export function runEngine(raw: unknown): EngineOutput {
   if (bundleWarn) ruleResults.push(bundleWarn);
 
   // ── Benchmark ──────────────────────────────────────────────────────────────
-  const benchmark = buildBenchmarkResult(input.acv_usd, input.annual_cost_usd, 'company');
+  const benchmark = buildBenchmarkResult(input.acv_usd, input.annual_cost_usd, 'company', input.credits_usd);
 
   if (benchmark) {
     const highRate = ruleBenchmarkHighRate(benchmark);

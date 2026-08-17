@@ -5,6 +5,18 @@ import type { EngineOutput } from './engine.js';
 import { DiscountStatus, BundleStructure, ResultType, UsageRating, RequirementStatus, ReplacementOption, DependencyFlag } from './types.js';
 import type { ProductInput, EngineResult } from './types.js';
 import { PRODUCT_CATALOG } from './products.js';
+import { getCurrentUser, signIn, signUp, signOut, resetPassword, onAuthStateChange, type AuthState } from './auth.js';
+import { checkEntitlement } from './entitlements.js';
+
+// ── Auth State ────────────────────────────────────────────────────────────────
+
+let authState: AuthState = {
+  user: null,
+  loading: true,
+  authenticated: false,
+};
+
+let hasProAccess = false;
 
 // ── State ─────────────────────────────────────────────────────────────────────
 
@@ -19,9 +31,13 @@ interface WizardState {
   discount_pct: number | null;
   discount_usd: number | null;
   bundle_structure: BundleStructure | null;
+  credits_usd: number | null;
   rate_protection_status: 'active' | 'unclear' | 'none' | null;
   renewal_increase_pct: number | null;
+  tier_changed: 'YES' | 'NO' | 'NOT_SURE' | null;
+  packaging_changed: 'YES' | 'NO' | 'NOT_SURE' | null;
   expected_next_year_acv_usd: number | null;
+  construction_type: 'commercial' | 'industrial' | 'civil_infrastructure' | 'other' | null;
   target_savings_pct: 5 | 10 | 15 | 20 | null;
   before_annual_cost_usd: number | null;
   after_annual_cost_usd: number | null;
@@ -51,9 +67,13 @@ function makeInitialState(): WizardState {
     discount_pct: null,
     discount_usd: null,
     bundle_structure: null,
+    credits_usd: null,
     rate_protection_status: null,
     renewal_increase_pct: null,
+    tier_changed: null,
+    packaging_changed: null,
     expected_next_year_acv_usd: null,
+    construction_type: null,
     target_savings_pct: null,
     before_annual_cost_usd: null,
     after_annual_cost_usd: null,
@@ -288,12 +308,20 @@ function saveStep4(): void {
   state.discount_usd = dusd ? parseFloat(dusd) : null;
   const bs = ($('bundle_structure') as HTMLSelectElement | null)?.value ?? '';
   state.bundle_structure = bs ? (bs as BundleStructure) : null;
+  const credits = ($('credits_usd') as HTMLInputElement | null)?.value ?? '';
+  state.credits_usd = credits ? parseFloat(credits) : null;
   const rp = ($('rate_protection_status') as HTMLSelectElement | null)?.value ?? '';
   state.rate_protection_status = rp ? (rp as 'active' | 'unclear' | 'none') : null;
   const ri = ($('renewal_increase_pct') as HTMLInputElement | null)?.value ?? '';
   state.renewal_increase_pct = ri ? parseFloat(ri) : null;
+  const tc = ($('tier_changed') as HTMLSelectElement | null)?.value ?? '';
+  state.tier_changed = tc ? (tc as 'YES' | 'NO' | 'NOT_SURE') : null;
+  const pc = ($('packaging_changed') as HTMLSelectElement | null)?.value ?? '';
+  state.packaging_changed = pc ? (pc as 'YES' | 'NO' | 'NOT_SURE') : null;
   const eny = ($('expected_next_year_acv_usd') as HTMLInputElement | null)?.value ?? '';
   state.expected_next_year_acv_usd = eny ? parseFloat(eny) : null;
+  const ct = ($('construction_type') as HTMLSelectElement | null)?.value ?? '';
+  state.construction_type = ct ? (ct as 'commercial' | 'industrial' | 'civil_infrastructure' | 'other') : null;
   const tsp = ($('target_savings_pct') as HTMLSelectElement | null)?.value ?? '';
   state.target_savings_pct = tsp ? (parseInt(tsp, 10) as 5 | 10 | 15 | 20) : null;
   const bef = ($('before_annual_cost_usd') as HTMLInputElement | null)?.value ?? '';
@@ -320,8 +348,13 @@ function renderReview(): void {
   if (state.discount_pct != null) rows.push(['Discount %', `${state.discount_pct}%`]);
   if (state.discount_usd != null) rows.push(['Discount USD', fmtUSD(state.discount_usd)]);
   if (state.bundle_structure) rows.push(['Bundle', state.bundle_structure]);
+  if (state.credits_usd != null) rows.push(['Credits', fmtUSD(state.credits_usd)]);
   if (state.rate_protection_status) rows.push(['Rate Protection', state.rate_protection_status]);
   if (state.renewal_increase_pct != null) rows.push(['Renewal Increase', `${state.renewal_increase_pct}%`]);
+  if (state.tier_changed) rows.push(['Tier Changed', state.tier_changed.replace(/_/g, ' ')]);
+  if (state.packaging_changed) rows.push(['Packaging Changed', state.packaging_changed.replace(/_/g, ' ')]);
+  if (state.expected_next_year_acv_usd != null) rows.push(['Expected Next-Year ACV', fmtUSD(state.expected_next_year_acv_usd)]);
+  if (state.construction_type) rows.push(['Construction Type', state.construction_type.replace(/_/g, ' ')]);
   if (state.target_savings_pct != null) rows.push(['Savings Target', `${state.target_savings_pct}%`]);
   if (state.before_annual_cost_usd != null) rows.push(['Before Quote', fmtUSD(state.before_annual_cost_usd)]);
   if (state.after_annual_cost_usd != null) rows.push(['After Quote', fmtUSD(state.after_annual_cost_usd)]);
@@ -367,9 +400,13 @@ function buildEngineInput(): Record<string, unknown> {
   if (state.discount_pct != null) input['discount_pct'] = state.discount_pct;
   if (state.discount_usd != null) input['discount_usd'] = state.discount_usd;
   if (state.bundle_structure) input['bundle_structure'] = state.bundle_structure;
+  if (state.credits_usd != null) input['credits_usd'] = state.credits_usd;
   if (state.rate_protection_status) input['rate_protection_status'] = state.rate_protection_status;
   if (state.renewal_increase_pct != null) input['renewal_increase_pct'] = state.renewal_increase_pct;
+  if (state.tier_changed) input['tier_changed'] = state.tier_changed;
+  if (state.packaging_changed) input['packaging_changed'] = state.packaging_changed;
   if (state.expected_next_year_acv_usd != null) input['expected_next_year_acv_usd'] = state.expected_next_year_acv_usd;
+  if (state.construction_type) input['construction_type'] = state.construction_type;
   if (state.target_savings_pct != null) input['target_savings_pct'] = state.target_savings_pct;
   if (state.before_annual_cost_usd != null) input['before_annual_cost_usd'] = state.before_annual_cost_usd;
   if (state.after_annual_cost_usd != null) input['after_annual_cost_usd'] = state.after_annual_cost_usd;
@@ -497,6 +534,7 @@ function renderCounterfactualSection(output: EngineOutput): void {
 function evidenceSourceType(id: string): string {
   if (id.startsWith('REDDIT-')) return 'Customer observation (Reddit)';
   if (id.startsWith('WEB-')) return 'Web/secondary source';
+  if (id.startsWith('PQ-')) return 'Public procurement quote';
   return 'Public observation';
 }
 
@@ -1141,7 +1179,7 @@ function generatePDF(output: EngineOutput, input: Record<string, unknown>): void
     body('Evidence sources referenced in this analysis.', muted);
     y += 8;
 
-    allEvidence.slice(0, 10).forEach(evidenceId => {
+    allEvidence.forEach(evidenceId => {
       checkPage(18);
 
       doc.setFont('helvetica', 'bold');
@@ -1151,7 +1189,8 @@ function generatePDF(output: EngineOutput, input: Record<string, unknown>): void
       y += 6;
 
       const sourceType = evidenceId.startsWith('REDDIT-') ? 'Customer observation (Reddit)' :
-        evidenceId.startsWith('WEB-') ? 'Web/secondary source' : 'Public observation';
+        evidenceId.startsWith('WEB-') ? 'Web/secondary source' :
+        evidenceId.startsWith('PQ-') ? 'Public procurement quote' : 'Public observation';
 
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8);
@@ -1163,6 +1202,107 @@ function generatePDF(output: EngineOutput, input: Record<string, unknown>): void
       doc.text('  Does not support: Exact post-removal renewal pricing', margin + 2, y);
       y += 8;
     });
+    divider();
+  }
+
+  // ============================================================
+  // QUOTE EVIDENCE SUMMARY
+  // ============================================================
+
+  const qes = output.paid_report.quote_evidence_summary;
+  if (qes && qes.records.length > 0) {
+    checkPage(40);
+    h2('Public Quote Evidence Summary');
+    y += 3;
+    body(
+      `${qes.usable_records} usable public quote observations from public procurement records. ` +
+      `${qes.excluded_records} excluded (pooled structure, incomplete, or commercial-structure-only records). ` +
+      'These are PUBLIC QUOTE OBSERVATIONS — not an official Procore price list. ' +
+      'No individual record establishes a universal module price or guaranteed removal saving.',
+      muted,
+    );
+    y += 8;
+
+    // Disclaimer badge
+    doc.setFillColor(254, 243, 199);
+    doc.setDrawColor(217, 119, 6);
+    doc.roundedRect(margin, y, contentW, 9, 2, 2, 'FD');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(146, 64, 14);
+    doc.text('CONTEXTUAL EVIDENCE ONLY — No savings are guaranteed from these observations', margin + 4, y + 5.5);
+    y += 15;
+
+    const usableRecords = qes.records.filter(r => !r.exclude_from_calculations && r.quoted_annual_price_usd !== null);
+    const excludedRecords = qes.records.filter(r => r.exclude_from_calculations);
+
+    if (usableRecords.length > 0) {
+      h3('Usable Observations');
+      y += 2;
+
+      usableRecords.forEach(rec => {
+        checkPage(38);
+
+        // Row header
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.setTextColor(...charcoal);
+        doc.text(`${rec.evidence_id}  ·  ${rec.normalized_product_id ?? rec.product_reported}`, margin, y);
+        y += 6;
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(...muted);
+        doc.text(`Source: ${rec.source_description}`, margin + 2, y);
+        y += 5;
+
+        const priceStr = rec.quoted_annual_price_usd !== null
+          ? `$${rec.quoted_annual_price_usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/year`
+          : 'Price not disclosed';
+        doc.text(`Observed price: ${priceStr}   ACV context: ${rec.acv_context}   Term: ${rec.term}`, margin + 2, y);
+        y += 5;
+
+        if (rec.limitation_flags.length > 0) {
+          doc.setTextColor(...amber);
+          doc.text(`Flags: ${rec.limitation_flags.join(', ')}`, margin + 2, y);
+          doc.setTextColor(...muted);
+          y += 5;
+        }
+
+        const supLines = doc.splitTextToSize(`Supports: ${rec.what_it_supports}`, contentW - 8);
+        supLines.forEach((line: string) => { checkPage(5); doc.text(line, margin + 2, y); y += 4.5; });
+
+        const noSupLines = doc.splitTextToSize(`Does not support: ${rec.what_it_does_not_support}`, contentW - 8);
+        doc.setTextColor(220, 38, 38);
+        noSupLines.forEach((line: string) => { checkPage(5); doc.text(line, margin + 2, y); y += 4.5; });
+        doc.setTextColor(...muted);
+
+        y += 5;
+        doc.setDrawColor(229, 231, 235);
+        doc.setLineWidth(0.2);
+        doc.line(margin + 2, y, pageW - margin - 2, y);
+        y += 5;
+      });
+    }
+
+    if (excludedRecords.length > 0) {
+      checkPage(20);
+      h3('Excluded Records (not used in calculations)');
+      y += 2;
+
+      excludedRecords.forEach(rec => {
+        checkPage(14);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.setTextColor(...muted);
+        doc.text(`${rec.evidence_id}  ·  ${rec.normalized_product_id ?? rec.product_reported ?? 'Platform'}`, margin, y);
+        y += 5;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7.5);
+        doc.text(`${rec.source_description}   Flags: ${rec.limitation_flags.join(', ')}`, margin + 2, y);
+        y += 7;
+      });
+    }
 
     divider();
   }
@@ -1724,6 +1864,237 @@ async function runAnalysis(): Promise<void> {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// ── Auth Functions ────────────────────────────────────────────────────────────
+
+function updateNavbar() {
+  const btnSignin = $('btn-signin');
+  const btnSignout = $('btn-signout');
+  const navUserEmail = $('nav-user-email');
+
+  if (authState.authenticated && authState.user) {
+    // Authenticated state
+    if (btnSignin) btnSignin.style.display = 'none';
+    if (btnSignout) btnSignout.style.display = 'inline-block';
+    if (navUserEmail) {
+      const email = authState.user.email || '';
+      const truncated = email.length > 25 ? email.substring(0, 22) + '...' : email;
+      navUserEmail.textContent = truncated;
+      navUserEmail.style.display = 'inline';
+    }
+  } else {
+    // Unauthenticated state
+    if (btnSignin) btnSignin.style.display = 'inline-block';
+    if (btnSignout) btnSignout.style.display = 'none';
+    if (navUserEmail) navUserEmail.style.display = 'none';
+  }
+}
+
+function showAuthModal() {
+  const modal = $('auth-modal');
+  if (modal) modal.hidden = false;
+}
+
+function hideAuthModal() {
+  const modal = $('auth-modal');
+  if (modal) modal.hidden = true;
+  // Clear form fields
+  const signinEmail = $('signin-email') as HTMLInputElement;
+  const signinPassword = $('signin-password') as HTMLInputElement;
+  const signupEmail = $('signup-email') as HTMLInputElement;
+  const signupPassword = $('signup-password') as HTMLInputElement;
+  const signupPasswordConfirm = $('signup-password-confirm') as HTMLInputElement;
+  if (signinEmail) signinEmail.value = '';
+  if (signinPassword) signinPassword.value = '';
+  if (signupEmail) signupEmail.value = '';
+  if (signupPassword) signupPassword.value = '';
+  if (signupPasswordConfirm) signupPasswordConfirm.value = '';
+  // Clear errors
+  ['signin-error', 'signup-error', 'signup-success', 'forgot-error', 'forgot-success'].forEach(id => {
+    const el = $(id);
+    if (el) el.hidden = true;
+  });
+}
+
+function switchAuthTab(tab: 'signin' | 'signup' | 'forgot') {
+  // Update tabs
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  const tabButton = document.querySelector(`[data-tab="${tab}"]`);
+  if (tabButton) tabButton.classList.add('active');
+
+  // Update forms
+  document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+  const form = $(`${tab}-form`);
+  if (form) form.classList.add('active');
+}
+
+async function handleSignIn(email: string, password: string) {
+  const btn = $('signin-btn') as HTMLButtonElement;
+  const errorEl = $('signin-error');
+
+  if (btn) btn.disabled = true;
+  if (errorEl) errorEl.hidden = true;
+
+  const { user, error } = await signIn(email, password);
+
+  if (error) {
+    if (errorEl) {
+      errorEl.textContent = error.message || 'Sign in failed. Please check your credentials.';
+      errorEl.hidden = false;
+    }
+    if (btn) btn.disabled = false;
+    return;
+  }
+
+  if (user) {
+    authState = { user, authenticated: true, loading: false };
+    // Check entitlement
+    const entitlement = await checkEntitlement(user.id, user.email || undefined);
+    hasProAccess = entitlement.hasProAccess;
+    updateNavbar();
+    hideAuthModal();
+
+    // If we were trying to view pro report, show it now
+    if (hasProAccess && lastOutput) {
+      showProReport();
+    }
+  }
+
+  if (btn) btn.disabled = false;
+}
+
+async function handleSignUp(email: string, password: string, passwordConfirm: string) {
+  const btn = $('signup-btn') as HTMLButtonElement;
+  const errorEl = $('signup-error');
+  const successEl = $('signup-success');
+
+  if (btn) btn.disabled = true;
+  if (errorEl) errorEl.hidden = true;
+  if (successEl) successEl.hidden = true;
+
+  if (password !== passwordConfirm) {
+    if (errorEl) {
+      errorEl.textContent = 'Passwords do not match.';
+      errorEl.hidden = false;
+    }
+    if (btn) btn.disabled = false;
+    return;
+  }
+
+  if (password.length < 6) {
+    if (errorEl) {
+      errorEl.textContent = 'Password must be at least 6 characters.';
+      errorEl.hidden = false;
+    }
+    if (btn) btn.disabled = false;
+    return;
+  }
+
+  const { user, error } = await signUp(email, password);
+
+  if (error) {
+    if (errorEl) {
+      errorEl.textContent = error.message || 'Sign up failed. Please try again.';
+      errorEl.hidden = false;
+    }
+    if (btn) btn.disabled = false;
+    return;
+  }
+
+  if (user) {
+    if (successEl) {
+      successEl.textContent = 'Account created! Please check your email to confirm your account, then sign in.';
+      successEl.hidden = false;
+    }
+    // Clear form
+    const emailInput = $('signup-email') as HTMLInputElement;
+    const passwordInput = $('signup-password') as HTMLInputElement;
+    const confirmInput = $('signup-password-confirm') as HTMLInputElement;
+    if (emailInput) emailInput.value = '';
+    if (passwordInput) passwordInput.value = '';
+    if (confirmInput) confirmInput.value = '';
+  }
+
+  if (btn) btn.disabled = false;
+}
+
+async function handleForgotPassword(email: string) {
+  const btn = $('forgot-btn') as HTMLButtonElement;
+  const errorEl = $('forgot-error');
+  const successEl = $('forgot-success');
+
+  if (btn) btn.disabled = true;
+  if (errorEl) errorEl.hidden = true;
+  if (successEl) successEl.hidden = true;
+
+  const { error } = await resetPassword(email);
+
+  if (error) {
+    if (errorEl) {
+      errorEl.textContent = error.message || 'Failed to send reset email. Please try again.';
+      errorEl.hidden = false;
+    }
+    if (btn) btn.disabled = false;
+    return;
+  }
+
+  if (successEl) {
+    successEl.textContent = 'Password reset email sent! Check your inbox.';
+    successEl.hidden = false;
+  }
+
+  if (btn) btn.disabled = false;
+}
+
+async function handleSignOut() {
+  await signOut();
+  authState = { user: null, authenticated: false, loading: false };
+  hasProAccess = false;
+  updateNavbar();
+
+  // Hide pro report if visible
+  const proSection = $('pro-report-section');
+  if (proSection) proSection.hidden = true;
+}
+
+function showProReport() {
+  const proSection = $('pro-report-section');
+  const proCta = $('pro-report-cta');
+
+  if (proSection) proSection.hidden = false;
+  if (proCta) proCta.hidden = true;
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function requireAuth() {
+  if (!authState.authenticated) {
+    showAuthModal();
+    return false;
+  }
+  return true;
+}
+
+async function handleViewProReport() {
+  // Preserve current analysis in session storage
+  if (lastInput && lastOutput) {
+    sessionStorage.setItem('rs_last_input', JSON.stringify(lastInput));
+    sessionStorage.setItem('rs_last_output', JSON.stringify(lastOutput));
+  }
+
+  // Check auth
+  if (!requireAuth()) {
+    return;
+  }
+
+  // Check entitlement
+  if (!hasProAccess) {
+    alert('Pro access required. Payment integration coming soon!\n\nFor now, use a dev email (e.g., test@renewalscope.com) to access Pro features.');
+    return;
+  }
+
+  showProReport();
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1791,6 +2162,123 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+
+  // Auth initialization
+  (async () => {
+    const user = await getCurrentUser();
+    authState = {
+      user,
+      authenticated: !!user,
+      loading: false,
+    };
+
+    if (user) {
+      const entitlement = await checkEntitlement(user.id, user.email || undefined);
+      hasProAccess = entitlement.hasProAccess;
+    }
+
+    updateNavbar();
+
+    // Restore session if user came back after auth
+    const savedInput = sessionStorage.getItem('rs_last_input');
+    const savedOutput = sessionStorage.getItem('rs_last_output');
+    if (savedInput && savedOutput) {
+      try {
+        lastInput = JSON.parse(savedInput);
+        lastOutput = JSON.parse(savedOutput);
+        sessionStorage.removeItem('rs_last_input');
+        sessionStorage.removeItem('rs_last_output');
+      } catch (e) {
+        // ignore parse errors
+      }
+    }
+  })();
+
+  // Auth state change listener
+  onAuthStateChange(async (event, session) => {
+    if (session?.user) {
+      authState = {
+        user: session.user,
+        authenticated: true,
+        loading: false,
+      };
+      const entitlement = await checkEntitlement(session.user.id, session.user.email || undefined);
+      hasProAccess = entitlement.hasProAccess;
+    } else {
+      authState = {
+        user: null,
+        authenticated: false,
+        loading: false,
+      };
+      hasProAccess = false;
+    }
+    updateNavbar();
+  });
+
+  // Auth modal - tabs
+  document.querySelectorAll('.auth-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const tabName = tab.getAttribute('data-tab') as 'signin' | 'signup';
+      switchAuthTab(tabName);
+    });
+  });
+
+  // Auth modal - close
+  $('auth-modal-close')?.addEventListener('click', hideAuthModal);
+  $('auth-modal')?.addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) {
+      hideAuthModal();
+    }
+  });
+
+  // Sign in button in navbar
+  $('btn-signin')?.addEventListener('click', showAuthModal);
+
+  // Sign out button in navbar
+  $('btn-signout')?.addEventListener('click', handleSignOut);
+
+  // Sign in form
+  $('signin-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = ($('signin-email') as HTMLInputElement)?.value;
+    const password = ($('signin-password') as HTMLInputElement)?.value;
+    if (email && password) {
+      handleSignIn(email, password);
+    }
+  });
+
+  // Sign up form
+  $('signup-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = ($('signup-email') as HTMLInputElement)?.value;
+    const password = ($('signup-password') as HTMLInputElement)?.value;
+    const passwordConfirm = ($('signup-password-confirm') as HTMLInputElement)?.value;
+    if (email && password && passwordConfirm) {
+      handleSignUp(email, password, passwordConfirm);
+    }
+  });
+
+  // Forgot password link
+  $('forgot-password-link')?.addEventListener('click', () => {
+    switchAuthTab('forgot');
+  });
+
+  // Back to sign in
+  $('back-to-signin')?.addEventListener('click', () => {
+    switchAuthTab('signin');
+  });
+
+  // Forgot password form
+  $('forgot-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = ($('forgot-email') as HTMLInputElement)?.value;
+    if (email) {
+      handleForgotPassword(email);
+    }
+  });
+
+  // View Professional Report button
+  $('btn-view-pro')?.addEventListener('click', handleViewProReport);
 
   // Landing → Wizard (multiple entry points)
   const startWizard = () => {
