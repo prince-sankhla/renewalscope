@@ -5,7 +5,7 @@ import type { EngineOutput } from './engine.js';
 import { DiscountStatus, BundleStructure, ResultType, UsageRating, RequirementStatus, ReplacementOption, DependencyFlag } from './types.js';
 import type { ProductInput, EngineResult } from './types.js';
 import { PRODUCT_CATALOG } from './products.js';
-import { getCurrentUser, signIn, signUp, signOut, resetPassword, onAuthStateChange, type AuthState } from './auth.js';
+import { getCurrentUser, signIn, signUp, signOut, resetPassword, onAuthStateChange, signInWithGoogle, type AuthState } from './auth.js';
 import { checkEntitlement } from './entitlements.js';
 
 // ── Auth State ────────────────────────────────────────────────────────────────
@@ -2056,6 +2056,27 @@ async function handleSignOut() {
   if (proSection) proSection.hidden = true;
 }
 
+async function handleGoogleSignIn() {
+  // Preserve current analysis in session storage
+  if (lastInput && lastOutput) {
+    sessionStorage.setItem('rs_last_input', JSON.stringify(lastInput));
+    sessionStorage.setItem('rs_last_output', JSON.stringify(lastOutput));
+  }
+
+  const { error } = await signInWithGoogle();
+
+  if (error) {
+    const errorEl = $('signin-error');
+    if (errorEl) {
+      errorEl.textContent = error.message || 'Google sign-in failed. Please try again.';
+      errorEl.hidden = false;
+    }
+  }
+
+  // OAuth redirect will happen automatically
+  // User will be redirected back after Google authentication
+}
+
 function showProReport() {
   const proSection = $('pro-report-section');
   const proCta = $('pro-report-cta');
@@ -2257,6 +2278,10 @@ document.addEventListener('DOMContentLoaded', () => {
       handleSignUp(email, password, passwordConfirm);
     }
   });
+
+  // Google Sign-In buttons
+  $('google-signin-btn')?.addEventListener('click', handleGoogleSignIn);
+  $('google-signup-btn')?.addEventListener('click', handleGoogleSignIn);
 
   // Forgot password link
   $('forgot-password-link')?.addEventListener('click', () => {

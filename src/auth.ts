@@ -144,6 +144,33 @@ export async function resetPassword(email: string): Promise<{ error: AuthError |
   }
 }
 
+export async function signInWithGoogle(): Promise<{ error: AuthError | null }> {
+  try {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin,
+      },
+    });
+
+    if (error) {
+      console.error('signInWithGoogle error:', error);
+      return { error };
+    }
+
+    return { error: null };
+  } catch (err) {
+    console.error('signInWithGoogle exception:', err);
+    return {
+      error: {
+        message: err instanceof Error ? err.message : 'Google sign-in failed',
+        name: 'GoogleSignInError',
+        status: 0,
+      } as AuthError
+    };
+  }
+}
+
 export function onAuthStateChange(callback: (event: AuthChangeEvent, session: Session | null) => void) {
   return supabase.auth.onAuthStateChange(callback);
 }
