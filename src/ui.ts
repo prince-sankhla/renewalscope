@@ -1604,13 +1604,21 @@ function renderStatusHero(output: EngineOutput): void {
   const savingsHTML = showSavings
     ? `<div class="spend-item"><div class="spend-label">${savingsLabel}</div>` +
       `<div class="spend-value savings">${fmtUSD(savings!)}</div></div>` : '';
+  const noDefensibleSavings = isNoDefensibleSavingsResult(output);
+  const reassuranceHTML = noDefensibleSavings
+    ? `<div class="no-savings-reassurance">` +
+      `<div class="no-savings-reassurance-title"><span class="no-savings-reassurance-check">&#10003;</span>` +
+      `Your current setup is commercially defensible.</div>` +
+      `<div class="no-savings-reassurance-copy">RenewalScope found no evidence-based savings opportunity worth acting on. ` +
+      `There is no defensible reason to remove or reconfigure products solely to reduce your renewal cost.</div></div>`
+    : '';
+  const subtitleHTML = noDefensibleSavings ? '' :
+    `<div class="status-subtitle">${output.free_result.explanation}</div>`;
 
   container.innerHTML = `<div class="status-hero ${heroClass}">` +
     `<div class="status-badge ${badgeClass}">${badgeText}</div>` +
     `<div class="status-title">${titleText}</div>` +
-    `<div class="status-subtitle">${isNoDefensibleSavingsResult(output)
-      ? 'Based on the information provided, RenewalScope could not identify a defensible savings opportunity.'
-      : output.free_result.explanation}</div>` +
+    reassuranceHTML + subtitleHTML +
     `<div class="spend-display">` +
     `<div class="spend-item"><div class="spend-label">Current Annual Spend</div>` +
     `<div class="spend-value">${fmtUSD(output.free_result.current_spend)}</div></div>` +
