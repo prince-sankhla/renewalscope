@@ -1,11 +1,10349 @@
-"use strict";(()=>{var hi=Object.create;var Lt=Object.defineProperty;var pi=Object.getOwnPropertyDescriptor;var _i=Object.getOwnPropertyNames;var fi=Object.getPrototypeOf,mi=Object.prototype.hasOwnProperty;var gi=(r,e,n)=>()=>{if(n)throw n[0];try{return r&&(e=r(r=0)),e}catch(t){throw n=[t],t}};var se=(r,e)=>()=>{try{return e||r((e={exports:{}}).exports,e),e.exports}catch(n){throw e=0,n}},vi=(r,e)=>{for(var n in e)Lt(r,n,{get:e[n],enumerable:!0})},er=(r,e,n,t)=>{if(e&&typeof e=="object"||typeof e=="function")for(let s of _i(e))!mi.call(r,s)&&s!==n&&Lt(r,s,{get:()=>e[s],enumerable:!(t=pi(e,s))||t.enumerable});return r};var tr=(r,e,n)=>(n=r!=null?hi(fi(r)):{},er(e||!r||!r.__esModule?Lt(n,"default",{value:r,enumerable:!0}):n,r)),bi=r=>er(Lt({},"__esModule",{value:!0}),r);var Ee={};vi(Ee,{Headers:()=>fn,Request:()=>Qi,Response:()=>Yi,default:()=>_n,fetch:()=>Gi});var Wi,qe,Gi,_n,fn,Qi,Yi,me=gi(()=>{"use strict";Wi=function(){if(typeof self<"u")return self;if(typeof window<"u")return window;if(typeof global<"u")return global;throw new Error("unable to locate global object")},qe=Wi(),Gi=qe.fetch,_n=qe.fetch.bind(qe),fn=qe.Headers,Qi=qe.Request,Yi=qe.Response});var $r=se(gn=>{"use strict";Object.defineProperty(gn,"__esModule",{value:!0});var mn=class extends Error{constructor(e){super(e.message),this.name="PostgrestError",this.details=e.details,this.hint=e.hint,this.code=e.code}};gn.default=mn});var bn=se(it=>{"use strict";var jr=it&&it.__importDefault||function(r){return r&&r.__esModule?r:{default:r}};Object.defineProperty(it,"__esModule",{value:!0});var Ji=jr((me(),bi(Ee))),Zi=jr($r()),vn=class{constructor(e){this.shouldThrowOnError=!1,this.method=e.method,this.url=e.url,this.headers=e.headers,this.schema=e.schema,this.body=e.body,this.shouldThrowOnError=e.shouldThrowOnError,this.signal=e.signal,this.isMaybeSingle=e.isMaybeSingle,e.fetch?this.fetch=e.fetch:typeof fetch>"u"?this.fetch=Ji.default:this.fetch=fetch}throwOnError(){return this.shouldThrowOnError=!0,this}setHeader(e,n){return this.headers=Object.assign({},this.headers),this.headers[e]=n,this}then(e,n){this.schema===void 0||(["GET","HEAD"].includes(this.method)?this.headers["Accept-Profile"]=this.schema:this.headers["Content-Profile"]=this.schema),this.method!=="GET"&&this.method!=="HEAD"&&(this.headers["Content-Type"]="application/json");let t=this.fetch,s=t(this.url.toString(),{method:this.method,headers:this.headers,body:JSON.stringify(this.body),signal:this.signal}).then(async i=>{var o,c,a;let u=null,l=null,d=null,p=i.status,m=i.statusText;if(i.ok){if(this.method!=="HEAD"){let O=await i.text();O===""||(this.headers.Accept==="text/csv"||this.headers.Accept&&this.headers.Accept.includes("application/vnd.pgrst.plan+text")?l=O:l=JSON.parse(O))}let E=(o=this.headers.Prefer)===null||o===void 0?void 0:o.match(/count=(exact|planned|estimated)/),b=(c=i.headers.get("content-range"))===null||c===void 0?void 0:c.split("/");E&&b&&b.length>1&&(d=parseInt(b[1])),this.isMaybeSingle&&this.method==="GET"&&Array.isArray(l)&&(l.length>1?(u={code:"PGRST116",details:`Results contain ${l.length} rows, application/vnd.pgrst.object+json requires 1 row`,hint:null,message:"JSON object requested, multiple (or no) rows returned"},l=null,d=null,p=406,m="Not Acceptable"):l.length===1?l=l[0]:l=null)}else{let E=await i.text();try{u=JSON.parse(E),Array.isArray(u)&&i.status===404&&(l=[],u=null,p=200,m="OK")}catch{i.status===404&&E===""?(p=204,m="No Content"):u={message:E}}if(u&&this.isMaybeSingle&&(!((a=u?.details)===null||a===void 0)&&a.includes("0 rows"))&&(u=null,p=200,m="OK"),u&&this.shouldThrowOnError)throw new Zi.default(u)}return{error:u,data:l,count:d,status:p,statusText:m}});return this.shouldThrowOnError||(s=s.catch(i=>{var o,c,a;return{error:{message:`${(o=i?.name)!==null&&o!==void 0?o:"FetchError"}: ${i?.message}`,details:`${(c=i?.stack)!==null&&c!==void 0?c:""}`,hint:"",code:`${(a=i?.code)!==null&&a!==void 0?a:""}`},data:null,count:null,status:0,statusText:""}})),s.then(e,n)}};it.default=vn});var En=se(ot=>{"use strict";var Xi=ot&&ot.__importDefault||function(r){return r&&r.__esModule?r:{default:r}};Object.defineProperty(ot,"__esModule",{value:!0});var eo=Xi(bn()),yn=class extends eo.default{select(e){let n=!1,t=(e??"*").split("").map(s=>/\s/.test(s)&&!n?"":(s==='"'&&(n=!n),s)).join("");return this.url.searchParams.set("select",t),this.headers.Prefer&&(this.headers.Prefer+=","),this.headers.Prefer+="return=representation",this}order(e,{ascending:n=!0,nullsFirst:t,foreignTable:s,referencedTable:i=s}={}){let o=i?`${i}.order`:"order",c=this.url.searchParams.get(o);return this.url.searchParams.set(o,`${c?`${c},`:""}${e}.${n?"asc":"desc"}${t===void 0?"":t?".nullsfirst":".nullslast"}`),this}limit(e,{foreignTable:n,referencedTable:t=n}={}){let s=typeof t>"u"?"limit":`${t}.limit`;return this.url.searchParams.set(s,`${e}`),this}range(e,n,{foreignTable:t,referencedTable:s=t}={}){let i=typeof s>"u"?"offset":`${s}.offset`,o=typeof s>"u"?"limit":`${s}.limit`;return this.url.searchParams.set(i,`${e}`),this.url.searchParams.set(o,`${n-e+1}`),this}abortSignal(e){return this.signal=e,this}single(){return this.headers.Accept="application/vnd.pgrst.object+json",this}maybeSingle(){return this.method==="GET"?this.headers.Accept="application/json":this.headers.Accept="application/vnd.pgrst.object+json",this.isMaybeSingle=!0,this}csv(){return this.headers.Accept="text/csv",this}geojson(){return this.headers.Accept="application/geo+json",this}explain({analyze:e=!1,verbose:n=!1,settings:t=!1,buffers:s=!1,wal:i=!1,format:o="text"}={}){var c;let a=[e?"analyze":null,n?"verbose":null,t?"settings":null,s?"buffers":null,i?"wal":null].filter(Boolean).join("|"),u=(c=this.headers.Accept)!==null&&c!==void 0?c:"application/json";return this.headers.Accept=`application/vnd.pgrst.plan+${o}; for="${u}"; options=${a};`,o==="json"?this:this}rollback(){var e;return((e=this.headers.Prefer)!==null&&e!==void 0?e:"").trim().length>0?this.headers.Prefer+=",tx=rollback":this.headers.Prefer="tx=rollback",this}returns(){return this}};ot.default=yn});var qt=se(at=>{"use strict";var to=at&&at.__importDefault||function(r){return r&&r.__esModule?r:{default:r}};Object.defineProperty(at,"__esModule",{value:!0});var no=to(En()),wn=class extends no.default{eq(e,n){return this.url.searchParams.append(e,`eq.${n}`),this}neq(e,n){return this.url.searchParams.append(e,`neq.${n}`),this}gt(e,n){return this.url.searchParams.append(e,`gt.${n}`),this}gte(e,n){return this.url.searchParams.append(e,`gte.${n}`),this}lt(e,n){return this.url.searchParams.append(e,`lt.${n}`),this}lte(e,n){return this.url.searchParams.append(e,`lte.${n}`),this}like(e,n){return this.url.searchParams.append(e,`like.${n}`),this}likeAllOf(e,n){return this.url.searchParams.append(e,`like(all).{${n.join(",")}}`),this}likeAnyOf(e,n){return this.url.searchParams.append(e,`like(any).{${n.join(",")}}`),this}ilike(e,n){return this.url.searchParams.append(e,`ilike.${n}`),this}ilikeAllOf(e,n){return this.url.searchParams.append(e,`ilike(all).{${n.join(",")}}`),this}ilikeAnyOf(e,n){return this.url.searchParams.append(e,`ilike(any).{${n.join(",")}}`),this}is(e,n){return this.url.searchParams.append(e,`is.${n}`),this}in(e,n){let t=Array.from(new Set(n)).map(s=>typeof s=="string"&&new RegExp("[,()]").test(s)?`"${s}"`:`${s}`).join(",");return this.url.searchParams.append(e,`in.(${t})`),this}contains(e,n){return typeof n=="string"?this.url.searchParams.append(e,`cs.${n}`):Array.isArray(n)?this.url.searchParams.append(e,`cs.{${n.join(",")}}`):this.url.searchParams.append(e,`cs.${JSON.stringify(n)}`),this}containedBy(e,n){return typeof n=="string"?this.url.searchParams.append(e,`cd.${n}`):Array.isArray(n)?this.url.searchParams.append(e,`cd.{${n.join(",")}}`):this.url.searchParams.append(e,`cd.${JSON.stringify(n)}`),this}rangeGt(e,n){return this.url.searchParams.append(e,`sr.${n}`),this}rangeGte(e,n){return this.url.searchParams.append(e,`nxl.${n}`),this}rangeLt(e,n){return this.url.searchParams.append(e,`sl.${n}`),this}rangeLte(e,n){return this.url.searchParams.append(e,`nxr.${n}`),this}rangeAdjacent(e,n){return this.url.searchParams.append(e,`adj.${n}`),this}overlaps(e,n){return typeof n=="string"?this.url.searchParams.append(e,`ov.${n}`):this.url.searchParams.append(e,`ov.{${n.join(",")}}`),this}textSearch(e,n,{config:t,type:s}={}){let i="";s==="plain"?i="pl":s==="phrase"?i="ph":s==="websearch"&&(i="w");let o=t===void 0?"":`(${t})`;return this.url.searchParams.append(e,`${i}fts${o}.${n}`),this}match(e){return Object.entries(e).forEach(([n,t])=>{this.url.searchParams.append(n,`eq.${t}`)}),this}not(e,n,t){return this.url.searchParams.append(e,`not.${n}.${t}`),this}or(e,{foreignTable:n,referencedTable:t=n}={}){let s=t?`${t}.or`:"or";return this.url.searchParams.append(s,`(${e})`),this}filter(e,n,t){return this.url.searchParams.append(e,`${n}.${t}`),this}};at.default=wn});var Sn=se(lt=>{"use strict";var ro=lt&&lt.__importDefault||function(r){return r&&r.__esModule?r:{default:r}};Object.defineProperty(lt,"__esModule",{value:!0});var ct=ro(qt()),Tn=class{constructor(e,{headers:n={},schema:t,fetch:s}){this.url=e,this.headers=n,this.schema=t,this.fetch=s}select(e,{head:n=!1,count:t}={}){let s=n?"HEAD":"GET",i=!1,o=(e??"*").split("").map(c=>/\s/.test(c)&&!i?"":(c==='"'&&(i=!i),c)).join("");return this.url.searchParams.set("select",o),t&&(this.headers.Prefer=`count=${t}`),new ct.default({method:s,url:this.url,headers:this.headers,schema:this.schema,fetch:this.fetch,allowEmpty:!1})}insert(e,{count:n,defaultToNull:t=!0}={}){let s="POST",i=[];if(this.headers.Prefer&&i.push(this.headers.Prefer),n&&i.push(`count=${n}`),t||i.push("missing=default"),this.headers.Prefer=i.join(","),Array.isArray(e)){let o=e.reduce((c,a)=>c.concat(Object.keys(a)),[]);if(o.length>0){let c=[...new Set(o)].map(a=>`"${a}"`);this.url.searchParams.set("columns",c.join(","))}}return new ct.default({method:s,url:this.url,headers:this.headers,schema:this.schema,body:e,fetch:this.fetch,allowEmpty:!1})}upsert(e,{onConflict:n,ignoreDuplicates:t=!1,count:s,defaultToNull:i=!0}={}){let o="POST",c=[`resolution=${t?"ignore":"merge"}-duplicates`];if(n!==void 0&&this.url.searchParams.set("on_conflict",n),this.headers.Prefer&&c.push(this.headers.Prefer),s&&c.push(`count=${s}`),i||c.push("missing=default"),this.headers.Prefer=c.join(","),Array.isArray(e)){let a=e.reduce((u,l)=>u.concat(Object.keys(l)),[]);if(a.length>0){let u=[...new Set(a)].map(l=>`"${l}"`);this.url.searchParams.set("columns",u.join(","))}}return new ct.default({method:o,url:this.url,headers:this.headers,schema:this.schema,body:e,fetch:this.fetch,allowEmpty:!1})}update(e,{count:n}={}){let t="PATCH",s=[];return this.headers.Prefer&&s.push(this.headers.Prefer),n&&s.push(`count=${n}`),this.headers.Prefer=s.join(","),new ct.default({method:t,url:this.url,headers:this.headers,schema:this.schema,body:e,fetch:this.fetch,allowEmpty:!1})}delete({count:e}={}){let n="DELETE",t=[];return e&&t.push(`count=${e}`),this.headers.Prefer&&t.unshift(this.headers.Prefer),this.headers.Prefer=t.join(","),new ct.default({method:n,url:this.url,headers:this.headers,schema:this.schema,fetch:this.fetch,allowEmpty:!1})}};lt.default=Tn});var Br=se(Vt=>{"use strict";Object.defineProperty(Vt,"__esModule",{value:!0});Vt.version=void 0;Vt.version="0.0.0-automated"});var Mr=se(Ht=>{"use strict";Object.defineProperty(Ht,"__esModule",{value:!0});Ht.DEFAULT_HEADERS=void 0;var so=Br();Ht.DEFAULT_HEADERS={"X-Client-Info":`postgrest-js/${so.version}`}});var Vr=se(ut=>{"use strict";var qr=ut&&ut.__importDefault||function(r){return r&&r.__esModule?r:{default:r}};Object.defineProperty(ut,"__esModule",{value:!0});var io=qr(Sn()),oo=qr(qt()),ao=Mr(),In=class r{constructor(e,{headers:n={},schema:t,fetch:s}={}){this.url=e,this.headers=Object.assign(Object.assign({},ao.DEFAULT_HEADERS),n),this.schemaName=t,this.fetch=s}from(e){let n=new URL(`${this.url}/${e}`);return new io.default(n,{headers:Object.assign({},this.headers),schema:this.schemaName,fetch:this.fetch})}schema(e){return new r(this.url,{headers:this.headers,schema:e,fetch:this.fetch})}rpc(e,n={},{head:t=!1,get:s=!1,count:i}={}){let o,c=new URL(`${this.url}/rpc/${e}`),a;t||s?(o=t?"HEAD":"GET",Object.entries(n).filter(([l,d])=>d!==void 0).map(([l,d])=>[l,Array.isArray(d)?`{${d.join(",")}}`:`${d}`]).forEach(([l,d])=>{c.searchParams.append(l,d)})):(o="POST",a=n);let u=Object.assign({},this.headers);return i&&(u.Prefer=`count=${i}`),new oo.default({method:o,url:c,headers:u,schema:this.schemaName,body:a,fetch:this.fetch,allowEmpty:!1})}};ut.default=In});var Yr=se($=>{"use strict";var dt=$&&$.__importDefault||function(r){return r&&r.__esModule?r:{default:r}};Object.defineProperty($,"__esModule",{value:!0});$.PostgrestBuilder=$.PostgrestTransformBuilder=$.PostgrestFilterBuilder=$.PostgrestQueryBuilder=$.PostgrestClient=void 0;var Hr=dt(Vr());$.PostgrestClient=Hr.default;var zr=dt(Sn());$.PostgrestQueryBuilder=zr.default;var Wr=dt(qt());$.PostgrestFilterBuilder=Wr.default;var Gr=dt(En());$.PostgrestTransformBuilder=Gr.default;var Qr=dt(bn());$.PostgrestBuilder=Qr.default;$.default={PostgrestClient:Hr.default,PostgrestQueryBuilder:zr.default,PostgrestFilterBuilder:Wr.default,PostgrestTransformBuilder:Gr.default,PostgrestBuilder:Qr.default}});var ss=se((Jc,rs)=>{"use strict";rs.exports=function(){throw new Error("ws does not work in the browser. Browser clients must use the native WebSocket object")}});var Ze=(o=>(o.CRITICAL="CRITICAL",o.REGULAR="REGULAR",o.OCCASIONAL="OCCASIONAL",o.RARELY="RARELY",o.NOT_USED="NOT_USED",o.NOT_SURE="NOT_SURE",o))(Ze||{}),Xe=(i=>(i.BUSINESS_CRITICAL="BUSINESS_CRITICAL",i.CLIENT_CONTRACT="CLIENT_CONTRACT",i.INTERNAL_POLICY="INTERNAL_POLICY",i.NOT_REQUIRED="NOT_REQUIRED",i.NOT_SURE="NOT_SURE",i))(Xe||{}),Dt=(i=>(i.ANOTHER_TOOL="ANOTHER_TOOL",i.INTERNAL_PROCESS="INTERNAL_PROCESS",i.NOT_NEEDED="NOT_NEEDED",i.NO_REPLACEMENT="NO_REPLACEMENT",i.NOT_SURE="NOT_SURE",i))(Dt||{}),et=(t=>(t.YES="YES",t.NO="NO",t.NOT_SURE="NOT_SURE",t))(et||{}),ye=(s=>(s.PCT_KNOWN="PCT_KNOWN",s.USD_KNOWN="USD_KNOWN",s.SHOWN_IN_QUOTE="SHOWN_IN_QUOTE",s.DONT_KNOW="DONT_KNOW",s))(ye||{}),Me=(s=>(s.BUNDLED="BUNDLED",s.POOLED="POOLED",s.STANDARD="STANDARD",s.UNKNOWN="UNKNOWN",s))(Me||{}),un=(t=>(t.YES="YES",t.NO="NO",t.NOT_SURE="NOT_SURE",t))(un||{});function S(r,e){return{id:r,label:e}}var X=[{id:"project_management",label:"Project Management",category:"UNCATEGORIZED",capabilities:[S("rfis","RFIs"),S("submittals","Submittals"),S("schedule","Schedule"),S("punch_list","Punch List"),S("documents","Documents"),S("photos_videos","Photos & Videos")],mvp_supported:!0,pricing_basis:"acv",guard:"Do not treat every tool as a separately priced product."},{id:"quality_safety",label:"Quality & Safety",category:"UNCATEGORIZED",capabilities:[S("inspections","Inspections"),S("incidents","Incidents"),S("observations","Observations"),S("deficiency_list","Deficiency List"),S("daily_log","Daily Log"),S("forms","Forms")],mvp_supported:!0,pricing_basis:"acv",guard:"Commercial product/category/tool hierarchy must stay separate."},{id:"project_financials",label:"Project Financials",category:"FINANCIAL_MANAGEMENT",capabilities:[S("budgets","Budgets"),S("cost_management","Cost Management"),S("financial_workflows","Financial Workflows")],mvp_supported:!0,pricing_basis:"acv",guard:"Flag ERP/accounting integrations before removal."},{id:"invoice_management",label:"Invoice Management",category:"FINANCIAL_MANAGEMENT",capabilities:[S("invoice_workflows","Invoice Workflows"),S("billing","Billing")],mvp_supported:!0,pricing_basis:"acv",guard:"Line-item spend is not automatically removal savings."},{id:"analytics",label:"Analytics",category:"UNCATEGORIZED",capabilities:[S("reporting","Reporting"),S("dashboards","Dashboards"),S("unified_data","Unified Data")],mvp_supported:!0,pricing_basis:"acv",guard:"Do not infer operational-module dependency from analytics alone."},{id:"pay",label:"Pay",category:"FINANCIAL_MANAGEMENT",capabilities:[S("subcontractor_payments","Subcontractor Payments"),S("compliance","Compliance"),S("lien_waiver_workflows","Lien-Waiver Workflows")],mvp_supported:!0,pricing_basis:"unknown",guard:"Use UNKNOWN where counterfactual pricing is unsupported."},{id:"resource_tracking",label:"Resource Tracking",category:"RESOURCE_MANAGEMENT",capabilities:[S("labor_tracking","Labor Tracking"),S("productivity_tracking","Productivity Tracking"),S("resource_tracking","Resource Tracking")],mvp_supported:!0,pricing_basis:"unknown",guard:"Do not apply ACV formula to FTE-priced products without evidence."},{id:"estimating",label:"Estimating",category:"PRECONSTRUCTION",capabilities:[S("estimating","Estimating"),S("takeoff","Takeoff")],mvp_supported:!0,pricing_basis:"unknown",guard:"Validate industry/product eligibility."},{id:"bid_management",label:"Bid Management",category:"PRECONSTRUCTION",capabilities:[S("bid_distribution","Bid Distribution"),S("bid_collection","Bid Collection"),S("bid_coverage","Bid Coverage")],mvp_supported:!0,pricing_basis:"unknown",guard:"Validate industry/product eligibility."},{id:"field_productivity",label:"Field Productivity",category:"RESOURCE_MANAGEMENT",capabilities:[S("field_productivity_tracking","Field Productivity Tracking")],mvp_supported:"conditional",pricing_basis:"fte",guard:"Do not calculate with ACV pricing logic unless contract evidence supports it."},{id:"other",label:"Other Procore capabilities",category:"UNCATEGORIZED",capabilities:[],mvp_supported:"conditional",pricing_basis:"unknown",guard:"If evidence is insufficient, return UNKNOWN rather than inventing."}];function dn(r){return X.find(e=>e.id===r)}var yi=[{source_product_id:"quality_safety",dependent_id:"inspections",dependent_label:"Inspections",relation_type:"CAPABILITY_LICENSING",user_confirmation_needed:!0,removal_guard:"If inspections are required, do not recommend removing the commercial capability without validating impact.",evidence_status:"FACT / official Procore documentation"},{source_product_id:"quality_safety",dependent_id:"incidents",dependent_label:"Incidents",relation_type:"CAPABILITY_WORKFLOW",user_confirmation_needed:!0,removal_guard:"Check active incident workflow before removal.",evidence_status:"FACT / official product documentation"},{source_product_id:"quality_safety",dependent_id:"observations",dependent_label:"Observations",relation_type:"CAPABILITY_WORKFLOW",user_confirmation_needed:!0,removal_guard:"Check active observations workflow before removal.",evidence_status:"FACT / official product documentation"},{source_product_id:"quality_safety",dependent_id:"forms",dependent_label:"Forms",relation_type:"CAPABILITY_WORKFLOW",user_confirmation_needed:!0,removal_guard:"Check whether forms are used for Q&S-critical processes.",evidence_status:"FACT / official product documentation"},{source_product_id:"quality_safety",dependent_id:"daily_log",dependent_label:"Daily Log",relation_type:"CAPABILITY_WORKFLOW",user_confirmation_needed:!0,removal_guard:"Daily Log can remain part of PM workflows; do not assume removing Q&S removes all PM tools.",evidence_status:"FACT / official documentation"},{source_product_id:"project_financials",dependent_id:"accounting_erp_integration",dependent_label:"Accounting / ERP integration",relation_type:"INTEGRATION",user_confirmation_needed:!0,removal_guard:"Flag integration and validate replacement before removal.",evidence_status:"FACT / official Procore support evidence"},{source_product_id:"analytics",dependent_id:"operational_modules",dependent_label:"Operational modules",relation_type:"SOFT_DATA_CONSUMPTION",user_confirmation_needed:!1,removal_guard:"Do not infer a module dependency merely because analytics consumes data.",evidence_status:"FACT / official Procore support evidence"},{source_product_id:"*",dependent_id:"customer_specific_workflow",dependent_label:"Customer-specific workflow",relation_type:"BUSINESS_DEPENDENCY",user_confirmation_needed:!0,removal_guard:"Client contract, compliance, internal policy or required workflow blocks removal.",evidence_status:"Customer input"}];function Ei(r){return yi.filter(e=>e.source_product_id===r||e.source_product_id==="*")}function wi(r){switch(r){case"BUSINESS_CRITICAL":case"CLIENT_CONTRACT":case"INTERNAL_POLICY":return"BLOCKED";case"NOT_REQUIRED":return"ELIGIBLE";case"NOT_SURE":return"UNCERTAIN";default:return"UNCERTAIN"}}function Ti(r){switch(r){case"YES":return"BLOCKED";case"NO":return"ELIGIBLE";case"NOT_SURE":return"UNCERTAIN";default:return"UNCERTAIN"}}function nr(r,e,n){let t=[],s=Ei(r),i=wi(e);if(i==="BLOCKED")return t.push(`Requirement status "${e}" blocks removal.`),{eligibility:"BLOCKED",reasons:t,applicable_rules:s};let o=Ti(n);if(o==="BLOCKED")return t.push("User-confirmed dependency blocks removal."),{eligibility:"BLOCKED",reasons:t,applicable_rules:s};i==="UNCERTAIN"&&t.push("Requirement status is not confirmed."),o==="UNCERTAIN"&&t.push("Dependency status is not confirmed.");let c=s.filter(a=>a.user_confirmation_needed&&a.source_product_id!=="*");return c.length>0&&t.push(...c.map(a=>a.removal_guard)),i==="UNCERTAIN"||o==="UNCERTAIN"||c.length>0?{eligibility:"UNCERTAIN",reasons:t,applicable_rules:s}:{eligibility:"ELIGIBLE",reasons:t,applicable_rules:s}}var Si=new Set(["annual","multi_year","other"]),rr=new Set(Object.values(Ze)),sr=new Set(Object.values(Xe)),ir=new Set(Object.values(Dt)),or=new Set(Object.values(et)),ar=new Set(Object.values(ye)),cr=new Set(Object.values(Me)),Ut=new Set(Object.values(un)),Ii=new Set(["active","unclear","none"]),lr=new Set(["commercial","industrial","civil_infrastructure","other"]),xi=new Set([5,10,15,20,null]);function _e(r,e){return{field:r,severity:"MISSING_REQUIRED",message:e}}function R(r,e){return{field:r,severity:"INVALID_VALUE",message:e}}function ue(r,e){return{field:r,severity:"UNKNOWN_ACCEPTABLE",message:e}}function Ft(r,e){return{field:r,severity:"PREVENTS_CALCULATION",message:e}}function hn(r){let e=[],n=[];if(typeof r!="object"||r===null)return{valid:!1,can_calculate:!1,errors:[_e("root","Input must be a non-null object")],warnings:[]};let t=r;if((typeof t.annual_cost_usd!="number"||t.annual_cost_usd<=0)&&e.push(_e("annual_cost_usd","Must be a positive number")),(typeof t.acv_usd!="number"||t.acv_usd<=0)&&e.push(_e("acv_usd","Must be a positive number")),!Array.isArray(t.products)||t.products.length===0)e.push(_e("products","Must be a non-empty array of product IDs from the catalog"));else{let i=t.products;for(let o=0;o<i.length;o++)typeof i[o]!="string"?e.push(R(`products[${o}]`,"Each product ID must be a string")):dn(i[o])||e.push(R(`products[${o}]`,`Unknown product ID "${i[o]}". Use a catalog ID from products.ts`))}if(Si.has(t.contract_term)||e.push(R("contract_term",'Must be "annual", "multi_year", or "other"')),t.product_inputs!==void 0)if(!Array.isArray(t.product_inputs))e.push(R("product_inputs","Must be an array"));else{let i=t.product_inputs;i.length===0&&e.push(_e("product_inputs","Must be non-empty when provided"));for(let o=0;o<i.length;o++)Ri(i[o],o,e,n)}else n.push(ue("product_inputs","No per-product usage/requirement/dependency information provided. Analysis will be limited to benchmarking and commercial-structure rules; candidate generation and savings classification require product_inputs."));t.discount_status!==void 0?ar.has(t.discount_status)?(t.discount_status==="DONT_KNOW"&&n.push(Ft("discount_status","Discount is unknown. Any savings estimate that depends on the current discount surviving a reconfiguration cannot be defended.")),t.discount_status==="PCT_KNOWN"&&(typeof t.discount_pct!="number"||t.discount_pct<0||t.discount_pct>100)&&e.push(R("discount_pct","Must be a number between 0 and 100 when discount_status is PCT_KNOWN")),t.discount_status==="USD_KNOWN"&&(typeof t.discount_usd!="number"||t.discount_usd<0)&&e.push(R("discount_usd","Must be a non-negative number when discount_status is USD_KNOWN"))):e.push(R("discount_status",`Must be one of: ${[...ar].join(", ")}`)):n.push(ue("discount_status","Discount status not provided. Analysis will treat discount as unknown.")),t.bundle_structure!==void 0?cr.has(t.bundle_structure)?(t.bundle_structure==="BUNDLED"||t.bundle_structure==="POOLED")&&n.push(Ft("bundle_structure","Contract uses a bundled/pooled structure. Line-item removal does not automatically reduce total renewal by that amount.")):e.push(R("bundle_structure",`Must be one of: ${[...cr].join(", ")}`)):n.push(ue("bundle_structure","Bundle/pool structure not provided. Analysis will treat as unknown.")),t.credits_usd!==void 0&&(typeof t.credits_usd!="number"||t.credits_usd<0)&&e.push(R("credits_usd","Must be a non-negative number")),t.renewal_increase_pct!==void 0&&(typeof t.renewal_increase_pct!="number"||t.renewal_increase_pct<0)&&e.push(R("renewal_increase_pct","Must be a non-negative number")),t.tier_changed!==void 0&&!Ut.has(t.tier_changed)&&e.push(R("tier_changed",`Must be one of: ${[...Ut].join(", ")}`)),t.packaging_changed!==void 0&&!Ut.has(t.packaging_changed)&&e.push(R("packaging_changed",`Must be one of: ${[...Ut].join(", ")}`)),t.rate_protection_status!==void 0&&!Ii.has(t.rate_protection_status)&&e.push(R("rate_protection_status",'Must be "active", "unclear", or "none"')),t.expected_next_year_acv_usd!==void 0&&(typeof t.expected_next_year_acv_usd!="number"||t.expected_next_year_acv_usd<=0?e.push(R("expected_next_year_acv_usd","Must be a positive number")):typeof t.acv_usd=="number"&&t.expected_next_year_acv_usd<t.acv_usd&&e.push(R("expected_next_year_acv_usd","Must be greater than or equal to current ACV"))),t.target_savings_pct!==void 0&&t.target_savings_pct!==null&&(xi.has(t.target_savings_pct)||e.push(R("target_savings_pct","Must be 5, 10, 15, 20, or null"))),t.construction_type!==void 0&&!lr.has(t.construction_type)&&e.push(R("construction_type",`Must be one of: ${[...lr].join(", ")}`)),t.before_annual_cost_usd!==void 0&&(typeof t.before_annual_cost_usd!="number"||t.before_annual_cost_usd<=0)&&e.push(R("before_annual_cost_usd","Must be a positive number")),t.after_annual_cost_usd!==void 0&&(typeof t.after_annual_cost_usd!="number"||t.after_annual_cost_usd<=0)&&e.push(R("after_annual_cost_usd","Must be a positive number")),t.prior_rate_per_1m_usd!==void 0&&(typeof t.prior_rate_per_1m_usd!="number"||t.prior_rate_per_1m_usd<=0)&&e.push(R("prior_rate_per_1m_usd","Must be a positive number"));let s=n.filter(i=>i.severity==="PREVENTS_CALCULATION");return{valid:e.length===0,can_calculate:e.length===0&&s.length===0,errors:e,warnings:n}}function Ri(r,e,n,t){let s=`product_inputs[${e}]`;if(typeof r!="object"||r===null){n.push(R(s,"Each product input must be an object"));return}let i=r;typeof i.product_id!="string"||i.product_id.trim()===""?n.push(_e(`${s}.product_id`,"Must be a non-empty string")):dn(i.product_id)||n.push(R(`${s}.product_id`,`Unknown product ID "${i.product_id}". Use a catalog ID from products.ts`)),rr.has(i.usage)?i.usage==="NOT_SURE"&&t.push(ue(`${s}.usage`,"Usage is not sure; candidate eligibility may be uncertain")):n.push(_e(`${s}.usage`,`Must be one of: ${[...rr].join(", ")}`)),sr.has(i.requirement)?i.requirement==="NOT_SURE"&&t.push(ue(`${s}.requirement`,"Requirement status is uncertain; candidate removal cannot be confirmed safe")):n.push(_e(`${s}.requirement`,`Must be one of: ${[...sr].join(", ")}`)),i.replacement===void 0?t.push(ue(`${s}.replacement`,"Replacement workflow not provided")):ir.has(i.replacement)?i.replacement==="NOT_SURE"?t.push(ue(`${s}.replacement`,"Replacement workflow is not sure")):i.replacement==="NO_REPLACEMENT"&&t.push(Ft(`${s}.replacement`,"No replacement exists for this capability. Removal may have operational impact.")):n.push(R(`${s}.replacement`,`Must be one of: ${[...ir].join(", ")}`)),i.dependency===void 0?t.push(ue(`${s}.dependency`,"Dependency status not provided")):or.has(i.dependency)?i.dependency==="NOT_SURE"&&t.push(Ft(`${s}.dependency`,"Dependency is unconfirmed. Candidate cannot advance to counterfactual pricing until resolved.")):n.push(R(`${s}.dependency`,`Must be one of: ${[...or].join(", ")}`)),i.annual_price_usd!==void 0?(typeof i.annual_price_usd!="number"||i.annual_price_usd<=0)&&n.push(R(`${s}.annual_price_usd`,"Must be a positive number when provided")):t.push(ue(`${s}.annual_price_usd`,"No line-item price provided; attributable spend cannot be reported"))}function ur(r){let e=hn(r);if(!e.valid)throw new Error(`Invalid UserInput: ${e.errors.map(n=>`${n.field}: ${n.message}`).join("; ")}`);return r}var tt={dataset_name:"RenewalScope Public Procore Quote Evidence Dataset",dataset_version:"1.0",dataset_date:"2026-08-16",primary_source:"PROCORE_BRAIN_RESEARCH_MASTER_PHASE8.xlsx",total_records:22,records_excluded_from_calculations:7,usable_for_product_benchmarks:15,coverage_notes:"Public procurement quotes and order forms, 2022-2026. Products: PM Pro, Q&S, Project Financials, Invoice Management, Analytics. These are PUBLIC QUOTE observations - not a proprietary Procore price list."},fe=[{evidence_id:"PQ-001",confidence:"OBSERVATION",acvType:"company",acv_usd:1e7,source_type:"PUBLIC_QUOTE",source_description:"Simi Valley USD public procurement quote (2022)",source_date:"2022-01-01",normalized_product_id:"project_management",quoted_product_annual_price_usd:13782.67,limitation_flags:["ESTIMATE_NOT_FINAL","RESELLER_QUOTE"],exclude_from_rate_benchmark:!0},{evidence_id:"PQ-002",confidence:"OBSERVATION",acvType:"company",acv_usd:1e7,source_type:"PUBLIC_QUOTE",source_description:"Simi Valley USD public procurement quote (2022)",source_date:"2022-01-01",normalized_product_id:"quality_safety",quoted_product_annual_price_usd:4499.09,limitation_flags:["ESTIMATE_NOT_FINAL","RESELLER_QUOTE"],exclude_from_rate_benchmark:!0},{evidence_id:"PQ-003",confidence:"OBSERVATION",acvType:"company",acv_band_min_usd:5e7,acv_band_max_usd:75e6,source_type:"PUBLIC_QUOTE",source_description:"City of Pasadena TX public procurement quote (2026-01-29)",source_date:"2026-01-29",normalized_product_id:"project_management",quoted_product_annual_price_usd:47451.74,limitation_flags:["BAND_NORMALIZED","RESELLER_QUOTE"],exclude_from_rate_benchmark:!0},{evidence_id:"PQ-004",confidence:"OBSERVATION",acvType:"company",acv_band_min_usd:5e7,acv_band_max_usd:75e6,source_type:"PUBLIC_QUOTE",source_description:"City of Pasadena TX public procurement quote (2026-01-29)",source_date:"2026-01-29",normalized_product_id:"quality_safety",quoted_product_annual_price_usd:17824.75,limitation_flags:["BAND_NORMALIZED","RESELLER_QUOTE"],exclude_from_rate_benchmark:!0},{evidence_id:"PQ-005",confidence:"OBSERVATION",acvType:"company",acv_band_min_usd:5e7,acv_band_max_usd:75e6,source_type:"PUBLIC_QUOTE",source_description:"City of Pasadena TX public procurement quote (2026-01-29)",source_date:"2026-01-29",normalized_product_id:"project_financials",quoted_product_annual_price_usd:22938.85,limitation_flags:["BAND_NORMALIZED","RESELLER_QUOTE"],exclude_from_rate_benchmark:!0},{evidence_id:"PQ-006",confidence:"OBSERVATION",acvType:"company",acv_band_min_usd:5e7,acv_band_max_usd:75e6,source_type:"PUBLIC_QUOTE",source_description:"City of Pasadena TX public procurement quote (2026-01-29)",source_date:"2026-01-29",normalized_product_id:"invoice_management",quoted_product_annual_price_usd:13636.17,limitation_flags:["BAND_NORMALIZED","RESELLER_QUOTE"],exclude_from_rate_benchmark:!0},{evidence_id:"PQ-007",confidence:"OBSERVATION",acvType:"company",acv_usd:54e7,source_type:"PUBLIC_QUOTE",source_description:"City of Denton TX public procurement quote (2025-11-18)",source_date:"2025-11-18",normalized_product_id:"project_management",quoted_product_annual_price_usd:184266.33,limitation_flags:["POOLED_CV","RESELLER_QUOTE"],exclude_from_rate_benchmark:!0,exclude_from_calculations:!0},{evidence_id:"PQ-008",confidence:"OBSERVATION",acvType:"company",acv_usd:54e7,source_type:"PUBLIC_QUOTE",source_description:"City of Denton TX public procurement quote (2025-11-18)",source_date:"2025-11-18",normalized_product_id:"quality_safety",quoted_product_annual_price_usd:91452.72,limitation_flags:["POOLED_CV","RESELLER_QUOTE"],exclude_from_rate_benchmark:!0,exclude_from_calculations:!0},{evidence_id:"PQ-009",confidence:"OBSERVATION",acvType:"company",acv_band_min_usd:1e8,acv_band_max_usd:15e7,source_type:"PUBLIC_QUOTE",source_description:"City of Denton TX public procurement quote (2025-11-18)",source_date:"2025-11-18",normalized_product_id:"project_financials",quoted_product_annual_price_usd:52799.78,limitation_flags:["POOLED_CV","BAND_NORMALIZED","RESELLER_QUOTE"],exclude_from_rate_benchmark:!0,exclude_from_calculations:!0},{evidence_id:"PQ-010",confidence:"OBSERVATION",acvType:"company",acv_band_min_usd:1e8,acv_band_max_usd:15e7,source_type:"PUBLIC_QUOTE",source_description:"City of Denton TX public procurement quote (2025-11-18)",source_date:"2025-11-18",normalized_product_id:"invoice_management",quoted_product_annual_price_usd:27317.5,limitation_flags:["POOLED_CV","BAND_NORMALIZED","RESELLER_QUOTE"],exclude_from_rate_benchmark:!0,exclude_from_calculations:!0},{evidence_id:"PQ-011",confidence:"OBSERVATION",acvType:"company",acv_band_min_usd:5e7,acv_band_max_usd:75e6,source_type:"PUBLIC_QUOTE",source_description:"Public cooperative procurement quote (2025-08-25)",source_date:"2025-08-25",normalized_product_id:"quality_safety",quoted_product_annual_price_usd:46865.91,limitation_flags:["BAND_NORMALIZED"],exclude_from_rate_benchmark:!0},{evidence_id:"PQ-012",confidence:"OBSERVATION",acvType:"company",acv_band_min_usd:5e7,acv_band_max_usd:75e6,source_type:"PUBLIC_QUOTE",source_description:"Public cooperative procurement quote (2025-08-25)",source_date:"2025-08-25",normalized_product_id:"project_financials",limitation_flags:["INCOMPLETE_RECORD","BAND_NORMALIZED"],exclude_from_rate_benchmark:!0,exclude_from_calculations:!0},{evidence_id:"PQ-013",confidence:"OBSERVATION",acvType:"company",acv_band_min_usd:5e7,acv_band_max_usd:75e6,source_type:"PUBLIC_QUOTE",source_description:"Public cooperative procurement quote (2025-08-25)",source_date:"2025-08-25",normalized_product_id:"invoice_management",quoted_product_annual_price_usd:13636.17,limitation_flags:["BAND_NORMALIZED"],exclude_from_rate_benchmark:!0},{evidence_id:"PQ-014",confidence:"OBSERVATION",acvType:"company",acv_band_min_usd:5e7,acv_band_max_usd:75e6,source_type:"PUBLIC_QUOTE",source_description:"Public cooperative procurement quote (2025-08-25)",source_date:"2025-08-25",normalized_product_id:"analytics",quoted_product_annual_price_usd:17604.7,limitation_flags:["BAND_NORMALIZED"],exclude_from_rate_benchmark:!0},{evidence_id:"PQ-015",confidence:"OBSERVATION",acvType:"company",acv_usd:12e7,source_type:"PUBLIC_QUOTE",source_description:"Highline Public Schools procurement quote (2026)",source_date:"2026-01-01",normalized_product_id:"project_management",quoted_product_annual_price_usd:99303.13,exclude_from_rate_benchmark:!0},{evidence_id:"PQ-016",confidence:"OBSERVATION",acvType:"company",acv_usd:12e7,source_type:"PUBLIC_QUOTE",source_description:"Highline Public Schools procurement quote (2026)",source_date:"2026-01-01",normalized_product_id:"project_financials",quoted_product_annual_price_usd:49963.92,exclude_from_rate_benchmark:!0},{evidence_id:"PQ-017",confidence:"OBSERVATION",acvType:"company",acv_usd:12e7,source_type:"PUBLIC_QUOTE",source_description:"Highline Public Schools procurement quote (2026)",source_date:"2026-01-01",normalized_product_id:"invoice_management",quoted_product_annual_price_usd:22592.4,exclude_from_rate_benchmark:!0},{evidence_id:"PQ-018",confidence:"OBSERVATION",acvType:"company",acv_usd:12e7,source_type:"PUBLIC_QUOTE",source_description:"Highline Public Schools procurement quote (2026)",source_date:"2026-01-01",normalized_product_id:"analytics",quoted_product_annual_price_usd:22974,exclude_from_rate_benchmark:!0},{evidence_id:"PQ-019",confidence:"OBSERVATION",acvType:"company",acv_band_min_usd:5e7,acv_band_max_usd:75e6,source_type:"PUBLIC_QUOTE",source_description:"Nassau County public max-price quote",source_date:"2025-01-01",normalized_product_id:"project_management",quoted_product_annual_price_usd:55606.38,limitation_flags:["MAX_PRICE_QUOTE","BAND_NORMALIZED"],exclude_from_rate_benchmark:!0},{evidence_id:"PQ-020",confidence:"OBSERVATION",acvType:"company",acv_band_min_usd:5e7,acv_band_max_usd:75e6,source_type:"PUBLIC_QUOTE",source_description:"Nassau County public max-price quote",source_date:"2025-01-01",normalized_product_id:"project_financials",quoted_product_annual_price_usd:26881.07,limitation_flags:["MAX_PRICE_QUOTE","BAND_NORMALIZED"],exclude_from_rate_benchmark:!0},{evidence_id:"PQ-021",confidence:"OBSERVATION",acvType:"company",acv_usd:2e8,source_type:"PUBLIC_QUOTE",source_description:"Port Canaveral public procurement quote (2026-02-26)",source_date:"2026-02-26",quoted_product_annual_price_usd:318223.7,limitation_flags:["POOLED_CV","PROJECT_SPECIFIC_LICENSE"],exclude_from_rate_benchmark:!0,exclude_from_calculations:!0,note:"Procore platform total NTE; pooled 3yr $200M CV. No individual product breakdown."},{evidence_id:"PQ-022",confidence:"OBSERVATION",acvType:"company",acv_usd:2e8,source_type:"PUBLIC_QUOTE",source_description:"Port Canaveral public procurement quote (2026-02-26)",source_date:"2026-02-26",limitation_flags:["POOLED_CV"],exclude_from_rate_benchmark:!0,exclude_from_calculations:!0,note:"Route price differential: direct $27,672 cheaper than reseller. Commercial structure evidence only."}];var Oi=[{evidence_id:"REDDIT-001",confidence:"OBSERVATION",acvType:"unknown",rate_per_1m:1e3,renewal_increase_pct:10.4,prev_rate_per_1m:500,products:["Project Management Pro","Quality & Safety"],note:"Typical renewal 2\u20135%; this renewal 10.4%. No total ACV or annual invoice. Rate doubled despite downgrade.",source_url:"https://www.reddit.com/r/Construction/comments/199uliq/procore_renewal_costs_escalating/"},{evidence_id:"REDDIT-002",confidence:"OBSERVATION",acvType:"unknown",renewal_increase_pct:150,note:"Single case: 150% price jump after five years; described as non-negotiable. Do not generalize.",source_url:"https://www.reddit.com/r/Construction/comments/199uliq/procore_renewal_costs_escalating/"},{evidence_id:"REDDIT-003",confidence:"OBSERVATION",acvType:"unknown",annual_cost_usd:3e4,note:"Range $30k\u2013$60k; cannot derive ACV or savings.",source_url:"https://www.reddit.com/r/Construction/comments/199uliq/procore_renewal_costs_escalating/"},{evidence_id:"REDDIT-004",confidence:"OBSERVATION",acvType:"company",acv_usd:2e8,annual_cost_usd:385e3,rate_per_1m:1925,contract_term:"multi_year",note:"Pass-through cost-recovery strategy; not evidence of a Procore discount.",source_url:"https://www.reddit.com/r/ConstructionManagers/comments/1j1188g/procore_renewal/"},{evidence_id:"REDDIT-005",confidence:"OBSERVATION",acvType:"company",acv_usd:15e6,rate_per_1m:1e3,note:"$1k/$1M used for pass-through allocation, not necessarily the actual Procore invoice rate.",source_url:"https://www.reddit.com/r/ConstructionManagers/comments/1j1188g/procore_renewal/"},{evidence_id:"REDDIT-006",confidence:"OBSERVATION",acvType:"unknown",products:["Submittals","RFIs","Change Orders","Inspections"],note:"Fit/demand evidence only; does not establish commercial removability of a module.",source_url:"https://www.reddit.com/r/Construction/comments/ack53j/anyone_know_what_they_pay_for_procore/"},{evidence_id:"REDDIT-007",confidence:"OBSERVATION",acvType:"project",acv_usd:15e6,annual_cost_usd:2e4,rate_per_1m:1333.33,note:'Source says "$15M job", not company ACV. Project-level observation; do not use as company-ACV benchmark.',source_url:"https://www.reddit.com/r/Construction/comments/ack53j/anyone_know_what_they_pay_for_procore/"},{evidence_id:"REDDIT-008",confidence:"OBSERVATION",acvType:"company",acv_usd:4e6,annual_cost_usd:6e3,rate_per_1m:1500,products:["Project Management","Financial Management"],contract_term:"annual",note:"Annual cost from $500/month PM quote only; Financial is excluded (range estimate).",source_url:"https://www.reddit.com/r/Construction/comments/1iqb442/construction_software_pricing_comparison_based_on/"},{evidence_id:"REDDIT-009",confidence:"OBSERVATION",acvType:"unknown",contract_term:"annual",note:"Process observation only; does not establish pricing algorithm.",source_url:"https://www.reddit.com/r/Construction/comments/10gh7ej"},{evidence_id:"REDDIT-010",confidence:"OBSERVATION",acvType:"unknown",contract_term:"multi_year",note:"Pain/alternative evidence; not a pricing benchmark.",source_url:"https://www.reddit.com/r/ConstructionManagers/comments/1j1188g/procore_renewal/"},{evidence_id:"WEB-011",confidence:"OBSERVATION",acvType:"company",acv_usd:4e8,annual_cost_usd:324e3,rate_per_1m:810,contract_term:"multi_year",note:"Annualized from $27k/month. Distinct from REDDIT-004; do not infer identical product bundles.",source_url:"https://www.reddit.com/r/Construction/comments/1iqb442/construction_software_pricing_comparison_based_on/"},{evidence_id:"WEB-014",confidence:"BENCHMARK",acvType:"project",acv_usd:59e6,annual_cost_usd:8e4,rate_per_1m:1355.93,products:["Project Management"],note:"Secondary source; Financial module explicitly excluded. Not independently verified primary post.",source_url:"https://downtobid.com/blog/how-much-is-procore-software"},{evidence_id:"WEB-015",confidence:"BENCHMARK",acvType:"company",acv_usd:55e6,annual_cost_usd:55e3,rate_per_1m:1e3,note:"Secondary source; do not count as new independent customer.",source_url:"https://www.getonecrew.com/post/procore-reviews"},{evidence_id:"WEB-016",confidence:"VERIFIED_PUBLIC_DOCUMENT",acvType:"project",acv_usd:85e6,annual_cost_usd:85e3,rate_per_1m:1e3,contract_term:"annual",products:["Procore CMIS"],note:"Project-specific license; year-1 estimate. Not a standard commercial customer contract.",source_url:"https://mccmeetings.blob.core.usgovcloudapi.net/escondidca-pubu/MEET-Packet-1c066802b58043ba9504a911b624394f.pdf"},{evidence_id:"WEB-017",confidence:"OBSERVATION",acvType:"project",acv_usd:4e6,annual_cost_usd:7500,rate_per_1m:1875,products:["Project Management Pro"],note:'Older 2021 observation; source says "project revenue" not explicit ACV.',source_url:"https://www.reddit.com/r/Construction/comments/lvpcvg"},{evidence_id:"WEB-018",confidence:"OBSERVATION",acvType:"company",acv_usd:1e7,annual_cost_usd:1e4,rate_per_1m:1e3,products:["PM Starter"],note:"$10k/year for PM Starter at $10\u201315M revenue; full-package ~$35k retained in notes only.",source_url:"https://www.reddit.com/r/Construction/comments/oghlhi/any_of_you_specialty_subs_use_procore_if_so_how/"},{evidence_id:"WEB-019",confidence:"OBSERVATION",acvType:"company",acv_usd:2e7,annual_cost_usd:4e4,rate_per_1m:2e3,note:"Source says >$20M; $20M is a conservative normalization, not an exact rate.",source_url:"https://www.reddit.com/r/ConstructionManagers/comments/1bvtinw/procore_capabilities/"},{evidence_id:"WEB-021",confidence:"OBSERVATION",acvType:"company",acv_usd:25e6,note:"No quote; demand/negotiation evidence only.",source_url:"https://www.reddit.com/r/Construction/comments/1nr3j7q/procore_for_small_commercial_gc/"},{evidence_id:"WEB-022",confidence:"OBSERVATION",acvType:"unknown",products:["Analytics","BIM","PM"],note:"Qualitative renewal pain signal; does not prove removability or savings.",source_url:"https://cafe.cfma.org/discussion/procore-renewals-requiring-wip-financial-statements-1"}];var hr=[...Oi,...fe];function pr(){return fe.filter(r=>r.exclude_from_calculations!==!0&&r.quoted_product_annual_price_usd!==void 0)}function Ai(r,e,n){if(e<=0)throw new Error("acv_usd must be positive");return(r-(n??0))/e*1e6}function Ci(r,e,n=hr){let t=r*.1,s=r*10;return n.filter(i=>!(i.confidence==="DUPLICATE"||i.rate_per_1m===void 0||i.acvType==="project"&&e==="company"||i.acvType==="company"&&e==="project"||i.acv_usd!==void 0&&(i.acv_usd<t||i.acv_usd>s)))}function pn(r,e){if(r.length===0)return 0;let n=e/100*(r.length-1),t=Math.floor(n),s=Math.ceil(n);return t===s?r[t]:r[t]+(r[s]-r[t])*(n-t)}function Ni(r){let e=r.map(t=>t.rate_per_1m).filter(t=>t!==void 0).sort((t,s)=>t-s);if(e.length===0)return{min:0,max:0,p25:0,p50:0,p75:0,mean:0,count:0};let n=e.reduce((t,s)=>t+s,0)/e.length;return{min:e[0],max:e[e.length-1],p25:pn(e,25),p50:pn(e,50),p75:pn(e,75),mean:n,count:e.length}}function ki(r,e){return r<e.p25?"below_p25":r<e.p50?"p25_to_p50":r<e.p75?"p50_to_p75":"above_p75"}function _r(r,e,n="company",t){let s=Ci(r,n);if(s.length===0)return null;let i=Ai(e,r,t),o=Ni(s),c=ki(i,o);return{user_rate:i,stats:o,position:c,comparable_evidence_ids:s.map(a=>a.evidence_id),min_evidence_count_met:s.length>=3}}function fr(r,e,n){let s=(n??fe).filter(c=>c.normalized_product_id===r&&c.quoted_product_annual_price_usd!==void 0&&c.exclude_from_calculations!==!0),i=[];for(let c of s){let a;if(c.acv_usd!==void 0?a=c.acv_usd:c.acv_band_min_usd!==void 0&&c.acv_band_max_usd!==void 0&&(a=(c.acv_band_min_usd+c.acv_band_max_usd)/2),a===void 0)continue;let u=a/e,l,d;u>=.5&&u<=2?(l="HIGH",d=`Representative ACV $${a.toLocaleString()} is within 0.5x-2x of user ACV $${e.toLocaleString()}`):u>=.2&&u<=5?(l="MEDIUM",d=`Representative ACV $${a.toLocaleString()} is within 0.2x-5x of user ACV $${e.toLocaleString()}`):(l="LOW",d=`Representative ACV $${a.toLocaleString()} is outside 0.2x-5x of user ACV $${e.toLocaleString()}`),i.push({row:c,comparability:l,comparability_reason:d})}let o={HIGH:0,MEDIUM:1,LOW:2};return i.sort((c,a)=>o[c.comparability]-o[a.comparability])}function gr(r){return r.contract_term==="multi_year"?{result_type:"SAVINGS_IDENTIFIED",confidence:"FACT",recommendation_text:"Ask Procore whether a pooled-volume or renewal-rate-protection clause is available within your multi-year agreement.",comparable_evidence:[],explanation:"Procore SEC filings confirm that multi-year and pooled-volume structures exist as official commercial options. Whether your specific account qualifies is unconfirmed; request a written confirmation from your Procore rep."}:{result_type:"SAVINGS_IDENTIFIED",confidence:"FACT",recommendation_text:"Ask Procore whether converting to a multi-year pooled agreement would provide a renewal rate cap.",comparable_evidence:[],explanation:"Procore offers multi-year and pooled-volume structures (per SEC filings). Your current annual contract may be eligible to convert; eligibility and any price change are unconfirmed without a quote."}}function vr(r){return r.expected_next_year_acv_usd===void 0||r.expected_next_year_acv_usd<=r.acv_usd*1.15?null:{result_type:"SAVINGS_IDENTIFIED",confidence:"FACT",recommendation_text:"Your expected ACV growth exceeds 15%. Ask Procore whether your renewal can pre-price the additional volume at today's rate before the increase is applied.",comparable_evidence:[],explanation:"Procore pricing is generally based on contracted ACV. A significant ACV increase can materially raise the renewal cost. Asking to pre-price the incremental volume is a documented commercial structure option; eligibility is account-specific."}}function br(r){return r.contract_term==="annual"||r.rate_protection_status==="unclear"||r.rate_protection_status==="none"?{result_type:"SAVINGS_IDENTIFIED",confidence:"FACT",recommendation_text:"Ask Procore whether a renewal rate-protection clause can be added to limit future annual increases.",comparable_evidence:["REDDIT-001"],explanation:"Customer evidence (REDDIT-001) shows renewal increases of 10%+ are possible. Rate-protection language is a documented commercial structure; whether it is available for your account is unconfirmed without a quote."}:null}function yr(r){return!r.min_evidence_count_met||r.position!=="above_p75"?null:{result_type:"SAVINGS_IDENTIFIED",confidence:"BENCHMARK",recommendation_text:`Your effective rate of $${r.user_rate.toFixed(0)}/1M ACV sits above the 75th percentile of comparable public observations (range $${r.stats.min.toFixed(0)}\u2013$${r.stats.max.toFixed(0)}/1M, n=${r.stats.count}). Ask Procore for a rate comparison relative to current market conditions.`,comparable_evidence:r.comparable_evidence_ids,explanation:"This is a directional benchmark from public customer observations, not an official Procore price list. Do not cite this as a guaranteed saving. Use it to frame a negotiation question."}}function Er(r){return!r.min_evidence_count_met||r.position!=="below_p25"?null:{result_type:"WARNING",confidence:"BENCHMARK",recommendation_text:`Your effective rate of $${r.user_rate.toFixed(0)}/1M ACV appears favorable relative to comparable public observations (p25=$${r.stats.p25.toFixed(0)}/1M, n=${r.stats.count}). Confirm the commercial impact in writing before restructuring the contract; changing a legacy configuration can expose you to current-market pricing.`,comparable_evidence:r.comparable_evidence_ids,explanation:"Do not recommend restructuring solely because a benchmark suggests a lower current-market rate. This observation is directional; it is not proof that your rate is negotiable downward."}}function wr(r){return r.renewal_increase_pct===void 0?null:r.renewal_increase_pct>14?{result_type:"WARNING",confidence:"OBSERVATION",recommendation_text:`Your reported renewal increase of ${r.renewal_increase_pct}% exceeds the highest increase reported in the evidence dataset (14%). Ask Procore for a written justification and request renewal-rate protection.`,comparable_evidence:["REDDIT-001"],explanation:"REDDIT-001 reports a rep saying the highest renewal seen was 14%. Your figure exceeds this. This is OBSERVATION-level evidence from a single customer interaction, not an official Procore cap."}:r.renewal_increase_pct>5?{result_type:"WARNING",confidence:"OBSERVATION",recommendation_text:`Your renewal increase of ${r.renewal_increase_pct}% is above the typical 2\u20135% range reported in customer evidence. Ask Procore for a written justification and request renewal-rate protection language.`,comparable_evidence:["REDDIT-001"],explanation:"REDDIT-001 reports a customer saying typical increases are 2\u20135%. This is OBSERVATION-level evidence, not an official Procore policy."}:null}function Tr(r){return r.discount_status!=="DONT_KNOW"?null:{result_type:"WARNING",confidence:"FACT",recommendation_text:"Your current discount status is unknown. Before requesting any configuration change, confirm in writing whether your existing discount applies to the proposed configuration.",comparable_evidence:[],explanation:"Procore discounts are account- and configuration-specific. A discount on the current contract does not automatically transfer to a reconfigured renewal. Any savings estimate that depends on a discount surviving the change would be unreliable."}}function Sr(r){if(r.bundle_structure!=="BUNDLED"&&r.bundle_structure!=="POOLED")return null;let e=r.bundle_structure==="BUNDLED"?"bundled":"pooled-volume";return{result_type:"WARNING",confidence:"FACT",recommendation_text:`Your contract appears to use a ${e} commercial structure. Request a written quote for the proposed configuration before assuming a line-item removal will reduce your renewal by that line-item amount.`,comparable_evidence:[],explanation:"In a bundled or pooled contract, the renewal price reflects the overall structure, not the sum of independent line items. Removing a product may not reduce total cost by the attributable line-item amount. A comparable written quote is required before any savings can be claimed."}}function Ir(r){if(!r.product_inputs||r.product_inputs.length===0)return null;let e=r.product_inputs.filter(t=>t.requirement==="BUSINESS_CRITICAL"||t.requirement==="CLIENT_CONTRACT"||t.requirement==="INTERNAL_POLICY");if(e.length===0)return null;let n=e.map(t=>t.product_id).join(", ");return{result_type:"WARNING",confidence:"FACT",recommendation_text:`The following products are marked as required: ${n}. These have been excluded from optimization candidates. Do not recommend removal.`,comparable_evidence:[],explanation:"A product required by client contract, internal policy, or business-critical workflow must not be treated as a removal candidate. Verify the requirement in writing before reconsidering."}}function xr(r){if(!r.product_inputs||r.product_inputs.length===0)return null;let e=r.product_inputs.filter(t=>t.dependency==="NOT_SURE");if(e.length===0)return null;let n=e.map(t=>t.product_id).join(", ");return{result_type:"OPPORTUNITY_NOT_QUANTIFIABLE",confidence:"UNKNOWN",recommendation_text:`Dependency status is unconfirmed for: ${n}. Resolve whether a technical or workflow dependency exists before treating these as removal candidates.`,comparable_evidence:[],explanation:"The engine cannot assume removability when a dependency is unknown. Confirm the dependency status before advancing these products to counterfactual pricing."}}function Rr(r){if(r.before_annual_cost_usd===void 0||r.after_annual_cost_usd===void 0)return null;let e=r.before_annual_cost_usd-r.after_annual_cost_usd;return e<=0?{result_type:"WARNING",confidence:"FACT",recommendation_text:"The after-restructuring cost equals or exceeds the current cost. No saving is achieved by this change.",comparable_evidence:[],explanation:"before_annual_cost_usd minus after_annual_cost_usd is not positive."}:{result_type:"VERIFIED_BEFORE_AFTER",confidence:"FACT",recommendation_text:`The two quotes you provided show a verified annual saving of $${e.toLocaleString()}.`,comparable_evidence:[],explanation:"Saving is calculated as the difference between the two user-supplied quotes. This is a VERIFIED_BEFORE_AFTER result only if both quotes are official written Procore proposals for comparable configurations.",dollar_saving:e}}function Or(r){if(!r.product_inputs||r.product_inputs.length===0)return{candidates:[],blocked:[],skipped_product_ids:[]};let e=[],n=[],t=[];for(let s of r.product_inputs){if(s.usage==="CRITICAL"||s.usage==="REGULAR"){t.push(s.product_id);continue}let i=nr(s.product_id,s.requirement,s.dependency),o={product_id:s.product_id,usage:s.usage,requirement:s.requirement,replacement:s.replacement,dependency:s.dependency,annual_price_usd:s.annual_price_usd};i.eligibility==="BLOCKED"?n.push({...o,blocked_reason:i.reasons.join("; ")}):i.eligibility==="UNCERTAIN"?e.push({...o,blocked_reason:i.reasons.join("; ")}):e.push(o)}return{candidates:e,blocked:n,skipped_product_ids:t}}function Cr(r,e){let n=[],t=[];if((r.discount_status==="DONT_KNOW"||r.discount_status===void 0)&&t.push("Discount status unknown: any savings estimate depending on the current discount surviving a reconfiguration cannot be defended."),r.bundle_structure==="BUNDLED"||r.bundle_structure==="POOLED"){let a=r.bundle_structure==="BUNDLED"?"bundled":"pooled-volume";t.push(`Contract uses a ${a} structure: line-item removal does not automatically reduce total renewal by the attributable line-item amount.`)}if(e.candidates.length===0)return{overall_result:"NO_DEFENSIBLE_SAVINGS_IDENTIFIED",counterfactual_results:[],target_prices:[],global_assumptions:t};let s=typeof r.before_annual_cost_usd=="number"&&r.before_annual_cost_usd>0,i=typeof r.after_annual_cost_usd=="number"&&r.after_annual_cost_usd>0;if(s&&i){let a=r.before_annual_cost_usd-r.after_annual_cost_usd,u=e.candidates[0],l={result_class:a>0?"VERIFIED_BEFORE_AFTER":"WARNING",candidate:u,dollar_saving:a>0?a:void 0,assumptions:[...t,"Saving is the arithmetic difference between the two user-supplied quotes.","VERIFIED_BEFORE_AFTER only when both quotes are official written Procore proposals for comparable configurations."],evidence_ids:[],confidence:"FACT",explanation:a>0?`The two user-supplied quotes differ by $${a.toLocaleString()}/year. This is a verified quote-to-quote difference. Whether this difference is attributable to a specific product removal cannot be determined from the quote amounts alone \u2014 request a written quote confirming which configuration changed.`:"The after-restructuring cost equals or exceeds the current cost. No saving is achieved by this change."};return{overall_result:l.result_class,counterfactual_results:[l],target_prices:[],global_assumptions:t}}let o=[],c="NO_DEFENSIBLE_SAVINGS_IDENTIFIED";for(let a of e.candidates){let u=Pi(a,r,t);o.push(u),r.target_savings_pct!=null&&u.result_class!=="NO_DEFENSIBLE_SAVINGS_IDENTIFIED"&&n.push(Li(r,a,r.target_savings_pct)),Ar(u.result_class)>Ar(c)&&(c=u.result_class)}return{overall_result:c,counterfactual_results:o,target_prices:n,global_assumptions:t}}function Pi(r,e,n){let t=[...n],s=r.annual_price_usd?` Your current attributable spend is $${r.annual_price_usd.toLocaleString()}/year.`:"",o=fr(r.product_id,e.acv_usd).filter(u=>u.comparability==="HIGH"||u.comparability==="MEDIUM").map(u=>u.row.evidence_id),c=o.length>0?` Comparable public quote observations exist for ${r.product_id} (${o.length} observation${o.length>1?"s":""}, see evidence trail). Directional context only \u2014 not a savings guarantee.`:"";return r.blocked_reason?{result_class:"OPPORTUNITY_NOT_QUANTIFIABLE",candidate:r,assumptions:t,evidence_ids:o,confidence:"UNKNOWN",explanation:`${r.product_id} may be an optimization candidate, but removal cannot be confirmed safe.${s} Confirmation needed: ${r.blocked_reason} Request a comparable quote before treating this as a dollar saving.`+c}:e.discount_status==="DONT_KNOW"||e.discount_status===void 0||e.bundle_structure==="BUNDLED"||e.bundle_structure==="POOLED"?{result_class:"OPPORTUNITY_NOT_QUANTIFIABLE",candidate:r,assumptions:t,evidence_ids:o,confidence:"UNKNOWN",explanation:`${r.product_id} is reported as not actively used and no known requirement prevents a configuration change.${s} However, commercial structure or discount uncertainty prevents a defensible savings calculation. Request a comparable written quote before treating this as a dollar saving.`+c}:{result_class:"OPPORTUNITY_NOT_QUANTIFIABLE",candidate:r,assumptions:t,evidence_ids:o,confidence:"UNKNOWN",explanation:`${r.product_id} is reported as not actively used and no known requirement prevents a configuration change.${s} However, available evidence is insufficient to defensibly determine the resulting renewal price. Request a comparable quote before treating this as a dollar saving.`+c}}function Li(r,e,n){let t=Math.round(r.annual_cost_usd*(1-n/100)*100)/100;return{product_id:e.product_id,current_spend:r.annual_cost_usd,target_savings_pct:n,max_acceptable_price:t}}function Ar(r){switch(r){case"VERIFIED_BEFORE_AFTER":return 5;case"WARNING":return 4;case"SAVINGS_IDENTIFIED":return 3;case"OPPORTUNITY_NOT_QUANTIFIABLE":return 2;case"NO_DEFENSIBLE_SAVINGS_IDENTIFIED":return 1;default:return 0}}function Di(r){return r.toLocaleString("en-US",{maximumFractionDigits:2})}function Ui(r,e){let n=`Request a written quote from Procore for your current configuration with ${r.product_id} removed, holding all other contract terms constant.`;return e.contract_term==="annual"?n+" Also ask whether converting to a multi-year agreement would provide better pricing.":n}function Fi(r,e){let n=e.products.filter(s=>s!==r.product_id),t=n.length>0?n.join(", "):"remaining products";return`Current configuration minus ${r.product_id}; retaining ${t}.`}function $i(r,e){let n=["The resulting renewal price for the proposed configuration is not known until Procore provides a written quote.","Whether your current discount rate will be preserved in the reconfigured contract."];return r.blocked_reason&&n.push(`Dependency/requirement confirmation still needed: ${r.blocked_reason}`),(e.bundle_structure==="BUNDLED"||e.bundle_structure==="POOLED")&&n.push("The commercial impact of removing a line item from a bundled/pooled contract structure is not known without a comparable written quote."),n}function ji(r,e){let n=["A written Procore quote for the proposed configuration.","Confirmation that the quoted price is comparable (same ACV, same term, same other products).","Whether your current discount and rate protection apply to the reconfigured contract."];return(e.bundle_structure==="BUNDLED"||e.bundle_structure==="POOLED")&&n.push(`The commercial impact of removing ${r.product_id} from your current bundled/pooled pricing structure.`),(r.blocked_reason?.includes("ERP")||r.product_id==="project_financials")&&n.push("That removing Project Financials will not break your active ERP/accounting integration."),n}function Bi(r,e){let n=["If your current contract has a favorable legacy rate, reconfiguration may expose you to current-market pricing.","Removing a product without a written comparable quote means the actual savings cannot be verified in advance."];return e.discount_status==="DONT_KNOW"&&n.push("Your current discount is unknown. It may not survive a reconfiguration, making the net saving smaller than expected."),r.blocked_reason&&n.push(`Unresolved eligibility: ${r.blocked_reason} If this dependency exists, removal could disrupt active workflows.`),n}function Nr(r,e){if(e.overall_result==="NO_DEFENSIBLE_SAVINGS_IDENTIFIED"||e.counterfactual_results.length===0)return null;let n=e.counterfactual_results[0],t=n.candidate,s=e.target_prices.find(o=>o.product_id===t.product_id),i=n.result_class==="VERIFIED_BEFORE_AFTER"?`The two user-supplied quotes differ by $${Di(n.dollar_saving)} per year. This is a verified quote-to-quote difference. This amount cannot automatically be attributed to the removal of a specific product without a written quote confirming the configuration change.`:`${t.product_id} has been identified as a potential optimization candidate. A comparable written quote is required to determine whether a defensible saving exists.`;return{what_to_ask:Ui(t,r),why:i,configuration_requested:Fi(t,r),target_price:s?.max_acceptable_price,max_acceptable_price:s?s.max_acceptable_price:void 0,evidence_ids:n.evidence_ids,unknowns:$i(t,r),confirm_in_writing:ji(t,r),risks:Bi(t,r)}}function Mi(r){switch(r){case"VERIFIED_BEFORE_AFTER":return"Verified savings identified";case"SAVINGS_IDENTIFIED":return"Potential savings identified";case"OPPORTUNITY_NOT_QUANTIFIABLE":return"Optimization opportunity identified \u2014 savings not yet quantifiable";case"NO_DEFENSIBLE_SAVINGS_IDENTIFIED":return"No defensible savings identified";default:return"Analysis complete"}}function kr(r){return r.counterfactual_results[0]?.confidence??"UNKNOWN"}function qi(r){let e=r.counterfactual_results[0];if(e)return e.explanation}function Vi(r){return r.global_assumptions.slice()}function Hi(r){let e=[];for(let n of r.counterfactual_results)n.result_class==="OPPORTUNITY_NOT_QUANTIFIABLE"&&e.push(`Request a written Procore quote for configuration without ${n.candidate.product_id} to determine the renewal impact.`);return e.length===0&&e.push("Cross-check any estimate against your actual Procore renewal quote before making decisions."),e}function Pr(r,e,n){let t=e.overall_result,s,i;n?.min_evidence_count_met&&(s=n.user_rate,i=n.position);let o=e.counterfactual_results[0],c=t==="VERIFIED_BEFORE_AFTER"&&o?.dollar_saving!=null?o.dollar_saving:void 0,a=r.product_inputs?.map(d=>d.product_id)??r.products??[],u=pr().filter(d=>a.includes(d.normalized_product_id??"")).length,l=u>0?`${u} public quote observation${u>1?"s":""} available for your product mix. Directional context only \u2014 not an official Procore price list.`:void 0;return{verdict:t,current_spend:r.annual_cost_usd,effective_rate:s,benchmark_position:i,main_opportunity:qi(e),savings_amount:c,savings_range:void 0,confidence:kr(e),explanation:Mi(t),warnings:Vi(e),what_to_confirm:Hi(e),benchmark_evidence_note:l}}function Lr(r,e,n,t,s){let i=r.product_inputs??[],o=e.candidates.length>0?[e.candidates]:[],c=[...new Set(n.counterfactual_results.flatMap(f=>f.evidence_ids))];if(t?.comparable_evidence_ids)for(let f of t.comparable_evidence_ids)c.includes(f)||c.push(f);let a=[...n.global_assumptions,...n.counterfactual_results.flatMap(f=>f.assumptions)];r.credits_usd!=null&&r.credits_usd>0&&a.push(`Credits of $${r.credits_usd.toLocaleString()} applied \u2014 effective rate reflects net annual spend after credits.`);let u=new Set,l=a.filter(f=>u.has(f)?!1:(u.add(f),!0)),d=[...e.blocked.map(f=>`${f.product_id} blocked: ${f.blocked_reason}`),...e.candidates.filter(f=>f.blocked_reason).map(f=>`${f.product_id} uncertain: ${f.blocked_reason}`)],p=[];t?.min_evidence_count_met&&t.position==="below_p25"&&p.push(`Your effective rate of $${t.user_rate.toFixed(0)}/1M ACV appears favorable relative to comparable public observations. Confirm the commercial impact in writing before restructuring the contract.`);let m=["Savings estimates are not verified unless explicitly marked VERIFIED_BEFORE_AFTER.","Customer-specific pricing can differ from any benchmark or estimate shown.","Discount and rate-protection terms may not survive a reconfiguration."];(r.bundle_structure==="BUNDLED"||r.bundle_structure==="POOLED")&&m.push("Bundled/pooled contract: removing a product may not reduce total renewal by the line-item amount."),r.tier_changed==="YES"&&m.push("Pricing tier changed since last year \u2014 renewal pricing may reflect new tier structure."),r.packaging_changed==="YES"&&m.push("Packaging structure changed since last year \u2014 bundle lock-in risk may apply to current configuration.");let g=["Request a written quote for your current configuration with any candidate products removed.","Ask Procore to hold all other terms constant in the alternative quote.","Ask whether your current discount and rate protection apply to the proposed configuration."];if(r.contract_term==="annual"&&g.push("Ask whether a multi-year pooled agreement would provide a renewal rate cap."),r.rate_protection_status==="active"&&g.push("Invoke your rate protection clause if the renewal increase exceeds the contractual cap."),r.expected_next_year_acv_usd!=null&&r.expected_next_year_acv_usd>r.acv_usd*1.15&&g.push("Expected ACV growth exceeds 15%. Ask whether your renewal can pre-price the additional volume at today's rate."),r.target_savings_pct!=null&&n.target_prices.length>0){let f=n.target_prices[0];g.push(`Target negotiation maximum: $${f.max_acceptable_price.toLocaleString()} (${f.target_savings_pct}% below current spend). Label this as your walk-away price, not an expected Procore quote.`)}let E=n.overall_result==="VERIFIED_BEFORE_AFTER"?"You have a verified savings opportunity. Present both quotes to Procore and negotiate the lower-cost configuration.":n.overall_result==="OPPORTUNITY_NOT_QUANTIFIABLE"?"Request a written comparable quote for the candidate configuration. Do not negotiate on the basis of the current line-item price alone.":"No configuration change with a defensible saving was identified. Focus on renewal rate protection and multi-year structure options.",b=[`Analysis date: ${new Date().toISOString().split("T")[0]}`,`Input: annual_cost_usd=${r.annual_cost_usd}, acv_usd=${r.acv_usd}, contract_term=${r.contract_term}`,`Candidates evaluated: ${e.candidates.length}`,`Blocked products: ${e.blocked.length}`,`Overall result: ${n.overall_result}`,...n.counterfactual_results.map(f=>`  ${f.candidate.product_id}: ${f.result_class}`+(f.dollar_saving!=null?` ($${f.dollar_saving.toLocaleString()})`:""))];function O(f){return f.acv_usd?`$${(f.acv_usd/1e6).toFixed(0)}M ACV`:f.acv_band_min_usd&&f.acv_band_max_usd?`$${(f.acv_band_min_usd/1e6).toFixed(0)}M\u2013$${(f.acv_band_max_usd/1e6).toFixed(0)}M ACV band`:"ACV not disclosed"}let U=fe.map(f=>({evidence_id:f.evidence_id,source_description:f.source_description??"",product_reported:f.products?.[0]??f.normalized_product_id??"Platform total",normalized_product_id:f.normalized_product_id,acv_context:O(f),quoted_annual_price_usd:f.quoted_product_annual_price_usd??null,term:f.contract_term??"Quote",limitation_flags:f.limitation_flags??[],what_it_supports:f.quoted_product_annual_price_usd?`Observed public quote price for ${f.normalized_product_id??"this product"} at ${O(f)}`:"Non-calculational context evidence",what_it_does_not_support:"Universal module price or guaranteed removal saving for any customer",exclude_from_calculations:f.exclude_from_calculations===!0})),P=U.filter(f=>!f.exclude_from_calculations&&f.quoted_annual_price_usd!==null).length,k=[...new Set(fe.filter(f=>f.normalized_product_id&&!f.exclude_from_calculations).map(f=>f.normalized_product_id))],L={dataset_name:tt.dataset_name,total_records:tt.total_records,usable_records:P,excluded_records:tt.total_records-P,products_covered:k,records:U};return{current_configuration:i,candidate_configurations:o,counterfactual_results:n.counterfactual_results,benchmark:t??void 0,evidence_trail:c,assumptions:l,confidence_rationale:`Overall confidence: ${kr(n)}. Financial claims are deterministic from user inputs and explicit assumptions. No LLM-generated numbers are used in calculations.`,dependency_findings:d,legacy_rate_warnings:p,commercial_risks:m,negotiation:s??void 0,suggested_questions:g,renewal_strategy:E,audit_trail:b,quote_evidence_summary:L}}var Dr={VERIFIED_BEFORE_AFTER:5,WARNING:4,SAVINGS_IDENTIFIED:3,OPPORTUNITY_NOT_QUANTIFIABLE:2,NO_DEFENSIBLE_SAVINGS_IDENTIFIED:1};function zi(r){return[...r].sort((e,n)=>Dr[n.result_type]-Dr[e.result_type])}function Ur(r){let e=ur(r),n=hn(r),t=[],s=[],i=gr(e);i&&t.push(i);let o=vr(e);o&&t.push(o);let c=br(e);c&&t.push(c);let a=Tr(e);a&&t.push(a);let u=Sr(e);u&&t.push(u);let l=_r(e.acv_usd,e.annual_cost_usd,"company",e.credits_usd);if(l){let J=yr(l);J&&t.push(J);let Fe=Er(l);Fe&&t.push(Fe)}else s.push("No comparable evidence rows found for the provided ACV; benchmark skipped.");let d=wr(e);d&&t.push(d);let p=Rr(e);p&&t.push(p);let m=Ir(e);m&&t.push(m);let g=xr(e);g&&t.push(g);let E=null,b=null,O=null;if(e.product_inputs&&e.product_inputs.length>0)E=Or(e),b=Cr(e,E),O=Nr(e,b),t.push({result_type:b.overall_result,confidence:"UNKNOWN",recommendation_text:b.counterfactual_results[0]?.explanation??"No defensible savings identified based on the provided inputs.",comparable_evidence:b.counterfactual_results[0]?.evidence_ids??[],explanation:b.global_assumptions.join(" "),dollar_saving:b.counterfactual_results[0]?.dollar_saving,assumptions:b.global_assumptions});else{let J=typeof e.before_annual_cost_usd=="number"&&e.before_annual_cost_usd>0,Fe=typeof e.after_annual_cost_usd=="number"&&e.after_annual_cost_usd>0,le=J&&Fe?e.before_annual_cost_usd-e.after_annual_cost_usd:null,ln=le!=null&&le>0?"VERIFIED_BEFORE_AFTER":"OPPORTUNITY_NOT_QUANTIFIABLE",G=le!=null&&le>0?[{result_class:"VERIFIED_BEFORE_AFTER",candidate:{product_id:"__quote_pair__",usage:"NOT_SURE",requirement:"NOT_SURE",replacement:"NOT_SURE",dependency:"NOT_SURE"},dollar_saving:le,assumptions:["Saving is the arithmetic difference between the two user-supplied quotes.","VERIFIED only when both quotes are official written Procore proposals for comparable configurations."],evidence_ids:[],confidence:"FACT",explanation:`The two quotes provided show a verified annual saving of $${le.toLocaleString()}.`}]:[];t.push({result_type:"OPPORTUNITY_NOT_QUANTIFIABLE",confidence:"UNKNOWN",recommendation_text:"Ask Procore for a written quote with your proposed configuration change, then compare that quote against your current contract.",comparable_evidence:[],explanation:"No per-product usage/requirement/dependency information was provided. Analysis is limited to benchmarking and commercial-structure rules."}),b={overall_result:ln,counterfactual_results:G,target_prices:[],global_assumptions:n.warnings.filter(j=>j.severity==="PREVENTS_CALCULATION").map(j=>j.message)},E={candidates:[],blocked:[],skipped_product_ids:[]}}for(let J of n.warnings)J.severity==="PREVENTS_CALCULATION"&&s.push(J.message);let U=!1,P=t.filter(J=>{if(J.result_type==="VERIFIED_BEFORE_AFTER"){if(U)return!1;U=!0}return!0}),k=zi(P),L=Pr(e,b,l),f=Lr(e,E,b,l,O);return{results:k,benchmark:l,warnings:s,assumptions:b.global_assumptions,candidates:E,counterfactual:b,negotiation:O,free_result:L,paid_report:f}}var Fr=r=>{let e;return r?e=r:typeof fetch>"u"?e=(...n)=>Promise.resolve().then(()=>(me(),Ee)).then(({default:t})=>t(...n)):e=fetch,(...n)=>e(...n)};var rt=class extends Error{constructor(e,n="FunctionsError",t){super(e),this.name=n,this.context=t}},$t=class extends rt{constructor(e){super("Failed to send a request to the Edge Function","FunctionsFetchError",e)}},jt=class extends rt{constructor(e){super("Relay Error invoking the Edge Function","FunctionsRelayError",e)}},Bt=class extends rt{constructor(e){super("Edge Function returned a non-2xx status code","FunctionsHttpError",e)}},Mt;(function(r){r.Any="any",r.ApNortheast1="ap-northeast-1",r.ApNortheast2="ap-northeast-2",r.ApSouth1="ap-south-1",r.ApSoutheast1="ap-southeast-1",r.ApSoutheast2="ap-southeast-2",r.CaCentral1="ca-central-1",r.EuCentral1="eu-central-1",r.EuWest1="eu-west-1",r.EuWest2="eu-west-2",r.EuWest3="eu-west-3",r.SaEast1="sa-east-1",r.UsEast1="us-east-1",r.UsWest1="us-west-1",r.UsWest2="us-west-2"})(Mt||(Mt={}));var Ki=function(r,e,n,t){function s(i){return i instanceof n?i:new n(function(o){o(i)})}return new(n||(n=Promise))(function(i,o){function c(l){try{u(t.next(l))}catch(d){o(d)}}function a(l){try{u(t.throw(l))}catch(d){o(d)}}function u(l){l.done?i(l.value):s(l.value).then(c,a)}u((t=t.apply(r,e||[])).next())})},st=class{constructor(e,{headers:n={},customFetch:t,region:s=Mt.Any}={}){this.url=e,this.headers=n,this.region=s,this.fetch=Fr(t)}setAuth(e){this.headers.Authorization=`Bearer ${e}`}invoke(e,n={}){var t;return Ki(this,void 0,void 0,function*(){try{let{headers:s,method:i,body:o}=n,c={},{region:a}=n;a||(a=this.region),a&&a!=="any"&&(c["x-region"]=a);let u;o&&(s&&!Object.prototype.hasOwnProperty.call(s,"Content-Type")||!s)&&(typeof Blob<"u"&&o instanceof Blob||o instanceof ArrayBuffer?(c["Content-Type"]="application/octet-stream",u=o):typeof o=="string"?(c["Content-Type"]="text/plain",u=o):typeof FormData<"u"&&o instanceof FormData?u=o:(c["Content-Type"]="application/json",u=JSON.stringify(o)));let l=yield this.fetch(`${this.url}/${e}`,{method:i||"POST",headers:Object.assign(Object.assign(Object.assign({},c),this.headers),s),body:u}).catch(g=>{throw new $t(g)}),d=l.headers.get("x-relay-error");if(d&&d==="true")throw new jt(l);if(!l.ok)throw new Bt(l);let p=((t=l.headers.get("Content-Type"))!==null&&t!==void 0?t:"text/plain").split(";")[0].trim(),m;return p==="application/json"?m=yield l.json():p==="application/octet-stream"?m=yield l.blob():p==="text/event-stream"?m=l:p==="multipart/form-data"?m=yield l.formData():m=yield l.text(),{data:m,error:null}}catch(s){return{data:null,error:s}}})}};var Kr=tr(Yr(),1),{PostgrestClient:Jr,PostgrestQueryBuilder:kc,PostgrestFilterBuilder:Pc,PostgrestTransformBuilder:Lc,PostgrestBuilder:Dc}=Kr.default;var Zr="2.10.2";var Xr={"X-Client-Info":`realtime-js/${Zr}`},es="1.0.0",Wt=1e4,ts=1e3,we;(function(r){r[r.connecting=0]="connecting",r[r.open=1]="open",r[r.closing=2]="closing",r[r.closed=3]="closed"})(we||(we={}));var V;(function(r){r.closed="closed",r.errored="errored",r.joined="joined",r.joining="joining",r.leaving="leaving"})(V||(V={}));var W;(function(r){r.close="phx_close",r.error="phx_error",r.join="phx_join",r.reply="phx_reply",r.leave="phx_leave",r.access_token="access_token"})(W||(W={}));var zt;(function(r){r.websocket="websocket"})(zt||(zt={}));var ge;(function(r){r.Connecting="connecting",r.Open="open",r.Closing="closing",r.Closed="closed"})(ge||(ge={}));var ht=class{constructor(){this.HEADER_LENGTH=1}decode(e,n){return e.constructor===ArrayBuffer?n(this._binaryDecode(e)):n(typeof e=="string"?JSON.parse(e):{})}_binaryDecode(e){let n=new DataView(e),t=new TextDecoder;return this._decodeBroadcast(e,n,t)}_decodeBroadcast(e,n,t){let s=n.getUint8(1),i=n.getUint8(2),o=this.HEADER_LENGTH+2,c=t.decode(e.slice(o,o+s));o=o+s;let a=t.decode(e.slice(o,o+i));o=o+i;let u=JSON.parse(t.decode(e.slice(o,e.byteLength)));return{ref:null,topic:c,event:a,payload:u}}};var Te=class{constructor(e,n){this.callback=e,this.timerCalc=n,this.timer=void 0,this.tries=0,this.callback=e,this.timerCalc=n}reset(){this.tries=0,clearTimeout(this.timer)}scheduleTimeout(){clearTimeout(this.timer),this.timer=setTimeout(()=>{this.tries=this.tries+1,this.callback()},this.timerCalc(this.tries+1))}};var I;(function(r){r.abstime="abstime",r.bool="bool",r.date="date",r.daterange="daterange",r.float4="float4",r.float8="float8",r.int2="int2",r.int4="int4",r.int4range="int4range",r.int8="int8",r.int8range="int8range",r.json="json",r.jsonb="jsonb",r.money="money",r.numeric="numeric",r.oid="oid",r.reltime="reltime",r.text="text",r.time="time",r.timestamp="timestamp",r.timestamptz="timestamptz",r.timetz="timetz",r.tsrange="tsrange",r.tstzrange="tstzrange"})(I||(I={}));var Rn=(r,e,n={})=>{var t;let s=(t=n.skipTypes)!==null&&t!==void 0?t:[];return Object.keys(e).reduce((i,o)=>(i[o]=co(o,r,e,s),i),{})},co=(r,e,n,t)=>{let s=e.find(c=>c.name===r),i=s?.type,o=n[r];return i&&!t.includes(i)?ns(i,o):xn(o)},ns=(r,e)=>{if(r.charAt(0)==="_"){let n=r.slice(1,r.length);return po(e,n)}switch(r){case I.bool:return lo(e);case I.float4:case I.float8:case I.int2:case I.int4:case I.int8:case I.numeric:case I.oid:return uo(e);case I.json:case I.jsonb:return ho(e);case I.timestamp:return _o(e);case I.abstime:case I.date:case I.daterange:case I.int4range:case I.int8range:case I.money:case I.reltime:case I.text:case I.time:case I.timestamptz:case I.timetz:case I.tsrange:case I.tstzrange:return xn(e);default:return xn(e)}},xn=r=>r,lo=r=>{switch(r){case"t":return!0;case"f":return!1;default:return r}},uo=r=>{if(typeof r=="string"){let e=parseFloat(r);if(!Number.isNaN(e))return e}return r},ho=r=>{if(typeof r=="string")try{return JSON.parse(r)}catch(e){return console.log(`JSON parse error: ${e}`),r}return r},po=(r,e)=>{if(typeof r!="string")return r;let n=r.length-1,t=r[n];if(r[0]==="{"&&t==="}"){let i,o=r.slice(1,n);try{i=JSON.parse("["+o+"]")}catch{i=o?o.split(","):[]}return i.map(c=>ns(e,c))}return r},_o=r=>typeof r=="string"?r.replace(" ","T"):r,Gt=r=>{let e=r;return e=e.replace(/^ws/i,"http"),e=e.replace(/(\/socket\/websocket|\/socket|\/websocket)\/?$/i,""),e.replace(/\/+$/,"")};var Se=class{constructor(e,n,t={},s=Wt){this.channel=e,this.event=n,this.payload=t,this.timeout=s,this.sent=!1,this.timeoutTimer=void 0,this.ref="",this.receivedResp=null,this.recHooks=[],this.refEvent=null}resend(e){this.timeout=e,this._cancelRefEvent(),this.ref="",this.refEvent=null,this.receivedResp=null,this.sent=!1,this.send()}send(){this._hasReceived("timeout")||(this.startTimeout(),this.sent=!0,this.channel.socket.push({topic:this.channel.topic,event:this.event,payload:this.payload,ref:this.ref,join_ref:this.channel._joinRef()}))}updatePayload(e){this.payload=Object.assign(Object.assign({},this.payload),e)}receive(e,n){var t;return this._hasReceived(e)&&n((t=this.receivedResp)===null||t===void 0?void 0:t.response),this.recHooks.push({status:e,callback:n}),this}startTimeout(){if(this.timeoutTimer)return;this.ref=this.channel.socket._makeRef(),this.refEvent=this.channel._replyEventName(this.ref);let e=n=>{this._cancelRefEvent(),this._cancelTimeout(),this.receivedResp=n,this._matchReceive(n)};this.channel._on(this.refEvent,{},e),this.timeoutTimer=setTimeout(()=>{this.trigger("timeout",{})},this.timeout)}trigger(e,n){this.refEvent&&this.channel._trigger(this.refEvent,{status:e,response:n})}destroy(){this._cancelRefEvent(),this._cancelTimeout()}_cancelRefEvent(){this.refEvent&&this.channel._off(this.refEvent,{})}_cancelTimeout(){clearTimeout(this.timeoutTimer),this.timeoutTimer=void 0}_matchReceive({status:e,response:n}){this.recHooks.filter(t=>t.status===e).forEach(t=>t.callback(n))}_hasReceived(e){return this.receivedResp&&this.receivedResp.status===e}};var On;(function(r){r.SYNC="sync",r.JOIN="join",r.LEAVE="leave"})(On||(On={}));var Ve=class r{constructor(e,n){this.channel=e,this.state={},this.pendingDiffs=[],this.joinRef=null,this.caller={onJoin:()=>{},onLeave:()=>{},onSync:()=>{}};let t=n?.events||{state:"presence_state",diff:"presence_diff"};this.channel._on(t.state,{},s=>{let{onJoin:i,onLeave:o,onSync:c}=this.caller;this.joinRef=this.channel._joinRef(),this.state=r.syncState(this.state,s,i,o),this.pendingDiffs.forEach(a=>{this.state=r.syncDiff(this.state,a,i,o)}),this.pendingDiffs=[],c()}),this.channel._on(t.diff,{},s=>{let{onJoin:i,onLeave:o,onSync:c}=this.caller;this.inPendingSyncState()?this.pendingDiffs.push(s):(this.state=r.syncDiff(this.state,s,i,o),c())}),this.onJoin((s,i,o)=>{this.channel._trigger("presence",{event:"join",key:s,currentPresences:i,newPresences:o})}),this.onLeave((s,i,o)=>{this.channel._trigger("presence",{event:"leave",key:s,currentPresences:i,leftPresences:o})}),this.onSync(()=>{this.channel._trigger("presence",{event:"sync"})})}static syncState(e,n,t,s){let i=this.cloneDeep(e),o=this.transformState(n),c={},a={};return this.map(i,(u,l)=>{o[u]||(a[u]=l)}),this.map(o,(u,l)=>{let d=i[u];if(d){let p=l.map(b=>b.presence_ref),m=d.map(b=>b.presence_ref),g=l.filter(b=>m.indexOf(b.presence_ref)<0),E=d.filter(b=>p.indexOf(b.presence_ref)<0);g.length>0&&(c[u]=g),E.length>0&&(a[u]=E)}else c[u]=l}),this.syncDiff(i,{joins:c,leaves:a},t,s)}static syncDiff(e,n,t,s){let{joins:i,leaves:o}={joins:this.transformState(n.joins),leaves:this.transformState(n.leaves)};return t||(t=()=>{}),s||(s=()=>{}),this.map(i,(c,a)=>{var u;let l=(u=e[c])!==null&&u!==void 0?u:[];if(e[c]=this.cloneDeep(a),l.length>0){let d=e[c].map(m=>m.presence_ref),p=l.filter(m=>d.indexOf(m.presence_ref)<0);e[c].unshift(...p)}t(c,l,a)}),this.map(o,(c,a)=>{let u=e[c];if(!u)return;let l=a.map(d=>d.presence_ref);u=u.filter(d=>l.indexOf(d.presence_ref)<0),e[c]=u,s(c,u,a),u.length===0&&delete e[c]}),e}static map(e,n){return Object.getOwnPropertyNames(e).map(t=>n(t,e[t]))}static transformState(e){return e=this.cloneDeep(e),Object.getOwnPropertyNames(e).reduce((n,t)=>{let s=e[t];return"metas"in s?n[t]=s.metas.map(i=>(i.presence_ref=i.phx_ref,delete i.phx_ref,delete i.phx_ref_prev,i)):n[t]=s,n},{})}static cloneDeep(e){return JSON.parse(JSON.stringify(e))}onJoin(e){this.caller.onJoin=e}onLeave(e){this.caller.onLeave=e}onSync(e){this.caller.onSync=e}inPendingSyncState(){return!this.joinRef||this.joinRef!==this.channel._joinRef()}};var An;(function(r){r.ALL="*",r.INSERT="INSERT",r.UPDATE="UPDATE",r.DELETE="DELETE"})(An||(An={}));var Cn;(function(r){r.BROADCAST="broadcast",r.PRESENCE="presence",r.POSTGRES_CHANGES="postgres_changes"})(Cn||(Cn={}));var Nn;(function(r){r.SUBSCRIBED="SUBSCRIBED",r.TIMED_OUT="TIMED_OUT",r.CLOSED="CLOSED",r.CHANNEL_ERROR="CHANNEL_ERROR"})(Nn||(Nn={}));var He=class r{constructor(e,n={config:{}},t){this.topic=e,this.params=n,this.socket=t,this.bindings={},this.state=V.closed,this.joinedOnce=!1,this.pushBuffer=[],this.subTopic=e.replace(/^realtime:/i,""),this.params.config=Object.assign({broadcast:{ack:!1,self:!1},presence:{key:""},private:!1},n.config),this.timeout=this.socket.timeout,this.joinPush=new Se(this,W.join,this.params,this.timeout),this.rejoinTimer=new Te(()=>this._rejoinUntilConnected(),this.socket.reconnectAfterMs),this.joinPush.receive("ok",()=>{this.state=V.joined,this.rejoinTimer.reset(),this.pushBuffer.forEach(s=>s.send()),this.pushBuffer=[]}),this._onClose(()=>{this.rejoinTimer.reset(),this.socket.log("channel",`close ${this.topic} ${this._joinRef()}`),this.state=V.closed,this.socket._remove(this)}),this._onError(s=>{this._isLeaving()||this._isClosed()||(this.socket.log("channel",`error ${this.topic}`,s),this.state=V.errored,this.rejoinTimer.scheduleTimeout())}),this.joinPush.receive("timeout",()=>{this._isJoining()&&(this.socket.log("channel",`timeout ${this.topic}`,this.joinPush.timeout),this.state=V.errored,this.rejoinTimer.scheduleTimeout())}),this._on(W.reply,{},(s,i)=>{this._trigger(this._replyEventName(i),s)}),this.presence=new Ve(this),this.broadcastEndpointURL=Gt(this.socket.endPoint)+"/api/broadcast"}subscribe(e,n=this.timeout){var t,s;if(this.socket.isConnected()||this.socket.connect(),this.joinedOnce)throw"tried to subscribe multiple times. 'subscribe' can only be called a single time per channel instance";{let{config:{broadcast:i,presence:o,private:c}}=this.params;this._onError(l=>e&&e("CHANNEL_ERROR",l)),this._onClose(()=>e&&e("CLOSED"));let a={},u={broadcast:i,presence:o,postgres_changes:(s=(t=this.bindings.postgres_changes)===null||t===void 0?void 0:t.map(l=>l.filter))!==null&&s!==void 0?s:[],private:c};this.socket.accessToken&&(a.access_token=this.socket.accessToken),this.updateJoinPayload(Object.assign({config:u},a)),this.joinedOnce=!0,this._rejoin(n),this.joinPush.receive("ok",({postgres_changes:l})=>{var d;if(this.socket.accessToken&&this.socket.setAuth(this.socket.accessToken),l===void 0){e&&e("SUBSCRIBED");return}else{let p=this.bindings.postgres_changes,m=(d=p?.length)!==null&&d!==void 0?d:0,g=[];for(let E=0;E<m;E++){let b=p[E],{filter:{event:O,schema:U,table:P,filter:k}}=b,L=l&&l[E];if(L&&L.event===O&&L.schema===U&&L.table===P&&L.filter===k)g.push(Object.assign(Object.assign({},b),{id:L.id}));else{this.unsubscribe(),e&&e("CHANNEL_ERROR",new Error("mismatch between server and client bindings for postgres changes"));return}}this.bindings.postgres_changes=g,e&&e("SUBSCRIBED");return}}).receive("error",l=>{e&&e("CHANNEL_ERROR",new Error(JSON.stringify(Object.values(l).join(", ")||"error")))}).receive("timeout",()=>{e&&e("TIMED_OUT")})}return this}presenceState(){return this.presence.state}async track(e,n={}){return await this.send({type:"presence",event:"track",payload:e},n.timeout||this.timeout)}async untrack(e={}){return await this.send({type:"presence",event:"untrack"},e)}on(e,n,t){return this._on(e,n,t)}async send(e,n={}){var t,s;if(!this._canPush()&&e.type==="broadcast"){let{event:i,payload:o}=e,c={method:"POST",headers:{Authorization:this.socket.accessToken?`Bearer ${this.socket.accessToken}`:"",apikey:this.socket.apiKey?this.socket.apiKey:"","Content-Type":"application/json"},body:JSON.stringify({messages:[{topic:this.subTopic,event:i,payload:o}]})};try{let a=await this._fetchWithTimeout(this.broadcastEndpointURL,c,(t=n.timeout)!==null&&t!==void 0?t:this.timeout);return await((s=a.body)===null||s===void 0?void 0:s.cancel()),a.ok?"ok":"error"}catch(a){return a.name==="AbortError"?"timed out":"error"}}else return new Promise(i=>{var o,c,a;let u=this._push(e.type,e,n.timeout||this.timeout);e.type==="broadcast"&&!(!((a=(c=(o=this.params)===null||o===void 0?void 0:o.config)===null||c===void 0?void 0:c.broadcast)===null||a===void 0)&&a.ack)&&i("ok"),u.receive("ok",()=>i("ok")),u.receive("error",()=>i("error")),u.receive("timeout",()=>i("timed out"))})}updateJoinPayload(e){this.joinPush.updatePayload(e)}unsubscribe(e=this.timeout){this.state=V.leaving;let n=()=>{this.socket.log("channel",`leave ${this.topic}`),this._trigger(W.close,"leave",this._joinRef())};return this.rejoinTimer.reset(),this.joinPush.destroy(),new Promise(t=>{let s=new Se(this,W.leave,{},e);s.receive("ok",()=>{n(),t("ok")}).receive("timeout",()=>{n(),t("timed out")}).receive("error",()=>{t("error")}),s.send(),this._canPush()||s.trigger("ok",{})})}async _fetchWithTimeout(e,n,t){let s=new AbortController,i=setTimeout(()=>s.abort(),t),o=await this.socket.fetch(e,Object.assign(Object.assign({},n),{signal:s.signal}));return clearTimeout(i),o}_push(e,n,t=this.timeout){if(!this.joinedOnce)throw`tried to push '${e}' to '${this.topic}' before joining. Use channel.subscribe() before pushing events`;let s=new Se(this,e,n,t);return this._canPush()?s.send():(s.startTimeout(),this.pushBuffer.push(s)),s}_onMessage(e,n,t){return n}_isMember(e){return this.topic===e}_joinRef(){return this.joinPush.ref}_trigger(e,n,t){var s,i;let o=e.toLocaleLowerCase(),{close:c,error:a,leave:u,join:l}=W;if(t&&[c,a,u,l].indexOf(o)>=0&&t!==this._joinRef())return;let p=this._onMessage(o,n,t);if(n&&!p)throw"channel onMessage callbacks must return the payload, modified or unmodified";["insert","update","delete"].includes(o)?(s=this.bindings.postgres_changes)===null||s===void 0||s.filter(m=>{var g,E,b;return((g=m.filter)===null||g===void 0?void 0:g.event)==="*"||((b=(E=m.filter)===null||E===void 0?void 0:E.event)===null||b===void 0?void 0:b.toLocaleLowerCase())===o}).map(m=>m.callback(p,t)):(i=this.bindings[o])===null||i===void 0||i.filter(m=>{var g,E,b,O,U,P;if(["broadcast","presence","postgres_changes"].includes(o))if("id"in m){let k=m.id,L=(g=m.filter)===null||g===void 0?void 0:g.event;return k&&((E=n.ids)===null||E===void 0?void 0:E.includes(k))&&(L==="*"||L?.toLocaleLowerCase()===((b=n.data)===null||b===void 0?void 0:b.type.toLocaleLowerCase()))}else{let k=(U=(O=m?.filter)===null||O===void 0?void 0:O.event)===null||U===void 0?void 0:U.toLocaleLowerCase();return k==="*"||k===((P=n?.event)===null||P===void 0?void 0:P.toLocaleLowerCase())}else return m.type.toLocaleLowerCase()===o}).map(m=>{if(typeof p=="object"&&"ids"in p){let g=p.data,{schema:E,table:b,commit_timestamp:O,type:U,errors:P}=g;p=Object.assign(Object.assign({},{schema:E,table:b,commit_timestamp:O,eventType:U,new:{},old:{},errors:P}),this._getPayloadRecords(g))}m.callback(p,t)})}_isClosed(){return this.state===V.closed}_isJoined(){return this.state===V.joined}_isJoining(){return this.state===V.joining}_isLeaving(){return this.state===V.leaving}_replyEventName(e){return`chan_reply_${e}`}_on(e,n,t){let s=e.toLocaleLowerCase(),i={type:s,filter:n,callback:t};return this.bindings[s]?this.bindings[s].push(i):this.bindings[s]=[i],this}_off(e,n){let t=e.toLocaleLowerCase();return this.bindings[t]=this.bindings[t].filter(s=>{var i;return!(((i=s.type)===null||i===void 0?void 0:i.toLocaleLowerCase())===t&&r.isEqual(s.filter,n))}),this}static isEqual(e,n){if(Object.keys(e).length!==Object.keys(n).length)return!1;for(let t in e)if(e[t]!==n[t])return!1;return!0}_rejoinUntilConnected(){this.rejoinTimer.scheduleTimeout(),this.socket.isConnected()&&this._rejoin()}_onClose(e){this._on(W.close,{},e)}_onError(e){this._on(W.error,{},n=>e(n))}_canPush(){return this.socket.isConnected()&&this._isJoined()}_rejoin(e=this.timeout){this._isLeaving()||(this.socket._leaveOpenTopic(this.topic),this.state=V.joining,this.joinPush.resend(e))}_getPayloadRecords(e){let n={new:{},old:{}};return(e.type==="INSERT"||e.type==="UPDATE")&&(n.new=Rn(e.columns,e.record)),(e.type==="UPDATE"||e.type==="DELETE")&&(n.old=Rn(e.columns,e.old_record)),n}};var mo=()=>{},go=typeof WebSocket<"u",ze=class{constructor(e,n){var t;this.accessToken=null,this.apiKey=null,this.channels=[],this.endPoint="",this.httpEndpoint="",this.headers=Xr,this.params={},this.timeout=Wt,this.heartbeatIntervalMs=3e4,this.heartbeatTimer=void 0,this.pendingHeartbeatRef=null,this.ref=0,this.logger=mo,this.conn=null,this.sendBuffer=[],this.serializer=new ht,this.stateChangeCallbacks={open:[],close:[],error:[],message:[]},this._resolveFetch=i=>{let o;return i?o=i:typeof fetch>"u"?o=(...c)=>Promise.resolve().then(()=>(me(),Ee)).then(({default:a})=>a(...c)):o=fetch,(...c)=>o(...c)},this.endPoint=`${e}/${zt.websocket}`,this.httpEndpoint=Gt(e),n?.transport?this.transport=n.transport:this.transport=null,n?.params&&(this.params=n.params),n?.headers&&(this.headers=Object.assign(Object.assign({},this.headers),n.headers)),n?.timeout&&(this.timeout=n.timeout),n?.logger&&(this.logger=n.logger),n?.heartbeatIntervalMs&&(this.heartbeatIntervalMs=n.heartbeatIntervalMs);let s=(t=n?.params)===null||t===void 0?void 0:t.apikey;s&&(this.accessToken=s,this.apiKey=s),this.reconnectAfterMs=n?.reconnectAfterMs?n.reconnectAfterMs:i=>[1e3,2e3,5e3,1e4][i-1]||1e4,this.encode=n?.encode?n.encode:(i,o)=>o(JSON.stringify(i)),this.decode=n?.decode?n.decode:this.serializer.decode.bind(this.serializer),this.reconnectTimer=new Te(async()=>{this.disconnect(),this.connect()},this.reconnectAfterMs),this.fetch=this._resolveFetch(n?.fetch)}connect(){if(!this.conn){if(this.transport){this.conn=new this.transport(this._endPointURL(),void 0,{headers:this.headers});return}if(go){this.conn=new WebSocket(this._endPointURL()),this.setupConnection();return}this.conn=new kn(this._endPointURL(),void 0,{close:()=>{this.conn=null}}),Promise.resolve().then(()=>tr(ss())).then(({default:e})=>{this.conn=new e(this._endPointURL(),void 0,{headers:this.headers}),this.setupConnection()})}}disconnect(e,n){this.conn&&(this.conn.onclose=function(){},e?this.conn.close(e,n??""):this.conn.close(),this.conn=null,this.heartbeatTimer&&clearInterval(this.heartbeatTimer),this.reconnectTimer.reset())}getChannels(){return this.channels}async removeChannel(e){let n=await e.unsubscribe();return this.channels.length===0&&this.disconnect(),n}async removeAllChannels(){let e=await Promise.all(this.channels.map(n=>n.unsubscribe()));return this.disconnect(),e}log(e,n,t){this.logger(e,n,t)}connectionState(){switch(this.conn&&this.conn.readyState){case we.connecting:return ge.Connecting;case we.open:return ge.Open;case we.closing:return ge.Closing;default:return ge.Closed}}isConnected(){return this.connectionState()===ge.Open}channel(e,n={config:{}}){let t=new He(`realtime:${e}`,n,this);return this.channels.push(t),t}push(e){let{topic:n,event:t,payload:s,ref:i}=e,o=()=>{this.encode(e,c=>{var a;(a=this.conn)===null||a===void 0||a.send(c)})};this.log("push",`${n} ${t} (${i})`,s),this.isConnected()?o():this.sendBuffer.push(o)}setAuth(e){this.accessToken=e,this.channels.forEach(n=>{e&&n.updateJoinPayload({access_token:e}),n.joinedOnce&&n._isJoined()&&n._push(W.access_token,{access_token:e})})}_makeRef(){let e=this.ref+1;return e===this.ref?this.ref=0:this.ref=e,this.ref.toString()}_leaveOpenTopic(e){let n=this.channels.find(t=>t.topic===e&&(t._isJoined()||t._isJoining()));n&&(this.log("transport",`leaving duplicate topic "${e}"`),n.unsubscribe())}_remove(e){this.channels=this.channels.filter(n=>n._joinRef()!==e._joinRef())}setupConnection(){this.conn&&(this.conn.binaryType="arraybuffer",this.conn.onopen=()=>this._onConnOpen(),this.conn.onerror=e=>this._onConnError(e),this.conn.onmessage=e=>this._onConnMessage(e),this.conn.onclose=e=>this._onConnClose(e))}_endPointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:es}))}_onConnMessage(e){this.decode(e.data,n=>{let{topic:t,event:s,payload:i,ref:o}=n;(o&&o===this.pendingHeartbeatRef||s===i?.type)&&(this.pendingHeartbeatRef=null),this.log("receive",`${i.status||""} ${t} ${s} ${o&&"("+o+")"||""}`,i),this.channels.filter(c=>c._isMember(t)).forEach(c=>c._trigger(s,i,o)),this.stateChangeCallbacks.message.forEach(c=>c(n))})}_onConnOpen(){this.log("transport",`connected to ${this._endPointURL()}`),this._flushSendBuffer(),this.reconnectTimer.reset(),this.heartbeatTimer&&clearInterval(this.heartbeatTimer),this.heartbeatTimer=setInterval(()=>this._sendHeartbeat(),this.heartbeatIntervalMs),this.stateChangeCallbacks.open.forEach(e=>e())}_onConnClose(e){this.log("transport","close",e),this._triggerChanError(),this.heartbeatTimer&&clearInterval(this.heartbeatTimer),this.reconnectTimer.scheduleTimeout(),this.stateChangeCallbacks.close.forEach(n=>n(e))}_onConnError(e){this.log("transport",e.message),this._triggerChanError(),this.stateChangeCallbacks.error.forEach(n=>n(e))}_triggerChanError(){this.channels.forEach(e=>e._trigger(W.error))}_appendParams(e,n){if(Object.keys(n).length===0)return e;let t=e.match(/\?/)?"&":"?",s=new URLSearchParams(n);return`${e}${t}${s}`}_flushSendBuffer(){this.isConnected()&&this.sendBuffer.length>0&&(this.sendBuffer.forEach(e=>e()),this.sendBuffer=[])}_sendHeartbeat(){var e;if(this.isConnected()){if(this.pendingHeartbeatRef){this.pendingHeartbeatRef=null,this.log("transport","heartbeat timeout. Attempting to re-establish connection"),(e=this.conn)===null||e===void 0||e.close(ts,"hearbeat timeout");return}this.pendingHeartbeatRef=this._makeRef(),this.push({topic:"phoenix",event:"heartbeat",payload:{},ref:this.pendingHeartbeatRef}),this.setAuth(this.accessToken)}}},kn=class{constructor(e,n,t){this.binaryType="arraybuffer",this.onclose=()=>{},this.onerror=()=>{},this.onmessage=()=>{},this.onopen=()=>{},this.readyState=we.connecting,this.send=()=>{},this.url=null,this.url=e,this.close=t.close}};var We=class extends Error{constructor(e){super(e),this.__isStorageError=!0,this.name="StorageError"}};function N(r){return typeof r=="object"&&r!==null&&"__isStorageError"in r}var Qt=class extends We{constructor(e,n){super(e),this.name="StorageApiError",this.status=n}toJSON(){return{name:this.name,message:this.message,status:this.status}}},Ie=class extends We{constructor(e,n){super(e),this.name="StorageUnknownError",this.originalError=n}};var vo=function(r,e,n,t){function s(i){return i instanceof n?i:new n(function(o){o(i)})}return new(n||(n=Promise))(function(i,o){function c(l){try{u(t.next(l))}catch(d){o(d)}}function a(l){try{u(t.throw(l))}catch(d){o(d)}}function u(l){l.done?i(l.value):s(l.value).then(c,a)}u((t=t.apply(r,e||[])).next())})},Kt=r=>{let e;return r?e=r:typeof fetch>"u"?e=(...n)=>Promise.resolve().then(()=>(me(),Ee)).then(({default:t})=>t(...n)):e=fetch,(...n)=>e(...n)},is=()=>vo(void 0,void 0,void 0,function*(){return typeof Response>"u"?(yield Promise.resolve().then(()=>(me(),Ee))).Response:Response}),Yt=r=>{if(Array.isArray(r))return r.map(n=>Yt(n));if(typeof r=="function"||r!==Object(r))return r;let e={};return Object.entries(r).forEach(([n,t])=>{let s=n.replace(/([-_][a-z])/gi,i=>i.toUpperCase().replace(/[-_]/g,""));e[s]=Yt(t)}),e};var xe=function(r,e,n,t){function s(i){return i instanceof n?i:new n(function(o){o(i)})}return new(n||(n=Promise))(function(i,o){function c(l){try{u(t.next(l))}catch(d){o(d)}}function a(l){try{u(t.throw(l))}catch(d){o(d)}}function u(l){l.done?i(l.value):s(l.value).then(c,a)}u((t=t.apply(r,e||[])).next())})},Pn=r=>r.msg||r.message||r.error_description||r.error||JSON.stringify(r),bo=(r,e,n)=>xe(void 0,void 0,void 0,function*(){let t=yield is();r instanceof t&&!n?.noResolveJson?r.json().then(s=>{e(new Qt(Pn(s),r.status||500))}).catch(s=>{e(new Ie(Pn(s),s))}):e(new Ie(Pn(r),r))}),yo=(r,e,n,t)=>{let s={method:r,headers:e?.headers||{}};return r==="GET"?s:(s.headers=Object.assign({"Content-Type":"application/json"},e?.headers),t&&(s.body=JSON.stringify(t)),Object.assign(Object.assign({},s),n))};function pt(r,e,n,t,s,i){return xe(this,void 0,void 0,function*(){return new Promise((o,c)=>{r(n,yo(e,t,s,i)).then(a=>{if(!a.ok)throw a;return t?.noResolveJson?a:a.json()}).then(a=>o(a)).catch(a=>bo(a,c,t))})})}function Ge(r,e,n,t){return xe(this,void 0,void 0,function*(){return pt(r,"GET",e,n,t)})}function ie(r,e,n,t,s){return xe(this,void 0,void 0,function*(){return pt(r,"POST",e,t,s,n)})}function os(r,e,n,t,s){return xe(this,void 0,void 0,function*(){return pt(r,"PUT",e,t,s,n)})}function as(r,e,n,t){return xe(this,void 0,void 0,function*(){return pt(r,"HEAD",e,Object.assign(Object.assign({},n),{noResolveJson:!0}),t)})}function Jt(r,e,n,t,s){return xe(this,void 0,void 0,function*(){return pt(r,"DELETE",e,t,s,n)})}var H=function(r,e,n,t){function s(i){return i instanceof n?i:new n(function(o){o(i)})}return new(n||(n=Promise))(function(i,o){function c(l){try{u(t.next(l))}catch(d){o(d)}}function a(l){try{u(t.throw(l))}catch(d){o(d)}}function u(l){l.done?i(l.value):s(l.value).then(c,a)}u((t=t.apply(r,e||[])).next())})},Eo={limit:100,offset:0,sortBy:{column:"name",order:"asc"}},cs={cacheControl:"3600",contentType:"text/plain;charset=UTF-8",upsert:!1},_t=class{constructor(e,n={},t,s){this.url=e,this.headers=n,this.bucketId=t,this.fetch=Kt(s)}uploadOrUpdate(e,n,t,s){return H(this,void 0,void 0,function*(){try{let i,o=Object.assign(Object.assign({},cs),s),c=Object.assign(Object.assign({},this.headers),e==="POST"&&{"x-upsert":String(o.upsert)}),a=o.metadata;typeof Blob<"u"&&t instanceof Blob?(i=new FormData,i.append("cacheControl",o.cacheControl),i.append("",t),a&&i.append("metadata",this.encodeMetadata(a))):typeof FormData<"u"&&t instanceof FormData?(i=t,i.append("cacheControl",o.cacheControl),a&&i.append("metadata",this.encodeMetadata(a))):(i=t,c["cache-control"]=`max-age=${o.cacheControl}`,c["content-type"]=o.contentType,a&&(c["x-metadata"]=this.toBase64(this.encodeMetadata(a)))),s?.headers&&(c=Object.assign(Object.assign({},c),s.headers));let u=this._removeEmptyFolders(n),l=this._getFinalPath(u),d=yield this.fetch(`${this.url}/object/${l}`,Object.assign({method:e,body:i,headers:c},o?.duplex?{duplex:o.duplex}:{})),p=yield d.json();return d.ok?{data:{path:u,id:p.Id,fullPath:p.Key},error:null}:{data:null,error:p}}catch(i){if(N(i))return{data:null,error:i};throw i}})}upload(e,n,t){return H(this,void 0,void 0,function*(){return this.uploadOrUpdate("POST",e,n,t)})}uploadToSignedUrl(e,n,t,s){return H(this,void 0,void 0,function*(){let i=this._removeEmptyFolders(e),o=this._getFinalPath(i),c=new URL(this.url+`/object/upload/sign/${o}`);c.searchParams.set("token",n);try{let a,u=Object.assign({upsert:cs.upsert},s),l=Object.assign(Object.assign({},this.headers),{"x-upsert":String(u.upsert)});typeof Blob<"u"&&t instanceof Blob?(a=new FormData,a.append("cacheControl",u.cacheControl),a.append("",t)):typeof FormData<"u"&&t instanceof FormData?(a=t,a.append("cacheControl",u.cacheControl)):(a=t,l["cache-control"]=`max-age=${u.cacheControl}`,l["content-type"]=u.contentType);let d=yield this.fetch(c.toString(),{method:"PUT",body:a,headers:l}),p=yield d.json();return d.ok?{data:{path:i,fullPath:p.Key},error:null}:{data:null,error:p}}catch(a){if(N(a))return{data:null,error:a};throw a}})}createSignedUploadUrl(e,n){return H(this,void 0,void 0,function*(){try{let t=this._getFinalPath(e),s=Object.assign({},this.headers);n?.upsert&&(s["x-upsert"]="true");let i=yield ie(this.fetch,`${this.url}/object/upload/sign/${t}`,{},{headers:s}),o=new URL(this.url+i.url),c=o.searchParams.get("token");if(!c)throw new We("No token returned by API");return{data:{signedUrl:o.toString(),path:e,token:c},error:null}}catch(t){if(N(t))return{data:null,error:t};throw t}})}update(e,n,t){return H(this,void 0,void 0,function*(){return this.uploadOrUpdate("PUT",e,n,t)})}move(e,n,t){return H(this,void 0,void 0,function*(){try{return{data:yield ie(this.fetch,`${this.url}/object/move`,{bucketId:this.bucketId,sourceKey:e,destinationKey:n,destinationBucket:t?.destinationBucket},{headers:this.headers}),error:null}}catch(s){if(N(s))return{data:null,error:s};throw s}})}copy(e,n,t){return H(this,void 0,void 0,function*(){try{return{data:{path:(yield ie(this.fetch,`${this.url}/object/copy`,{bucketId:this.bucketId,sourceKey:e,destinationKey:n,destinationBucket:t?.destinationBucket},{headers:this.headers})).Key},error:null}}catch(s){if(N(s))return{data:null,error:s};throw s}})}createSignedUrl(e,n,t){return H(this,void 0,void 0,function*(){try{let s=this._getFinalPath(e),i=yield ie(this.fetch,`${this.url}/object/sign/${s}`,Object.assign({expiresIn:n},t?.transform?{transform:t.transform}:{}),{headers:this.headers}),o=t?.download?`&download=${t.download===!0?"":t.download}`:"";return i={signedUrl:encodeURI(`${this.url}${i.signedURL}${o}`)},{data:i,error:null}}catch(s){if(N(s))return{data:null,error:s};throw s}})}createSignedUrls(e,n,t){return H(this,void 0,void 0,function*(){try{let s=yield ie(this.fetch,`${this.url}/object/sign/${this.bucketId}`,{expiresIn:n,paths:e},{headers:this.headers}),i=t?.download?`&download=${t.download===!0?"":t.download}`:"";return{data:s.map(o=>Object.assign(Object.assign({},o),{signedUrl:o.signedURL?encodeURI(`${this.url}${o.signedURL}${i}`):null})),error:null}}catch(s){if(N(s))return{data:null,error:s};throw s}})}download(e,n){return H(this,void 0,void 0,function*(){let s=typeof n?.transform<"u"?"render/image/authenticated":"object",i=this.transformOptsToQueryString(n?.transform||{}),o=i?`?${i}`:"";try{let c=this._getFinalPath(e);return{data:yield(yield Ge(this.fetch,`${this.url}/${s}/${c}${o}`,{headers:this.headers,noResolveJson:!0})).blob(),error:null}}catch(c){if(N(c))return{data:null,error:c};throw c}})}info(e){return H(this,void 0,void 0,function*(){let n=this._getFinalPath(e);try{let t=yield Ge(this.fetch,`${this.url}/object/info/${n}`,{headers:this.headers});return{data:Yt(t),error:null}}catch(t){if(N(t))return{data:null,error:t};throw t}})}exists(e){return H(this,void 0,void 0,function*(){let n=this._getFinalPath(e);try{return yield as(this.fetch,`${this.url}/object/${n}`,{headers:this.headers}),{data:!0,error:null}}catch(t){if(N(t)&&t instanceof Ie){let s=t.originalError;if([400,404].includes(s?.status))return{data:!1,error:t}}throw t}})}getPublicUrl(e,n){let t=this._getFinalPath(e),s=[],i=n?.download?`download=${n.download===!0?"":n.download}`:"";i!==""&&s.push(i);let c=typeof n?.transform<"u"?"render/image":"object",a=this.transformOptsToQueryString(n?.transform||{});a!==""&&s.push(a);let u=s.join("&");return u!==""&&(u=`?${u}`),{data:{publicUrl:encodeURI(`${this.url}/${c}/public/${t}${u}`)}}}remove(e){return H(this,void 0,void 0,function*(){try{return{data:yield Jt(this.fetch,`${this.url}/object/${this.bucketId}`,{prefixes:e},{headers:this.headers}),error:null}}catch(n){if(N(n))return{data:null,error:n};throw n}})}list(e,n,t){return H(this,void 0,void 0,function*(){try{let s=Object.assign(Object.assign(Object.assign({},Eo),n),{prefix:e||""});return{data:yield ie(this.fetch,`${this.url}/object/list/${this.bucketId}`,s,{headers:this.headers},t),error:null}}catch(s){if(N(s))return{data:null,error:s};throw s}})}encodeMetadata(e){return JSON.stringify(e)}toBase64(e){return typeof Buffer<"u"?Buffer.from(e).toString("base64"):btoa(e)}_getFinalPath(e){return`${this.bucketId}/${e}`}_removeEmptyFolders(e){return e.replace(/^\/|\/$/g,"").replace(/\/+/g,"/")}transformOptsToQueryString(e){let n=[];return e.width&&n.push(`width=${e.width}`),e.height&&n.push(`height=${e.height}`),e.resize&&n.push(`resize=${e.resize}`),e.format&&n.push(`format=${e.format}`),e.quality&&n.push(`quality=${e.quality}`),n.join("&")}};var ls="2.7.0";var us={"X-Client-Info":`storage-js/${ls}`};var Qe=function(r,e,n,t){function s(i){return i instanceof n?i:new n(function(o){o(i)})}return new(n||(n=Promise))(function(i,o){function c(l){try{u(t.next(l))}catch(d){o(d)}}function a(l){try{u(t.throw(l))}catch(d){o(d)}}function u(l){l.done?i(l.value):s(l.value).then(c,a)}u((t=t.apply(r,e||[])).next())})},ft=class{constructor(e,n={},t){this.url=e,this.headers=Object.assign(Object.assign({},us),n),this.fetch=Kt(t)}listBuckets(){return Qe(this,void 0,void 0,function*(){try{return{data:yield Ge(this.fetch,`${this.url}/bucket`,{headers:this.headers}),error:null}}catch(e){if(N(e))return{data:null,error:e};throw e}})}getBucket(e){return Qe(this,void 0,void 0,function*(){try{return{data:yield Ge(this.fetch,`${this.url}/bucket/${e}`,{headers:this.headers}),error:null}}catch(n){if(N(n))return{data:null,error:n};throw n}})}createBucket(e,n={public:!1}){return Qe(this,void 0,void 0,function*(){try{return{data:yield ie(this.fetch,`${this.url}/bucket`,{id:e,name:e,public:n.public,file_size_limit:n.fileSizeLimit,allowed_mime_types:n.allowedMimeTypes},{headers:this.headers}),error:null}}catch(t){if(N(t))return{data:null,error:t};throw t}})}updateBucket(e,n){return Qe(this,void 0,void 0,function*(){try{return{data:yield os(this.fetch,`${this.url}/bucket/${e}`,{id:e,name:e,public:n.public,file_size_limit:n.fileSizeLimit,allowed_mime_types:n.allowedMimeTypes},{headers:this.headers}),error:null}}catch(t){if(N(t))return{data:null,error:t};throw t}})}emptyBucket(e){return Qe(this,void 0,void 0,function*(){try{return{data:yield ie(this.fetch,`${this.url}/bucket/${e}/empty`,{},{headers:this.headers}),error:null}}catch(n){if(N(n))return{data:null,error:n};throw n}})}deleteBucket(e){return Qe(this,void 0,void 0,function*(){try{return{data:yield Jt(this.fetch,`${this.url}/bucket/${e}`,{},{headers:this.headers}),error:null}}catch(n){if(N(n))return{data:null,error:n};throw n}})}};var mt=class extends ft{constructor(e,n={},t){super(e,n,t)}from(e){return new _t(this.url,this.headers,e,this.fetch)}};var ds="2.45.4";var gt="";typeof Deno<"u"?gt="deno":typeof document<"u"?gt="web":typeof navigator<"u"&&navigator.product==="ReactNative"?gt="react-native":gt="node";var wo={"X-Client-Info":`supabase-js-${gt}/${ds}`},hs={headers:wo},ps={schema:"public"},_s={autoRefreshToken:!0,persistSession:!0,detectSessionInUrl:!0,flowType:"implicit"},fs={};me();var To=function(r,e,n,t){function s(i){return i instanceof n?i:new n(function(o){o(i)})}return new(n||(n=Promise))(function(i,o){function c(l){try{u(t.next(l))}catch(d){o(d)}}function a(l){try{u(t.throw(l))}catch(d){o(d)}}function u(l){l.done?i(l.value):s(l.value).then(c,a)}u((t=t.apply(r,e||[])).next())})},So=r=>{let e;return r?e=r:typeof fetch>"u"?e=_n:e=fetch,(...n)=>e(...n)},Io=()=>typeof Headers>"u"?fn:Headers,ms=(r,e,n)=>{let t=So(n),s=Io();return(i,o)=>To(void 0,void 0,void 0,function*(){var c;let a=(c=yield e())!==null&&c!==void 0?c:r,u=new s(o?.headers);return u.has("apikey")||u.set("apikey",r),u.has("Authorization")||u.set("Authorization",`Bearer ${a}`),t(i,Object.assign(Object.assign({},o),{headers:u}))})};var xo=function(r,e,n,t){function s(i){return i instanceof n?i:new n(function(o){o(i)})}return new(n||(n=Promise))(function(i,o){function c(l){try{u(t.next(l))}catch(d){o(d)}}function a(l){try{u(t.throw(l))}catch(d){o(d)}}function u(l){l.done?i(l.value):s(l.value).then(c,a)}u((t=t.apply(r,e||[])).next())})};function gs(r){return r.replace(/\/$/,"")}function vs(r,e){let{db:n,auth:t,realtime:s,global:i}=r,{db:o,auth:c,realtime:a,global:u}=e,l={db:Object.assign(Object.assign({},o),n),auth:Object.assign(Object.assign({},c),t),realtime:Object.assign(Object.assign({},a),s),global:Object.assign(Object.assign({},u),i),accessToken:()=>xo(this,void 0,void 0,function*(){return""})};return r.accessToken?l.accessToken=r.accessToken:delete l.accessToken,l}var Zt="2.65.0";var bs="http://localhost:9999",ys="supabase.auth.token";var Es={"X-Client-Info":`gotrue-js/${Zt}`},Ln=10;var vt="X-Supabase-Api-Version",Dn={"2024-01-01":{timestamp:Date.parse("2024-01-01T00:00:00.0Z"),name:"2024-01-01"}};function ws(r){return Math.round(Date.now()/1e3)+r}function Ts(){return"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,function(r){let e=Math.random()*16|0;return(r=="x"?e:e&3|8).toString(16)})}var Y=()=>typeof document<"u",Re={tested:!1,writable:!1},ve=()=>{if(!Y())return!1;try{if(typeof globalThis.localStorage!="object")return!1}catch{return!1}if(Re.tested)return Re.writable;let r=`lswt-${Math.random()}${Math.random()}`;try{globalThis.localStorage.setItem(r,r),globalThis.localStorage.removeItem(r),Re.tested=!0,Re.writable=!0}catch{Re.tested=!0,Re.writable=!1}return Re.writable};function Xt(r){let e={},n=new URL(r);if(n.hash&&n.hash[0]==="#")try{new URLSearchParams(n.hash.substring(1)).forEach((s,i)=>{e[i]=s})}catch{}return n.searchParams.forEach((t,s)=>{e[s]=t}),e}var en=r=>{let e;return r?e=r:typeof fetch>"u"?e=(...n)=>Promise.resolve().then(()=>(me(),Ee)).then(({default:t})=>t(...n)):e=fetch,(...n)=>e(...n)},Ss=r=>typeof r=="object"&&r!==null&&"status"in r&&"ok"in r&&"json"in r&&typeof r.json=="function",Un=async(r,e,n)=>{await r.setItem(e,JSON.stringify(n))},yt=async(r,e)=>{let n=await r.getItem(e);if(!n)return null;try{return JSON.parse(n)}catch{return n}},Et=async(r,e)=>{await r.removeItem(e)};function Ro(r){let e="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",n="",t,s,i,o,c,a,u,l=0;for(r=r.replace("-","+").replace("_","/");l<r.length;)o=e.indexOf(r.charAt(l++)),c=e.indexOf(r.charAt(l++)),a=e.indexOf(r.charAt(l++)),u=e.indexOf(r.charAt(l++)),t=o<<2|c>>4,s=(c&15)<<4|a>>2,i=(a&3)<<6|u,n=n+String.fromCharCode(t),a!=64&&s!=0&&(n=n+String.fromCharCode(s)),u!=64&&i!=0&&(n=n+String.fromCharCode(i));return n}var bt=class r{constructor(){this.promise=new r.promiseConstructor((e,n)=>{this.resolve=e,this.reject=n})}};bt.promiseConstructor=Promise;function Fn(r){let e=/^([a-z0-9_-]{4})*($|[a-z0-9_-]{3}=?$|[a-z0-9_-]{2}(==)?$)$/i,n=r.split(".");if(n.length!==3)throw new Error("JWT is not valid: not a JWT structure");if(!e.test(n[1]))throw new Error("JWT is not valid: payload is not in base64url format");let t=n[1];return JSON.parse(Ro(t))}async function Is(r){return await new Promise(e=>{setTimeout(()=>e(null),r)})}function xs(r,e){return new Promise((t,s)=>{(async()=>{for(let i=0;i<1/0;i++)try{let o=await r(i);if(!e(i,null,o)){t(o);return}}catch(o){if(!e(i,o)){s(o);return}}})()})}function Oo(r){return("0"+r.toString(16)).substr(-2)}function Ao(){let e=new Uint32Array(56);if(typeof crypto>"u"){let n="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~",t=n.length,s="";for(let i=0;i<56;i++)s+=n.charAt(Math.floor(Math.random()*t));return s}return crypto.getRandomValues(e),Array.from(e,Oo).join("")}async function Co(r){let n=new TextEncoder().encode(r),t=await crypto.subtle.digest("SHA-256",n),s=new Uint8Array(t);return Array.from(s).map(i=>String.fromCharCode(i)).join("")}function No(r){return btoa(r).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}async function ko(r){if(!(typeof crypto<"u"&&typeof crypto.subtle<"u"&&typeof TextEncoder<"u"))return console.warn("WebCrypto API is not supported. Code challenge method will default to use plain instead of sha256."),r;let n=await Co(r);return No(n)}async function Oe(r,e,n=!1){let t=Ao(),s=t;n&&(s+="/PASSWORD_RECOVERY"),await Un(r,`${e}-code-verifier`,s);let i=await ko(t);return[i,t===i?"plain":"s256"]}var Po=/^2[0-9]{3}-(0[1-9]|1[0-2])-(0[1-9]|1[0-9]|2[0-9]|3[0-1])$/i;function Rs(r){let e=r.headers.get(vt);if(!e||!e.match(Po))return null;try{return new Date(`${e}T00:00:00.0Z`)}catch{return null}}var wt=class extends Error{constructor(e,n,t){super(e),this.__isAuthError=!0,this.name="AuthError",this.status=n,this.code=t}};function w(r){return typeof r=="object"&&r!==null&&"__isAuthError"in r}var tn=class extends wt{constructor(e,n,t){super(e,n,t),this.name="AuthApiError",this.status=n,this.code=t}};function Os(r){return w(r)&&r.name==="AuthApiError"}var Ye=class extends wt{constructor(e,n){super(e),this.name="AuthUnknownError",this.originalError=n}},de=class extends wt{constructor(e,n,t,s){super(e,t,s),this.name=n,this.status=t}},K=class extends de{constructor(){super("Auth session missing!","AuthSessionMissingError",400,void 0)}};function As(r){return w(r)&&r.name==="AuthSessionMissingError"}var Ke=class extends de{constructor(){super("Auth session or user missing","AuthInvalidTokenResponseError",500,void 0)}},Ae=class extends de{constructor(e){super(e,"AuthInvalidCredentialsError",400,void 0)}},Ce=class extends de{constructor(e,n=null){super(e,"AuthImplicitGrantRedirectError",500,void 0),this.details=null,this.details=n}toJSON(){return{name:this.name,message:this.message,status:this.status,details:this.details}}},Tt=class extends de{constructor(e,n=null){super(e,"AuthPKCEGrantCodeExchangeError",500,void 0),this.details=null,this.details=n}toJSON(){return{name:this.name,message:this.message,status:this.status,details:this.details}}},Je=class extends de{constructor(e,n){super(e,"AuthRetryableFetchError",n,void 0)}};function nn(r){return w(r)&&r.name==="AuthRetryableFetchError"}var St=class extends de{constructor(e,n,t){super(e,"AuthWeakPasswordError",n,"weak_password"),this.reasons=t}};var Lo=function(r,e){var n={};for(var t in r)Object.prototype.hasOwnProperty.call(r,t)&&e.indexOf(t)<0&&(n[t]=r[t]);if(r!=null&&typeof Object.getOwnPropertySymbols=="function")for(var s=0,t=Object.getOwnPropertySymbols(r);s<t.length;s++)e.indexOf(t[s])<0&&Object.prototype.propertyIsEnumerable.call(r,t[s])&&(n[t[s]]=r[t[s]]);return n},Ne=r=>r.msg||r.message||r.error_description||r.error||JSON.stringify(r),Do=[502,503,504];async function Cs(r){var e;if(!Ss(r))throw new Je(Ne(r),0);if(Do.includes(r.status))throw new Je(Ne(r),r.status);let n;try{n=await r.json()}catch(i){throw new Ye(Ne(i),i)}let t,s=Rs(r);if(s&&s.getTime()>=Dn["2024-01-01"].timestamp&&typeof n=="object"&&n&&typeof n.code=="string"?t=n.code:typeof n=="object"&&n&&typeof n.error_code=="string"&&(t=n.error_code),t){if(t==="weak_password")throw new St(Ne(n),r.status,((e=n.weak_password)===null||e===void 0?void 0:e.reasons)||[]);if(t==="session_not_found")throw new K}else if(typeof n=="object"&&n&&typeof n.weak_password=="object"&&n.weak_password&&Array.isArray(n.weak_password.reasons)&&n.weak_password.reasons.length&&n.weak_password.reasons.reduce((i,o)=>i&&typeof o=="string",!0))throw new St(Ne(n),r.status,n.weak_password.reasons);throw new tn(Ne(n),r.status||500,t)}var Uo=(r,e,n,t)=>{let s={method:r,headers:e?.headers||{}};return r==="GET"?s:(s.headers=Object.assign({"Content-Type":"application/json;charset=UTF-8"},e?.headers),s.body=JSON.stringify(t),Object.assign(Object.assign({},s),n))};async function T(r,e,n,t){var s;let i=Object.assign({},t?.headers);i[vt]||(i[vt]=Dn["2024-01-01"].name),t?.jwt&&(i.Authorization=`Bearer ${t.jwt}`);let o=(s=t?.query)!==null&&s!==void 0?s:{};t?.redirectTo&&(o.redirect_to=t.redirectTo);let c=Object.keys(o).length?"?"+new URLSearchParams(o).toString():"",a=await Fo(r,e,n+c,{headers:i,noResolveJson:t?.noResolveJson},{},t?.body);return t?.xform?t?.xform(a):{data:Object.assign({},a),error:null}}async function Fo(r,e,n,t,s,i){let o=Uo(e,t,s,i),c;try{c=await r(n,Object.assign({},o))}catch(a){throw console.error(a),new Je(Ne(a),0)}if(c.ok||await Cs(c),t?.noResolveJson)return c;try{return await c.json()}catch(a){await Cs(a)}}function he(r){var e;let n=null;$o(r)&&(n=Object.assign({},r),r.expires_at||(n.expires_at=ws(r.expires_in)));let t=(e=r.user)!==null&&e!==void 0?e:r;return{data:{session:n,user:t},error:null}}function $n(r){let e=he(r);return!e.error&&r.weak_password&&typeof r.weak_password=="object"&&Array.isArray(r.weak_password.reasons)&&r.weak_password.reasons.length&&r.weak_password.message&&typeof r.weak_password.message=="string"&&r.weak_password.reasons.reduce((n,t)=>n&&typeof t=="string",!0)&&(e.data.weak_password=r.weak_password),e}function oe(r){var e;return{data:{user:(e=r.user)!==null&&e!==void 0?e:r},error:null}}function Ns(r){return{data:r,error:null}}function ks(r){let{action_link:e,email_otp:n,hashed_token:t,redirect_to:s,verification_type:i}=r,o=Lo(r,["action_link","email_otp","hashed_token","redirect_to","verification_type"]),c={action_link:e,email_otp:n,hashed_token:t,redirect_to:s,verification_type:i},a=Object.assign({},o);return{data:{properties:c,user:a},error:null}}function Ps(r){return r}function $o(r){return r.access_token&&r.refresh_token&&r.expires_in}var jo=function(r,e){var n={};for(var t in r)Object.prototype.hasOwnProperty.call(r,t)&&e.indexOf(t)<0&&(n[t]=r[t]);if(r!=null&&typeof Object.getOwnPropertySymbols=="function")for(var s=0,t=Object.getOwnPropertySymbols(r);s<t.length;s++)e.indexOf(t[s])<0&&Object.prototype.propertyIsEnumerable.call(r,t[s])&&(n[t[s]]=r[t[s]]);return n},ke=class{constructor({url:e="",headers:n={},fetch:t}){this.url=e,this.headers=n,this.fetch=en(t),this.mfa={listFactors:this._listFactors.bind(this),deleteFactor:this._deleteFactor.bind(this)}}async signOut(e,n="global"){try{return await T(this.fetch,"POST",`${this.url}/logout?scope=${n}`,{headers:this.headers,jwt:e,noResolveJson:!0}),{data:null,error:null}}catch(t){if(w(t))return{data:null,error:t};throw t}}async inviteUserByEmail(e,n={}){try{return await T(this.fetch,"POST",`${this.url}/invite`,{body:{email:e,data:n.data},headers:this.headers,redirectTo:n.redirectTo,xform:oe})}catch(t){if(w(t))return{data:{user:null},error:t};throw t}}async generateLink(e){try{let{options:n}=e,t=jo(e,["options"]),s=Object.assign(Object.assign({},t),n);return"newEmail"in t&&(s.new_email=t?.newEmail,delete s.newEmail),await T(this.fetch,"POST",`${this.url}/admin/generate_link`,{body:s,headers:this.headers,xform:ks,redirectTo:n?.redirectTo})}catch(n){if(w(n))return{data:{properties:null,user:null},error:n};throw n}}async createUser(e){try{return await T(this.fetch,"POST",`${this.url}/admin/users`,{body:e,headers:this.headers,xform:oe})}catch(n){if(w(n))return{data:{user:null},error:n};throw n}}async listUsers(e){var n,t,s,i,o,c,a;try{let u={nextPage:null,lastPage:0,total:0},l=await T(this.fetch,"GET",`${this.url}/admin/users`,{headers:this.headers,noResolveJson:!0,query:{page:(t=(n=e?.page)===null||n===void 0?void 0:n.toString())!==null&&t!==void 0?t:"",per_page:(i=(s=e?.perPage)===null||s===void 0?void 0:s.toString())!==null&&i!==void 0?i:""},xform:Ps});if(l.error)throw l.error;let d=await l.json(),p=(o=l.headers.get("x-total-count"))!==null&&o!==void 0?o:0,m=(a=(c=l.headers.get("link"))===null||c===void 0?void 0:c.split(","))!==null&&a!==void 0?a:[];return m.length>0&&(m.forEach(g=>{let E=parseInt(g.split(";")[0].split("=")[1].substring(0,1)),b=JSON.parse(g.split(";")[1].split("=")[1]);u[`${b}Page`]=E}),u.total=parseInt(p)),{data:Object.assign(Object.assign({},d),u),error:null}}catch(u){if(w(u))return{data:{users:[]},error:u};throw u}}async getUserById(e){try{return await T(this.fetch,"GET",`${this.url}/admin/users/${e}`,{headers:this.headers,xform:oe})}catch(n){if(w(n))return{data:{user:null},error:n};throw n}}async updateUserById(e,n){try{return await T(this.fetch,"PUT",`${this.url}/admin/users/${e}`,{body:n,headers:this.headers,xform:oe})}catch(t){if(w(t))return{data:{user:null},error:t};throw t}}async deleteUser(e,n=!1){try{return await T(this.fetch,"DELETE",`${this.url}/admin/users/${e}`,{headers:this.headers,body:{should_soft_delete:n},xform:oe})}catch(t){if(w(t))return{data:{user:null},error:t};throw t}}async _listFactors(e){try{let{data:n,error:t}=await T(this.fetch,"GET",`${this.url}/admin/users/${e.userId}/factors`,{headers:this.headers,xform:s=>({data:{factors:s},error:null})});return{data:n,error:t}}catch(n){if(w(n))return{data:null,error:n};throw n}}async _deleteFactor(e){try{return{data:await T(this.fetch,"DELETE",`${this.url}/admin/users/${e.userId}/factors/${e.id}`,{headers:this.headers}),error:null}}catch(n){if(w(n))return{data:null,error:n};throw n}}};var Ls={getItem:r=>ve()?globalThis.localStorage.getItem(r):null,setItem:(r,e)=>{ve()&&globalThis.localStorage.setItem(r,e)},removeItem:r=>{ve()&&globalThis.localStorage.removeItem(r)}};function jn(r={}){return{getItem:e=>r[e]||null,setItem:(e,n)=>{r[e]=n},removeItem:e=>{delete r[e]}}}function Ds(){if(typeof globalThis!="object")try{Object.defineProperty(Object.prototype,"__magic__",{get:function(){return this},configurable:!0}),__magic__.globalThis=__magic__,delete Object.prototype.__magic__}catch{typeof self<"u"&&(self.globalThis=self)}}var Pe={debug:!!(globalThis&&ve()&&globalThis.localStorage&&globalThis.localStorage.getItem("supabase.gotrue-js.locks.debug")==="true")},It=class extends Error{constructor(e){super(e),this.isAcquireTimeout=!0}},rn=class extends It{};async function Bn(r,e,n){Pe.debug&&console.log("@supabase/gotrue-js: navigatorLock: acquire lock",r,e);let t=new globalThis.AbortController;return e>0&&setTimeout(()=>{t.abort(),Pe.debug&&console.log("@supabase/gotrue-js: navigatorLock acquire timed out",r)},e),await globalThis.navigator.locks.request(r,e===0?{mode:"exclusive",ifAvailable:!0}:{mode:"exclusive",signal:t.signal},async s=>{if(s){Pe.debug&&console.log("@supabase/gotrue-js: navigatorLock: acquired",r,s.name);try{return await n()}finally{Pe.debug&&console.log("@supabase/gotrue-js: navigatorLock: released",r,s.name)}}else{if(e===0)throw Pe.debug&&console.log("@supabase/gotrue-js: navigatorLock: not immediately available",r),new rn(`Acquiring an exclusive Navigator LockManager lock "${r}" immediately failed`);if(Pe.debug)try{let i=await globalThis.navigator.locks.query();console.log("@supabase/gotrue-js: Navigator LockManager state",JSON.stringify(i,null,"  "))}catch(i){console.warn("@supabase/gotrue-js: Error when querying Navigator LockManager state",i)}return console.warn("@supabase/gotrue-js: Navigator LockManager returned a null lock when using #request without ifAvailable set to true, it appears this browser is not following the LockManager spec https://developer.mozilla.org/en-US/docs/Web/API/LockManager/request"),await n()}})}Ds();var Bo={url:bs,storageKey:ys,autoRefreshToken:!0,persistSession:!0,detectSessionInUrl:!0,headers:Es,flowType:"implicit",debug:!1,hasCustomAuthorizationHeader:!1},xt=30*1e3,Us=3;async function Fs(r,e,n){return await n()}var Le=class r{constructor(e){var n,t;this.memoryStorage=null,this.stateChangeEmitters=new Map,this.autoRefreshTicker=null,this.visibilityChangedCallback=null,this.refreshingDeferred=null,this.initializePromise=null,this.detectSessionInUrl=!0,this.hasCustomAuthorizationHeader=!1,this.suppressGetSessionWarning=!1,this.lockAcquired=!1,this.pendingInLock=[],this.broadcastChannel=null,this.logger=console.log,this.instanceID=r.nextInstanceID,r.nextInstanceID+=1,this.instanceID>0&&Y()&&console.warn("Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.");let s=Object.assign(Object.assign({},Bo),e);if(this.logDebugMessages=!!s.debug,typeof s.debug=="function"&&(this.logger=s.debug),this.persistSession=s.persistSession,this.storageKey=s.storageKey,this.autoRefreshToken=s.autoRefreshToken,this.admin=new ke({url:s.url,headers:s.headers,fetch:s.fetch}),this.url=s.url,this.headers=s.headers,this.fetch=en(s.fetch),this.lock=s.lock||Fs,this.detectSessionInUrl=s.detectSessionInUrl,this.flowType=s.flowType,this.hasCustomAuthorizationHeader=s.hasCustomAuthorizationHeader,s.lock?this.lock=s.lock:Y()&&(!((n=globalThis?.navigator)===null||n===void 0)&&n.locks)?this.lock=Bn:this.lock=Fs,this.mfa={verify:this._verify.bind(this),enroll:this._enroll.bind(this),unenroll:this._unenroll.bind(this),challenge:this._challenge.bind(this),listFactors:this._listFactors.bind(this),challengeAndVerify:this._challengeAndVerify.bind(this),getAuthenticatorAssuranceLevel:this._getAuthenticatorAssuranceLevel.bind(this)},this.persistSession?s.storage?this.storage=s.storage:ve()?this.storage=Ls:(this.memoryStorage={},this.storage=jn(this.memoryStorage)):(this.memoryStorage={},this.storage=jn(this.memoryStorage)),Y()&&globalThis.BroadcastChannel&&this.persistSession&&this.storageKey){try{this.broadcastChannel=new globalThis.BroadcastChannel(this.storageKey)}catch(i){console.error("Failed to create a new BroadcastChannel, multi-tab state changes will not be available",i)}(t=this.broadcastChannel)===null||t===void 0||t.addEventListener("message",async i=>{this._debug("received broadcast notification from other tab or client",i),await this._notifyAllSubscribers(i.data.event,i.data.session,!1)})}this.initialize()}_debug(...e){return this.logDebugMessages&&this.logger(`GoTrueClient@${this.instanceID} (${Zt}) ${new Date().toISOString()}`,...e),this}async initialize(){return this.initializePromise?await this.initializePromise:(this.initializePromise=(async()=>await this._acquireLock(-1,async()=>await this._initialize()))(),await this.initializePromise)}async _initialize(){try{let e=Y()?await this._isPKCEFlow():!1;if(this._debug("#_initialize()","begin","is PKCE flow",e),e||this.detectSessionInUrl&&this._isImplicitGrantFlow()){let{data:n,error:t}=await this._getSessionFromURL(e);if(t)return this._debug("#_initialize()","error detecting session from URL",t),t?.message==="Identity is already linked"||t?.message==="Identity is already linked to another user"?{error:t}:(await this._removeSession(),{error:t});let{session:s,redirectType:i}=n;return this._debug("#_initialize()","detected session in URL",s,"redirect type",i),await this._saveSession(s),setTimeout(async()=>{i==="recovery"?await this._notifyAllSubscribers("PASSWORD_RECOVERY",s):await this._notifyAllSubscribers("SIGNED_IN",s)},0),{error:null}}return await this._recoverAndRefresh(),{error:null}}catch(e){return w(e)?{error:e}:{error:new Ye("Unexpected error during initialization",e)}}finally{await this._handleVisibilityChange(),this._debug("#_initialize()","end")}}async signInAnonymously(e){var n,t,s;try{let i=await T(this.fetch,"POST",`${this.url}/signup`,{headers:this.headers,body:{data:(t=(n=e?.options)===null||n===void 0?void 0:n.data)!==null&&t!==void 0?t:{},gotrue_meta_security:{captcha_token:(s=e?.options)===null||s===void 0?void 0:s.captchaToken}},xform:he}),{data:o,error:c}=i;if(c||!o)return{data:{user:null,session:null},error:c};let a=o.session,u=o.user;return o.session&&(await this._saveSession(o.session),await this._notifyAllSubscribers("SIGNED_IN",a)),{data:{user:u,session:a},error:null}}catch(i){if(w(i))return{data:{user:null,session:null},error:i};throw i}}async signUp(e){var n,t,s;try{let i;if("email"in e){let{email:l,password:d,options:p}=e,m=null,g=null;this.flowType==="pkce"&&([m,g]=await Oe(this.storage,this.storageKey)),i=await T(this.fetch,"POST",`${this.url}/signup`,{headers:this.headers,redirectTo:p?.emailRedirectTo,body:{email:l,password:d,data:(n=p?.data)!==null&&n!==void 0?n:{},gotrue_meta_security:{captcha_token:p?.captchaToken},code_challenge:m,code_challenge_method:g},xform:he})}else if("phone"in e){let{phone:l,password:d,options:p}=e;i=await T(this.fetch,"POST",`${this.url}/signup`,{headers:this.headers,body:{phone:l,password:d,data:(t=p?.data)!==null&&t!==void 0?t:{},channel:(s=p?.channel)!==null&&s!==void 0?s:"sms",gotrue_meta_security:{captcha_token:p?.captchaToken}},xform:he})}else throw new Ae("You must provide either an email or phone number and a password");let{data:o,error:c}=i;if(c||!o)return{data:{user:null,session:null},error:c};let a=o.session,u=o.user;return o.session&&(await this._saveSession(o.session),await this._notifyAllSubscribers("SIGNED_IN",a)),{data:{user:u,session:a},error:null}}catch(i){if(w(i))return{data:{user:null,session:null},error:i};throw i}}async signInWithPassword(e){try{let n;if("email"in e){let{email:i,password:o,options:c}=e;n=await T(this.fetch,"POST",`${this.url}/token?grant_type=password`,{headers:this.headers,body:{email:i,password:o,gotrue_meta_security:{captcha_token:c?.captchaToken}},xform:$n})}else if("phone"in e){let{phone:i,password:o,options:c}=e;n=await T(this.fetch,"POST",`${this.url}/token?grant_type=password`,{headers:this.headers,body:{phone:i,password:o,gotrue_meta_security:{captcha_token:c?.captchaToken}},xform:$n})}else throw new Ae("You must provide either an email or phone number and a password");let{data:t,error:s}=n;return s?{data:{user:null,session:null},error:s}:!t||!t.session||!t.user?{data:{user:null,session:null},error:new Ke}:(t.session&&(await this._saveSession(t.session),await this._notifyAllSubscribers("SIGNED_IN",t.session)),{data:Object.assign({user:t.user,session:t.session},t.weak_password?{weakPassword:t.weak_password}:null),error:s})}catch(n){if(w(n))return{data:{user:null,session:null},error:n};throw n}}async signInWithOAuth(e){var n,t,s,i;return await this._handleProviderSignIn(e.provider,{redirectTo:(n=e.options)===null||n===void 0?void 0:n.redirectTo,scopes:(t=e.options)===null||t===void 0?void 0:t.scopes,queryParams:(s=e.options)===null||s===void 0?void 0:s.queryParams,skipBrowserRedirect:(i=e.options)===null||i===void 0?void 0:i.skipBrowserRedirect})}async exchangeCodeForSession(e){return await this.initializePromise,this._acquireLock(-1,async()=>this._exchangeCodeForSession(e))}async _exchangeCodeForSession(e){let n=await yt(this.storage,`${this.storageKey}-code-verifier`),[t,s]=(n??"").split("/");try{let{data:i,error:o}=await T(this.fetch,"POST",`${this.url}/token?grant_type=pkce`,{headers:this.headers,body:{auth_code:e,code_verifier:t},xform:he});if(await Et(this.storage,`${this.storageKey}-code-verifier`),o)throw o;return!i||!i.session||!i.user?{data:{user:null,session:null,redirectType:null},error:new Ke}:(i.session&&(await this._saveSession(i.session),await this._notifyAllSubscribers("SIGNED_IN",i.session)),{data:Object.assign(Object.assign({},i),{redirectType:s??null}),error:o})}catch(i){if(w(i))return{data:{user:null,session:null,redirectType:null},error:i};throw i}}async signInWithIdToken(e){try{let{options:n,provider:t,token:s,access_token:i,nonce:o}=e,c=await T(this.fetch,"POST",`${this.url}/token?grant_type=id_token`,{headers:this.headers,body:{provider:t,id_token:s,access_token:i,nonce:o,gotrue_meta_security:{captcha_token:n?.captchaToken}},xform:he}),{data:a,error:u}=c;return u?{data:{user:null,session:null},error:u}:!a||!a.session||!a.user?{data:{user:null,session:null},error:new Ke}:(a.session&&(await this._saveSession(a.session),await this._notifyAllSubscribers("SIGNED_IN",a.session)),{data:a,error:u})}catch(n){if(w(n))return{data:{user:null,session:null},error:n};throw n}}async signInWithOtp(e){var n,t,s,i,o;try{if("email"in e){let{email:c,options:a}=e,u=null,l=null;this.flowType==="pkce"&&([u,l]=await Oe(this.storage,this.storageKey));let{error:d}=await T(this.fetch,"POST",`${this.url}/otp`,{headers:this.headers,body:{email:c,data:(n=a?.data)!==null&&n!==void 0?n:{},create_user:(t=a?.shouldCreateUser)!==null&&t!==void 0?t:!0,gotrue_meta_security:{captcha_token:a?.captchaToken},code_challenge:u,code_challenge_method:l},redirectTo:a?.emailRedirectTo});return{data:{user:null,session:null},error:d}}if("phone"in e){let{phone:c,options:a}=e,{data:u,error:l}=await T(this.fetch,"POST",`${this.url}/otp`,{headers:this.headers,body:{phone:c,data:(s=a?.data)!==null&&s!==void 0?s:{},create_user:(i=a?.shouldCreateUser)!==null&&i!==void 0?i:!0,gotrue_meta_security:{captcha_token:a?.captchaToken},channel:(o=a?.channel)!==null&&o!==void 0?o:"sms"}});return{data:{user:null,session:null,messageId:u?.message_id},error:l}}throw new Ae("You must provide either an email or phone number.")}catch(c){if(w(c))return{data:{user:null,session:null},error:c};throw c}}async verifyOtp(e){var n,t;try{let s,i;"options"in e&&(s=(n=e.options)===null||n===void 0?void 0:n.redirectTo,i=(t=e.options)===null||t===void 0?void 0:t.captchaToken);let{data:o,error:c}=await T(this.fetch,"POST",`${this.url}/verify`,{headers:this.headers,body:Object.assign(Object.assign({},e),{gotrue_meta_security:{captcha_token:i}}),redirectTo:s,xform:he});if(c)throw c;if(!o)throw new Error("An error occurred on token verification.");let a=o.session,u=o.user;return a?.access_token&&(await this._saveSession(a),await this._notifyAllSubscribers(e.type=="recovery"?"PASSWORD_RECOVERY":"SIGNED_IN",a)),{data:{user:u,session:a},error:null}}catch(s){if(w(s))return{data:{user:null,session:null},error:s};throw s}}async signInWithSSO(e){var n,t,s;try{let i=null,o=null;return this.flowType==="pkce"&&([i,o]=await Oe(this.storage,this.storageKey)),await T(this.fetch,"POST",`${this.url}/sso`,{body:Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({},"providerId"in e?{provider_id:e.providerId}:null),"domain"in e?{domain:e.domain}:null),{redirect_to:(t=(n=e.options)===null||n===void 0?void 0:n.redirectTo)!==null&&t!==void 0?t:void 0}),!((s=e?.options)===null||s===void 0)&&s.captchaToken?{gotrue_meta_security:{captcha_token:e.options.captchaToken}}:null),{skip_http_redirect:!0,code_challenge:i,code_challenge_method:o}),headers:this.headers,xform:Ns})}catch(i){if(w(i))return{data:null,error:i};throw i}}async reauthenticate(){return await this.initializePromise,await this._acquireLock(-1,async()=>await this._reauthenticate())}async _reauthenticate(){try{return await this._useSession(async e=>{let{data:{session:n},error:t}=e;if(t)throw t;if(!n)throw new K;let{error:s}=await T(this.fetch,"GET",`${this.url}/reauthenticate`,{headers:this.headers,jwt:n.access_token});return{data:{user:null,session:null},error:s}})}catch(e){if(w(e))return{data:{user:null,session:null},error:e};throw e}}async resend(e){try{let n=`${this.url}/resend`;if("email"in e){let{email:t,type:s,options:i}=e,{error:o}=await T(this.fetch,"POST",n,{headers:this.headers,body:{email:t,type:s,gotrue_meta_security:{captcha_token:i?.captchaToken}},redirectTo:i?.emailRedirectTo});return{data:{user:null,session:null},error:o}}else if("phone"in e){let{phone:t,type:s,options:i}=e,{data:o,error:c}=await T(this.fetch,"POST",n,{headers:this.headers,body:{phone:t,type:s,gotrue_meta_security:{captcha_token:i?.captchaToken}}});return{data:{user:null,session:null,messageId:o?.message_id},error:c}}throw new Ae("You must provide either an email or phone number and a type")}catch(n){if(w(n))return{data:{user:null,session:null},error:n};throw n}}async getSession(){return await this.initializePromise,await this._acquireLock(-1,async()=>this._useSession(async n=>n))}async _acquireLock(e,n){this._debug("#_acquireLock","begin",e);try{if(this.lockAcquired){let t=this.pendingInLock.length?this.pendingInLock[this.pendingInLock.length-1]:Promise.resolve(),s=(async()=>(await t,await n()))();return this.pendingInLock.push((async()=>{try{await s}catch{}})()),s}return await this.lock(`lock:${this.storageKey}`,e,async()=>{this._debug("#_acquireLock","lock acquired for storage key",this.storageKey);try{this.lockAcquired=!0;let t=n();for(this.pendingInLock.push((async()=>{try{await t}catch{}})()),await t;this.pendingInLock.length;){let s=[...this.pendingInLock];await Promise.all(s),this.pendingInLock.splice(0,s.length)}return await t}finally{this._debug("#_acquireLock","lock released for storage key",this.storageKey),this.lockAcquired=!1}})}finally{this._debug("#_acquireLock","end")}}async _useSession(e){this._debug("#_useSession","begin");try{let n=await this.__loadSession();return await e(n)}finally{this._debug("#_useSession","end")}}async __loadSession(){this._debug("#__loadSession()","begin"),this.lockAcquired||this._debug("#__loadSession()","used outside of an acquired lock!",new Error().stack);try{let e=null,n=await yt(this.storage,this.storageKey);if(this._debug("#getSession()","session from storage",n),n!==null&&(this._isValidSession(n)?e=n:(this._debug("#getSession()","session from storage is not valid"),await this._removeSession())),!e)return{data:{session:null},error:null};let t=e.expires_at?e.expires_at<=Date.now()/1e3:!1;if(this._debug("#__loadSession()",`session has${t?"":" not"} expired`,"expires_at",e.expires_at),!t){if(this.storage.isServer){let o=this.suppressGetSessionWarning;e=new Proxy(e,{get:(a,u,l)=>(!o&&u==="user"&&(console.warn("Using the user object as returned from supabase.auth.getSession() or from some supabase.auth.onAuthStateChange() events could be insecure! This value comes directly from the storage medium (usually cookies on the server) and many not be authentic. Use supabase.auth.getUser() instead which authenticates the data by contacting the Supabase Auth server."),o=!0,this.suppressGetSessionWarning=!0),Reflect.get(a,u,l))})}return{data:{session:e},error:null}}let{session:s,error:i}=await this._callRefreshToken(e.refresh_token);return i?{data:{session:null},error:i}:{data:{session:s},error:null}}finally{this._debug("#__loadSession()","end")}}async getUser(e){return e?await this._getUser(e):(await this.initializePromise,await this._acquireLock(-1,async()=>await this._getUser()))}async _getUser(e){try{return e?await T(this.fetch,"GET",`${this.url}/user`,{headers:this.headers,jwt:e,xform:oe}):await this._useSession(async n=>{var t,s,i;let{data:o,error:c}=n;if(c)throw c;return!(!((t=o.session)===null||t===void 0)&&t.access_token)&&!this.hasCustomAuthorizationHeader?{data:{user:null},error:new K}:await T(this.fetch,"GET",`${this.url}/user`,{headers:this.headers,jwt:(i=(s=o.session)===null||s===void 0?void 0:s.access_token)!==null&&i!==void 0?i:void 0,xform:oe})})}catch(n){if(w(n))return As(n)&&(await this._removeSession(),await Et(this.storage,`${this.storageKey}-code-verifier`),await this._notifyAllSubscribers("SIGNED_OUT",null)),{data:{user:null},error:n};throw n}}async updateUser(e,n={}){return await this.initializePromise,await this._acquireLock(-1,async()=>await this._updateUser(e,n))}async _updateUser(e,n={}){try{return await this._useSession(async t=>{let{data:s,error:i}=t;if(i)throw i;if(!s.session)throw new K;let o=s.session,c=null,a=null;this.flowType==="pkce"&&e.email!=null&&([c,a]=await Oe(this.storage,this.storageKey));let{data:u,error:l}=await T(this.fetch,"PUT",`${this.url}/user`,{headers:this.headers,redirectTo:n?.emailRedirectTo,body:Object.assign(Object.assign({},e),{code_challenge:c,code_challenge_method:a}),jwt:o.access_token,xform:oe});if(l)throw l;return o.user=u.user,await this._saveSession(o),await this._notifyAllSubscribers("USER_UPDATED",o),{data:{user:o.user},error:null}})}catch(t){if(w(t))return{data:{user:null},error:t};throw t}}_decodeJWT(e){return Fn(e)}async setSession(e){return await this.initializePromise,await this._acquireLock(-1,async()=>await this._setSession(e))}async _setSession(e){try{if(!e.access_token||!e.refresh_token)throw new K;let n=Date.now()/1e3,t=n,s=!0,i=null,o=Fn(e.access_token);if(o.exp&&(t=o.exp,s=t<=n),s){let{session:c,error:a}=await this._callRefreshToken(e.refresh_token);if(a)return{data:{user:null,session:null},error:a};if(!c)return{data:{user:null,session:null},error:null};i=c}else{let{data:c,error:a}=await this._getUser(e.access_token);if(a)throw a;i={access_token:e.access_token,refresh_token:e.refresh_token,user:c.user,token_type:"bearer",expires_in:t-n,expires_at:t},await this._saveSession(i),await this._notifyAllSubscribers("SIGNED_IN",i)}return{data:{user:i.user,session:i},error:null}}catch(n){if(w(n))return{data:{session:null,user:null},error:n};throw n}}async refreshSession(e){return await this.initializePromise,await this._acquireLock(-1,async()=>await this._refreshSession(e))}async _refreshSession(e){try{return await this._useSession(async n=>{var t;if(!e){let{data:o,error:c}=n;if(c)throw c;e=(t=o.session)!==null&&t!==void 0?t:void 0}if(!e?.refresh_token)throw new K;let{session:s,error:i}=await this._callRefreshToken(e.refresh_token);return i?{data:{user:null,session:null},error:i}:s?{data:{user:s.user,session:s},error:null}:{data:{user:null,session:null},error:null}})}catch(n){if(w(n))return{data:{user:null,session:null},error:n};throw n}}async _getSessionFromURL(e){try{if(!Y())throw new Ce("No browser detected.");if(this.flowType==="implicit"&&!this._isImplicitGrantFlow())throw new Ce("Not a valid implicit grant flow url.");if(this.flowType=="pkce"&&!e)throw new Tt("Not a valid PKCE flow url.");let n=Xt(window.location.href);if(e){if(!n.code)throw new Tt("No code detected.");let{data:U,error:P}=await this._exchangeCodeForSession(n.code);if(P)throw P;let k=new URL(window.location.href);return k.searchParams.delete("code"),window.history.replaceState(window.history.state,"",k.toString()),{data:{session:U.session,redirectType:null},error:null}}if(n.error||n.error_description||n.error_code)throw new Ce(n.error_description||"Error in URL with unspecified error_description",{error:n.error||"unspecified_error",code:n.error_code||"unspecified_code"});let{provider_token:t,provider_refresh_token:s,access_token:i,refresh_token:o,expires_in:c,expires_at:a,token_type:u}=n;if(!i||!c||!o||!u)throw new Ce("No session defined in URL");let l=Math.round(Date.now()/1e3),d=parseInt(c),p=l+d;a&&(p=parseInt(a));let m=p-l;m*1e3<=xt&&console.warn(`@supabase/gotrue-js: Session as retrieved from URL expires in ${m}s, should have been closer to ${d}s`);let g=p-d;l-g>=120?console.warn("@supabase/gotrue-js: Session as retrieved from URL was issued over 120s ago, URL could be stale",g,p,l):l-g<0&&console.warn("@supabase/gotrue-js: Session as retrieved from URL was issued in the future? Check the device clock for skew",g,p,l);let{data:E,error:b}=await this._getUser(i);if(b)throw b;let O={provider_token:t,provider_refresh_token:s,access_token:i,expires_in:d,expires_at:p,refresh_token:o,token_type:u,user:E.user};return window.location.hash="",this._debug("#_getSessionFromURL()","clearing window.location.hash"),{data:{session:O,redirectType:n.type},error:null}}catch(n){if(w(n))return{data:{session:null,redirectType:null},error:n};throw n}}_isImplicitGrantFlow(){let e=Xt(window.location.href);return!!(Y()&&(e.access_token||e.error_description))}async _isPKCEFlow(){let e=Xt(window.location.href),n=await yt(this.storage,`${this.storageKey}-code-verifier`);return!!(e.code&&n)}async signOut(e={scope:"global"}){return await this.initializePromise,await this._acquireLock(-1,async()=>await this._signOut(e))}async _signOut({scope:e}={scope:"global"}){return await this._useSession(async n=>{var t;let{data:s,error:i}=n;if(i)return{error:i};let o=(t=s.session)===null||t===void 0?void 0:t.access_token;if(o){let{error:c}=await this.admin.signOut(o,e);if(c&&!(Os(c)&&(c.status===404||c.status===401||c.status===403)))return{error:c}}return e!=="others"&&(await this._removeSession(),await Et(this.storage,`${this.storageKey}-code-verifier`),await this._notifyAllSubscribers("SIGNED_OUT",null)),{error:null}})}onAuthStateChange(e){let n=Ts(),t={id:n,callback:e,unsubscribe:()=>{this._debug("#unsubscribe()","state change callback with id removed",n),this.stateChangeEmitters.delete(n)}};return this._debug("#onAuthStateChange()","registered callback with id",n),this.stateChangeEmitters.set(n,t),(async()=>(await this.initializePromise,await this._acquireLock(-1,async()=>{this._emitInitialSession(n)})))(),{data:{subscription:t}}}async _emitInitialSession(e){return await this._useSession(async n=>{var t,s;try{let{data:{session:i},error:o}=n;if(o)throw o;await((t=this.stateChangeEmitters.get(e))===null||t===void 0?void 0:t.callback("INITIAL_SESSION",i)),this._debug("INITIAL_SESSION","callback id",e,"session",i)}catch(i){await((s=this.stateChangeEmitters.get(e))===null||s===void 0?void 0:s.callback("INITIAL_SESSION",null)),this._debug("INITIAL_SESSION","callback id",e,"error",i),console.error(i)}})}async resetPasswordForEmail(e,n={}){let t=null,s=null;this.flowType==="pkce"&&([t,s]=await Oe(this.storage,this.storageKey,!0));try{return await T(this.fetch,"POST",`${this.url}/recover`,{body:{email:e,code_challenge:t,code_challenge_method:s,gotrue_meta_security:{captcha_token:n.captchaToken}},headers:this.headers,redirectTo:n.redirectTo})}catch(i){if(w(i))return{data:null,error:i};throw i}}async getUserIdentities(){var e;try{let{data:n,error:t}=await this.getUser();if(t)throw t;return{data:{identities:(e=n.user.identities)!==null&&e!==void 0?e:[]},error:null}}catch(n){if(w(n))return{data:null,error:n};throw n}}async linkIdentity(e){var n;try{let{data:t,error:s}=await this._useSession(async i=>{var o,c,a,u,l;let{data:d,error:p}=i;if(p)throw p;let m=await this._getUrlForProvider(`${this.url}/user/identities/authorize`,e.provider,{redirectTo:(o=e.options)===null||o===void 0?void 0:o.redirectTo,scopes:(c=e.options)===null||c===void 0?void 0:c.scopes,queryParams:(a=e.options)===null||a===void 0?void 0:a.queryParams,skipBrowserRedirect:!0});return await T(this.fetch,"GET",m,{headers:this.headers,jwt:(l=(u=d.session)===null||u===void 0?void 0:u.access_token)!==null&&l!==void 0?l:void 0})});if(s)throw s;return Y()&&!(!((n=e.options)===null||n===void 0)&&n.skipBrowserRedirect)&&window.location.assign(t?.url),{data:{provider:e.provider,url:t?.url},error:null}}catch(t){if(w(t))return{data:{provider:e.provider,url:null},error:t};throw t}}async unlinkIdentity(e){try{return await this._useSession(async n=>{var t,s;let{data:i,error:o}=n;if(o)throw o;return await T(this.fetch,"DELETE",`${this.url}/user/identities/${e.identity_id}`,{headers:this.headers,jwt:(s=(t=i.session)===null||t===void 0?void 0:t.access_token)!==null&&s!==void 0?s:void 0})})}catch(n){if(w(n))return{data:null,error:n};throw n}}async _refreshAccessToken(e){let n=`#_refreshAccessToken(${e.substring(0,5)}...)`;this._debug(n,"begin");try{let t=Date.now();return await xs(async s=>(s>0&&await Is(200*Math.pow(2,s-1)),this._debug(n,"refreshing attempt",s),await T(this.fetch,"POST",`${this.url}/token?grant_type=refresh_token`,{body:{refresh_token:e},headers:this.headers,xform:he})),(s,i)=>{let o=200*Math.pow(2,s);return i&&nn(i)&&Date.now()+o-t<xt})}catch(t){if(this._debug(n,"error",t),w(t))return{data:{session:null,user:null},error:t};throw t}finally{this._debug(n,"end")}}_isValidSession(e){return typeof e=="object"&&e!==null&&"access_token"in e&&"refresh_token"in e&&"expires_at"in e}async _handleProviderSignIn(e,n){let t=await this._getUrlForProvider(`${this.url}/authorize`,e,{redirectTo:n.redirectTo,scopes:n.scopes,queryParams:n.queryParams});return this._debug("#_handleProviderSignIn()","provider",e,"options",n,"url",t),Y()&&!n.skipBrowserRedirect&&window.location.assign(t),{data:{provider:e,url:t},error:null}}async _recoverAndRefresh(){var e;let n="#_recoverAndRefresh()";this._debug(n,"begin");try{let t=await yt(this.storage,this.storageKey);if(this._debug(n,"session from storage",t),!this._isValidSession(t)){this._debug(n,"session is not valid"),t!==null&&await this._removeSession();return}let s=Math.round(Date.now()/1e3),i=((e=t.expires_at)!==null&&e!==void 0?e:1/0)<s+Ln;if(this._debug(n,`session has${i?"":" not"} expired with margin of ${Ln}s`),i){if(this.autoRefreshToken&&t.refresh_token){let{error:o}=await this._callRefreshToken(t.refresh_token);o&&(console.error(o),nn(o)||(this._debug(n,"refresh failed with a non-retryable error, removing the session",o),await this._removeSession()))}}else await this._notifyAllSubscribers("SIGNED_IN",t)}catch(t){this._debug(n,"error",t),console.error(t);return}finally{this._debug(n,"end")}}async _callRefreshToken(e){var n,t;if(!e)throw new K;if(this.refreshingDeferred)return this.refreshingDeferred.promise;let s=`#_callRefreshToken(${e.substring(0,5)}...)`;this._debug(s,"begin");try{this.refreshingDeferred=new bt;let{data:i,error:o}=await this._refreshAccessToken(e);if(o)throw o;if(!i.session)throw new K;await this._saveSession(i.session),await this._notifyAllSubscribers("TOKEN_REFRESHED",i.session);let c={session:i.session,error:null};return this.refreshingDeferred.resolve(c),c}catch(i){if(this._debug(s,"error",i),w(i)){let o={session:null,error:i};return nn(i)||(await this._removeSession(),await this._notifyAllSubscribers("SIGNED_OUT",null)),(n=this.refreshingDeferred)===null||n===void 0||n.resolve(o),o}throw(t=this.refreshingDeferred)===null||t===void 0||t.reject(i),i}finally{this.refreshingDeferred=null,this._debug(s,"end")}}async _notifyAllSubscribers(e,n,t=!0){let s=`#_notifyAllSubscribers(${e})`;this._debug(s,"begin",n,`broadcast = ${t}`);try{this.broadcastChannel&&t&&this.broadcastChannel.postMessage({event:e,session:n});let i=[],o=Array.from(this.stateChangeEmitters.values()).map(async c=>{try{await c.callback(e,n)}catch(a){i.push(a)}});if(await Promise.all(o),i.length>0){for(let c=0;c<i.length;c+=1)console.error(i[c]);throw i[0]}}finally{this._debug(s,"end")}}async _saveSession(e){this._debug("#_saveSession()",e),this.suppressGetSessionWarning=!0,await Un(this.storage,this.storageKey,e)}async _removeSession(){this._debug("#_removeSession()"),await Et(this.storage,this.storageKey)}_removeVisibilityChangedCallback(){this._debug("#_removeVisibilityChangedCallback()");let e=this.visibilityChangedCallback;this.visibilityChangedCallback=null;try{e&&Y()&&window?.removeEventListener&&window.removeEventListener("visibilitychange",e)}catch(n){console.error("removing visibilitychange callback failed",n)}}async _startAutoRefresh(){await this._stopAutoRefresh(),this._debug("#_startAutoRefresh()");let e=setInterval(()=>this._autoRefreshTokenTick(),xt);this.autoRefreshTicker=e,e&&typeof e=="object"&&typeof e.unref=="function"?e.unref():typeof Deno<"u"&&typeof Deno.unrefTimer=="function"&&Deno.unrefTimer(e),setTimeout(async()=>{await this.initializePromise,await this._autoRefreshTokenTick()},0)}async _stopAutoRefresh(){this._debug("#_stopAutoRefresh()");let e=this.autoRefreshTicker;this.autoRefreshTicker=null,e&&clearInterval(e)}async startAutoRefresh(){this._removeVisibilityChangedCallback(),await this._startAutoRefresh()}async stopAutoRefresh(){this._removeVisibilityChangedCallback(),await this._stopAutoRefresh()}async _autoRefreshTokenTick(){this._debug("#_autoRefreshTokenTick()","begin");try{await this._acquireLock(0,async()=>{try{let e=Date.now();try{return await this._useSession(async n=>{let{data:{session:t}}=n;if(!t||!t.refresh_token||!t.expires_at){this._debug("#_autoRefreshTokenTick()","no session");return}let s=Math.floor((t.expires_at*1e3-e)/xt);this._debug("#_autoRefreshTokenTick()",`access token expires in ${s} ticks, a tick lasts ${xt}ms, refresh threshold is ${Us} ticks`),s<=Us&&await this._callRefreshToken(t.refresh_token)})}catch(n){console.error("Auto refresh tick failed with error. This is likely a transient error.",n)}}finally{this._debug("#_autoRefreshTokenTick()","end")}})}catch(e){if(e.isAcquireTimeout||e instanceof It)this._debug("auto refresh token tick lock not available");else throw e}}async _handleVisibilityChange(){if(this._debug("#_handleVisibilityChange()"),!Y()||!window?.addEventListener)return this.autoRefreshToken&&this.startAutoRefresh(),!1;try{this.visibilityChangedCallback=async()=>await this._onVisibilityChanged(!1),window?.addEventListener("visibilitychange",this.visibilityChangedCallback),await this._onVisibilityChanged(!0)}catch(e){console.error("_handleVisibilityChange",e)}}async _onVisibilityChanged(e){let n=`#_onVisibilityChanged(${e})`;this._debug(n,"visibilityState",document.visibilityState),document.visibilityState==="visible"?(this.autoRefreshToken&&this._startAutoRefresh(),e||(await this.initializePromise,await this._acquireLock(-1,async()=>{if(document.visibilityState!=="visible"){this._debug(n,"acquired the lock to recover the session, but the browser visibilityState is no longer visible, aborting");return}await this._recoverAndRefresh()}))):document.visibilityState==="hidden"&&this.autoRefreshToken&&this._stopAutoRefresh()}async _getUrlForProvider(e,n,t){let s=[`provider=${encodeURIComponent(n)}`];if(t?.redirectTo&&s.push(`redirect_to=${encodeURIComponent(t.redirectTo)}`),t?.scopes&&s.push(`scopes=${encodeURIComponent(t.scopes)}`),this.flowType==="pkce"){let[i,o]=await Oe(this.storage,this.storageKey),c=new URLSearchParams({code_challenge:`${encodeURIComponent(i)}`,code_challenge_method:`${encodeURIComponent(o)}`});s.push(c.toString())}if(t?.queryParams){let i=new URLSearchParams(t.queryParams);s.push(i.toString())}return t?.skipBrowserRedirect&&s.push(`skip_http_redirect=${t.skipBrowserRedirect}`),`${e}?${s.join("&")}`}async _unenroll(e){try{return await this._useSession(async n=>{var t;let{data:s,error:i}=n;return i?{data:null,error:i}:await T(this.fetch,"DELETE",`${this.url}/factors/${e.factorId}`,{headers:this.headers,jwt:(t=s?.session)===null||t===void 0?void 0:t.access_token})})}catch(n){if(w(n))return{data:null,error:n};throw n}}async _enroll(e){try{return await this._useSession(async n=>{var t,s;let{data:i,error:o}=n;if(o)return{data:null,error:o};let c=Object.assign({friendly_name:e.friendlyName,factor_type:e.factorType},e.factorType==="phone"?{phone:e.phone}:{issuer:e.issuer}),{data:a,error:u}=await T(this.fetch,"POST",`${this.url}/factors`,{body:c,headers:this.headers,jwt:(t=i?.session)===null||t===void 0?void 0:t.access_token});return u?{data:null,error:u}:(e.factorType==="phone"&&delete a.totp,e.factorType==="totp"&&(!((s=a?.totp)===null||s===void 0)&&s.qr_code)&&(a.totp.qr_code=`data:image/svg+xml;utf-8,${a.totp.qr_code}`),{data:a,error:null})})}catch(n){if(w(n))return{data:null,error:n};throw n}}async _verify(e){return this._acquireLock(-1,async()=>{try{return await this._useSession(async n=>{var t;let{data:s,error:i}=n;if(i)return{data:null,error:i};let{data:o,error:c}=await T(this.fetch,"POST",`${this.url}/factors/${e.factorId}/verify`,{body:{code:e.code,challenge_id:e.challengeId},headers:this.headers,jwt:(t=s?.session)===null||t===void 0?void 0:t.access_token});return c?{data:null,error:c}:(await this._saveSession(Object.assign({expires_at:Math.round(Date.now()/1e3)+o.expires_in},o)),await this._notifyAllSubscribers("MFA_CHALLENGE_VERIFIED",o),{data:o,error:c})})}catch(n){if(w(n))return{data:null,error:n};throw n}})}async _challenge(e){return this._acquireLock(-1,async()=>{try{return await this._useSession(async n=>{var t;let{data:s,error:i}=n;return i?{data:null,error:i}:await T(this.fetch,"POST",`${this.url}/factors/${e.factorId}/challenge`,{body:{channel:e.channel},headers:this.headers,jwt:(t=s?.session)===null||t===void 0?void 0:t.access_token})})}catch(n){if(w(n))return{data:null,error:n};throw n}})}async _challengeAndVerify(e){let{data:n,error:t}=await this._challenge({factorId:e.factorId});return t?{data:null,error:t}:await this._verify({factorId:e.factorId,challengeId:n.id,code:e.code})}async _listFactors(){let{data:{user:e},error:n}=await this.getUser();if(n)return{data:null,error:n};let t=e?.factors||[],s=t.filter(o=>o.factor_type==="totp"&&o.status==="verified"),i=t.filter(o=>o.factor_type==="phone"&&o.status==="verified");return{data:{all:t,totp:s,phone:i},error:null}}async _getAuthenticatorAssuranceLevel(){return this._acquireLock(-1,async()=>await this._useSession(async e=>{var n,t;let{data:{session:s},error:i}=e;if(i)return{data:null,error:i};if(!s)return{data:{currentLevel:null,nextLevel:null,currentAuthenticationMethods:[]},error:null};let o=this._decodeJWT(s.access_token),c=null;o.aal&&(c=o.aal);let a=c;((t=(n=s.user.factors)===null||n===void 0?void 0:n.filter(d=>d.status==="verified"))!==null&&t!==void 0?t:[]).length>0&&(a="aal2");let l=o.amr||[];return{data:{currentLevel:c,nextLevel:a,currentAuthenticationMethods:l},error:null}}))}};Le.nextInstanceID=0;var Mo=Le,Mn=Mo;var sn=class extends Mn{constructor(e){super(e)}};var qo=function(r,e,n,t){function s(i){return i instanceof n?i:new n(function(o){o(i)})}return new(n||(n=Promise))(function(i,o){function c(l){try{u(t.next(l))}catch(d){o(d)}}function a(l){try{u(t.throw(l))}catch(d){o(d)}}function u(l){l.done?i(l.value):s(l.value).then(c,a)}u((t=t.apply(r,e||[])).next())})},Rt=class{constructor(e,n,t){var s,i,o;if(this.supabaseUrl=e,this.supabaseKey=n,!e)throw new Error("supabaseUrl is required.");if(!n)throw new Error("supabaseKey is required.");let c=gs(e);this.realtimeUrl=`${c}/realtime/v1`.replace(/^http/i,"ws"),this.authUrl=`${c}/auth/v1`,this.storageUrl=`${c}/storage/v1`,this.functionsUrl=`${c}/functions/v1`;let a=`sb-${new URL(this.authUrl).hostname.split(".")[0]}-auth-token`,u={db:ps,realtime:fs,auth:Object.assign(Object.assign({},_s),{storageKey:a}),global:hs},l=vs(t??{},u);this.storageKey=(s=l.auth.storageKey)!==null&&s!==void 0?s:"",this.headers=(i=l.global.headers)!==null&&i!==void 0?i:{},l.accessToken?(this.accessToken=l.accessToken,this.auth=new Proxy({},{get:(d,p)=>{throw new Error(`@supabase/supabase-js: Supabase Client is configured with the accessToken option, accessing supabase.auth.${String(p)} is not possible`)}})):this.auth=this._initSupabaseAuthClient((o=l.auth)!==null&&o!==void 0?o:{},this.headers,l.global.fetch),this.fetch=ms(n,this._getAccessToken.bind(this),l.global.fetch),this.realtime=this._initRealtimeClient(Object.assign({headers:this.headers},l.realtime)),this.rest=new Jr(`${c}/rest/v1`,{headers:this.headers,schema:l.db.schema,fetch:this.fetch}),l.accessToken||this._listenForAuthEvents()}get functions(){return new st(this.functionsUrl,{headers:this.headers,customFetch:this.fetch})}get storage(){return new mt(this.storageUrl,this.headers,this.fetch)}from(e){return this.rest.from(e)}schema(e){return this.rest.schema(e)}rpc(e,n={},t={}){return this.rest.rpc(e,n,t)}channel(e,n={config:{}}){return this.realtime.channel(e,n)}getChannels(){return this.realtime.getChannels()}removeChannel(e){return this.realtime.removeChannel(e)}removeAllChannels(){return this.realtime.removeAllChannels()}_getAccessToken(){var e,n;return qo(this,void 0,void 0,function*(){if(this.accessToken)return yield this.accessToken();let{data:t}=yield this.auth.getSession();return(n=(e=t.session)===null||e===void 0?void 0:e.access_token)!==null&&n!==void 0?n:null})}_initSupabaseAuthClient({autoRefreshToken:e,persistSession:n,detectSessionInUrl:t,storage:s,storageKey:i,flowType:o,lock:c,debug:a},u,l){var d;let p={Authorization:`Bearer ${this.supabaseKey}`,apikey:`${this.supabaseKey}`};return new sn({url:this.authUrl,headers:Object.assign(Object.assign({},p),u),storageKey:i,autoRefreshToken:e,persistSession:n,detectSessionInUrl:t,storage:s,flowType:o,lock:c,debug:a,fetch:l,hasCustomAuthorizationHeader:(d="Authorization"in this.headers)!==null&&d!==void 0?d:!1})}_initRealtimeClient(e){return new ze(this.realtimeUrl,Object.assign(Object.assign({},e),{params:Object.assign({apikey:this.supabaseKey},e?.params)}))}_listenForAuthEvents(){return this.auth.onAuthStateChange((n,t)=>{this._handleTokenChanged(n,"CLIENT",t?.access_token)})}_handleTokenChanged(e,n,t){(e==="TOKEN_REFRESHED"||e==="SIGNED_IN")&&this.changedAccessToken!==t?(this.realtime.setAuth(t??null),this.changedAccessToken=t):e==="SIGNED_OUT"&&(this.realtime.setAuth(this.supabaseKey),n=="STORAGE"&&this.auth.signOut(),this.changedAccessToken=void 0)}};var $s=(r,e,n)=>new Rt(r,e,n);var Vo="https://qzunabrdemvyruvaozer.supabase.co",Ho="https://renewalscope.princesankhala670.workers.dev";function qn(){if(typeof window<"u"){let{hostname:r,origin:e}=window.location;if(r==="localhost"||r==="127.0.0.1")return e}return Ho}var zo="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6dW5hYnJkZW12eXJ1dmFvemVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5NDU3MDgsImV4cCI6MjEwMjUyMTcwOH0.cE3JVKZt0Y0EO5nS1SdEimVljdudfzKhS2mHhoH0wng",De=$s(Vo,zo,{auth:{autoRefreshToken:!0,persistSession:!0,detectSessionInUrl:!0}});async function js(){try{let{data:{user:r},error:e}=await De.auth.getUser();return e?(console.error("getCurrentUser error:",e),null):r}catch(r){return console.error("getCurrentUser exception:",r),null}}async function Bs(r,e){try{let{data:n,error:t}=await De.auth.signUp({email:r,password:e,options:{emailRedirectTo:qn()}});return t?(console.error("signUp error:",t),{user:null,error:t}):{user:n.user,error:null}}catch(n){return console.error("signUp exception:",n),{user:null,error:{message:n instanceof Error?n.message:"Network error: Failed to connect to authentication server",name:"NetworkError",status:0}}}}async function Ms(r,e){try{let{data:n,error:t}=await De.auth.signInWithPassword({email:r,password:e});return t?(console.error("signIn error:",t),{user:null,error:t}):{user:n.user,error:null}}catch(n){return console.error("signIn exception:",n),{user:null,error:{message:n instanceof Error?n.message:"Network error: Failed to connect to authentication server",name:"NetworkError",status:0}}}}async function qs(){try{let{error:r}=await De.auth.signOut();return r&&console.error("signOut error:",r),{error:r}}catch(r){return console.error("signOut exception:",r),{error:{message:r instanceof Error?r.message:"Sign out failed",name:"SignOutError",status:0}}}}async function Vs(r){try{let{error:e}=await De.auth.resetPasswordForEmail(r,{redirectTo:qn()});return e&&console.error("resetPassword error:",e),{error:e}}catch(e){return console.error("resetPassword exception:",e),{error:{message:e instanceof Error?e.message:"Password reset failed",name:"PasswordResetError",status:0}}}}async function Hs(){try{let{error:r}=await De.auth.signInWithOAuth({provider:"google",options:{redirectTo:qn()}});return r?(console.error("signInWithGoogle error:",r),{error:r}):{error:null}}catch(r){return console.error("signInWithGoogle exception:",r),{error:{message:r instanceof Error?r.message:"Google sign-in failed",name:"GoogleSignInError",status:0}}}}function zs(r){return De.auth.onAuthStateChange(r)}async function on(r,e){return{hasProAccess:!0,reason:"Beta access granted"}}var te={user:null,loading:!0,authenticated:!1},Ue=!1,Wo={project_management:"RFIs, submittals, scheduling, punch lists, documents",quality_safety:"Inspections, incidents, observations, forms, daily log",project_financials:"Budgets, cost management, financial workflows",invoice_management:"Invoice workflows and billing",analytics:"Reporting, dashboards, unified data",pay:"Subcontractor payments, compliance, lien waivers",resource_tracking:"Labor, productivity, resource tracking",estimating:"Estimating and takeoff workflows",bid_management:"Bid distribution, collection, coverage"};function Ks(){return{step:1,annual_cost_usd:null,acv_usd:null,contract_term:"annual",selected_products:[],product_inputs:[],discount_status:null,discount_pct:null,discount_usd:null,bundle_structure:null,credits_usd:null,rate_protection_status:null,renewal_increase_pct:null,tier_changed:null,packaging_changed:null,expected_next_year_acv_usd:null,construction_type:null,target_savings_pct:null,before_annual_cost_usd:null,after_annual_cost_usd:null}}var _=Ks(),ce=null,F=null,Js={CRITICAL:"Used daily",REGULAR:"Used weekly",OCCASIONAL:"Used occasionally",RARELY:"Used rarely",NOT_USED:"Not used",NOT_SURE:"Not sure"},Zs={BUSINESS_CRITICAL:"Business critical",CLIENT_CONTRACT:"Client/contract requirement",INTERNAL_POLICY:"Internal policy",NOT_REQUIRED:"Not required",NOT_SURE:"Not sure"},Xs={YES:"Dependency confirmed",NO:"No known dependency",NOT_SURE:"Dependency unknown"};function h(r){return document.getElementById(r)}function x(r){return"$"+r.toLocaleString("en-US",{maximumFractionDigits:0})}function ee(r){return"$"+r.toLocaleString("en-US",{maximumFractionDigits:0})}function D(r,e){let n=h(r);n&&(n.hidden=e)}function an(r,e){let n=h(r);n&&(n.innerHTML=`<div class="error-msg">${e}</div>`)}function Vn(r){let e=h(r);e&&(e.innerHTML="")}function Go(){let r=h("progress-fill"),e=h("progress-text");r&&(r.style.width=`${_.step/5*100}%`),e&&(e.textContent=`Step ${_.step} of 5`)}function ae(r){for(let e=1;e<=5;e++)D(`step-${e}`,e!==r);_.step=r,Go(),window.scrollTo({top:0,behavior:"smooth"})}function Qo(){let r=h("annual_cost_usd")?.value,e=h("acv_usd")?.value;return!r||parseFloat(r)<=0?"Please enter a valid annual spend greater than 0.":!e||parseFloat(e)<=0?"Please enter a valid ACV greater than 0.":null}function Yo(){_.annual_cost_usd=parseFloat(h("annual_cost_usd").value),_.acv_usd=parseFloat(h("acv_usd").value);let r=h("contract_term").value;_.contract_term=r||"annual"}function Ko(){let r=h("product-cards");if(!r)return;let e=X.filter(n=>n.mvp_supported===!0);r.innerHTML=e.map(n=>{let t=Wo[n.id]??"",s=_.selected_products.includes(n.id);return`<div class="product-card${s?" selected":""}" data-product-id="${n.id}" role="checkbox" aria-checked="${s}" tabindex="0"><div class="pc-label">${n.label}</div><div class="pc-desc">${t}</div></div>`}).join(""),r.querySelectorAll(".product-card").forEach(n=>{n.addEventListener("click",()=>Ws(n)),n.addEventListener("keydown",t=>{(t.key===" "||t.key==="Enter")&&(t.preventDefault(),Ws(n))})})}function Ws(r){let e=r.dataset.productId??"";e&&(_.selected_products.includes(e)?(_.selected_products=_.selected_products.filter(n=>n!==e),r.classList.remove("selected"),r.setAttribute("aria-checked","false")):(_.selected_products.push(e),r.classList.add("selected"),r.setAttribute("aria-checked","true")))}function Jo(){return _.selected_products.length===0?"Please select at least one product.":null}function Zo(){let r=h("product-details");r&&(r.innerHTML=_.selected_products.map(e=>{let t=X.find(d=>d.id===e)?.label??e,s=_.product_inputs.find(d=>d.product_id===e),i=s?.usage??"",o=s?.requirement??"",c=s?.replacement??"",a=s?.dependency??"",u=s?.annual_price_usd??"",l=(d,p,m)=>`<option value="${d}"${m===d?" selected":""}>${p}</option>`;return`<div class="product-detail-block" data-product-id="${e}"><div class="pd-heading">${t}</div><div class="pd-grid"><div class="field"><label>Usage</label><select class="pd-usage"><option value="">Select\u2026</option>`+l("CRITICAL","Used daily",i)+l("REGULAR","Used weekly",i)+l("OCCASIONAL","Used occasionally",i)+l("RARELY","Used rarely",i)+l("NOT_USED","Not used",i)+l("NOT_SURE","Not sure",i)+'</select></div><div class="field"><label>Business Requirement</label><select class="pd-requirement"><option value="">Select\u2026</option>'+l("BUSINESS_CRITICAL","Business critical",o)+l("CLIENT_CONTRACT","Client contract requirement",o)+l("INTERNAL_POLICY","Internal policy requirement",o)+l("NOT_REQUIRED","Not required",o)+l("NOT_SURE","Not sure",o)+'</select></div><div class="field"><label>Replacement Option</label><select class="pd-replacement"><option value="">Select\u2026</option>'+l("ANOTHER_TOOL","Another tool available",c)+l("INTERNAL_PROCESS","Internal process",c)+l("NOT_NEEDED","Not needed if removed",c)+l("NO_REPLACEMENT","No replacement exists",c)+l("NOT_SURE","Not sure",c)+'</select></div><div class="field"><label>Has Dependencies</label><select class="pd-dependency"><option value="">Select\u2026</option>'+l("YES","Yes, has dependencies",a)+l("NO","No dependencies",a)+l("NOT_SURE","Not sure",a)+`</select></div></div><div class="field" style="max-width:240px;margin-top:8px;"><label>Line-item annual price (USD)<span class="hint">Optional</span></label><input type="number" class="pd-price" placeholder="24000" min="0" value="${u}" /></div></div>`}).join(""))}function Xo(){let r=document.querySelectorAll(".product-detail-block");for(let e of r){let n=e.dataset.productId??"",s=X.find(i=>i.id===n)?.label??n;if(!e.querySelector(".pd-usage")?.value)return`Please select usage for ${s}.`;if(!e.querySelector(".pd-requirement")?.value)return`Please select a requirement for ${s}.`;if(!e.querySelector(".pd-replacement")?.value)return`Please select a replacement option for ${s}.`;if(!e.querySelector(".pd-dependency")?.value)return`Please select dependency status for ${s}.`}return null}function ea(){let r=[];document.querySelectorAll(".product-detail-block").forEach(e=>{let n=e.dataset.productId;if(!n)return;let t=e.querySelector(".pd-usage").value,s=e.querySelector(".pd-requirement").value,i=e.querySelector(".pd-replacement").value,o=e.querySelector(".pd-dependency").value,c=e.querySelector(".pd-price")?.value,a={product_id:n,usage:t,requirement:s,replacement:i,dependency:o};c&&parseFloat(c)>0&&(a.annual_price_usd=parseFloat(c)),r.push(a)}),_.product_inputs=r}function Gs(){let r=h("discount_status")?.value??"",e=h("discount-pct-field"),n=h("discount-usd-field");e&&(e.hidden=r!=="PCT_KNOWN"),n&&(n.hidden=r!=="USD_KNOWN")}function ta(){let r=h("discount_status")?.value??"";_.discount_status=r||null;let e=h("discount_pct")?.value??"";_.discount_pct=e?parseFloat(e):null;let n=h("discount_usd")?.value??"";_.discount_usd=n?parseFloat(n):null;let t=h("bundle_structure")?.value??"";_.bundle_structure=t||null;let s=h("credits_usd")?.value??"";_.credits_usd=s?parseFloat(s):null;let i=h("rate_protection_status")?.value??"";_.rate_protection_status=i||null;let o=h("renewal_increase_pct")?.value??"";_.renewal_increase_pct=o?parseFloat(o):null;let c=h("tier_changed")?.value??"";_.tier_changed=c||null;let a=h("packaging_changed")?.value??"";_.packaging_changed=a||null;let u=h("expected_next_year_acv_usd")?.value??"";_.expected_next_year_acv_usd=u?parseFloat(u):null;let l=h("construction_type")?.value??"";_.construction_type=l||null;let d=h("target_savings_pct")?.value??"";_.target_savings_pct=d?parseInt(d,10):null;let p=h("before_annual_cost_usd")?.value??"";_.before_annual_cost_usd=p?parseFloat(p):null;let m=h("after_annual_cost_usd")?.value??"";_.after_annual_cost_usd=m?parseFloat(m):null}function na(){let r=h("review-summary");if(!r)return;let e=_.contract_term==="annual"?"Annual":_.contract_term==="multi_year"?"Multi-year":"Other",n=_.selected_products.map(s=>X.find(i=>i.id===s)?.label??s).join(", ")||"\u2014",t=[["Annual Spend",_.annual_cost_usd!=null?x(_.annual_cost_usd):"\u2014"],["ACV",_.acv_usd!=null?x(_.acv_usd):"\u2014"],["Contract Term",e],["Products",n]];_.discount_status&&t.push(["Discount Status",_.discount_status.replace(/_/g," ")]),_.discount_pct!=null&&t.push(["Discount %",`${_.discount_pct}%`]),_.discount_usd!=null&&t.push(["Discount USD",x(_.discount_usd)]),_.bundle_structure&&t.push(["Bundle",_.bundle_structure]),_.credits_usd!=null&&t.push(["Credits",x(_.credits_usd)]),_.rate_protection_status&&t.push(["Rate Protection",_.rate_protection_status]),_.renewal_increase_pct!=null&&t.push(["Renewal Increase",`${_.renewal_increase_pct}%`]),_.tier_changed&&t.push(["Tier Changed",_.tier_changed.replace(/_/g," ")]),_.packaging_changed&&t.push(["Packaging Changed",_.packaging_changed.replace(/_/g," ")]),_.expected_next_year_acv_usd!=null&&t.push(["Expected Next-Year ACV",x(_.expected_next_year_acv_usd)]),_.construction_type&&t.push(["Construction Type",_.construction_type.replace(/_/g," ")]),_.target_savings_pct!=null&&t.push(["Savings Target",`${_.target_savings_pct}%`]),_.before_annual_cost_usd!=null&&t.push(["Before Quote",x(_.before_annual_cost_usd)]),_.after_annual_cost_usd!=null&&t.push(["After Quote",x(_.after_annual_cost_usd)]),r.innerHTML='<table class="review-table"><thead><tr><th>Field</th><th>Value</th></tr></thead><tbody>'+t.map(([s,i])=>`<tr><td>${s}</td><td>${i}</td></tr>`).join("")+"</tbody></table>"}function ra(){return new Promise(r=>{let e=0;function n(){let t=h(`ls-${e}`);if(t){t.classList.add("done");let s=t.querySelector(".check");s&&(s.textContent="\u2713")}e++,e<5?setTimeout(n,300):setTimeout(r,200)}setTimeout(n,300)})}function sa(){let r={annual_cost_usd:_.annual_cost_usd,acv_usd:_.acv_usd,contract_term:_.contract_term==="other"?"annual":_.contract_term,products:_.selected_products,product_inputs:_.product_inputs};return _.discount_status&&(r.discount_status=_.discount_status),_.discount_pct!=null&&(r.discount_pct=_.discount_pct),_.discount_usd!=null&&(r.discount_usd=_.discount_usd),_.bundle_structure&&(r.bundle_structure=_.bundle_structure),_.credits_usd!=null&&(r.credits_usd=_.credits_usd),_.rate_protection_status&&(r.rate_protection_status=_.rate_protection_status),_.renewal_increase_pct!=null&&(r.renewal_increase_pct=_.renewal_increase_pct),_.tier_changed&&(r.tier_changed=_.tier_changed),_.packaging_changed&&(r.packaging_changed=_.packaging_changed),_.expected_next_year_acv_usd!=null&&(r.expected_next_year_acv_usd=_.expected_next_year_acv_usd),_.construction_type&&(r.construction_type=_.construction_type),_.target_savings_pct!=null&&(r.target_savings_pct=_.target_savings_pct),_.before_annual_cost_usd!=null&&(r.before_annual_cost_usd=_.before_annual_cost_usd),_.after_annual_cost_usd!=null&&(r.after_annual_cost_usd=_.after_annual_cost_usd),r}function ia(r){switch(r){case"VERIFIED_BEFORE_AFTER":return"Verified Savings";case"SAVINGS_IDENTIFIED":return"Savings Identified";case"OPPORTUNITY_NOT_QUANTIFIABLE":return"Opportunity Identified";case"NO_DEFENSIBLE_SAVINGS_IDENTIFIED":return"No Defensible Savings";default:return String(r).replace(/_/g," ")}}function oa(r){let e=h("results-executive-summary");if(!e)return;let n=r.free_result,s=n.verdict==="VERIFIED_BEFORE_AFTER"&&n.savings_amount!=null&&n.savings_amount>0,i=r.candidates?.candidates.length??0,o=r.candidates?.blocked.length??0,c=(p,m,g="")=>`<div class="exec-stat"><div class="exec-stat-label">${p}</div><div class="exec-stat-value${g?" "+g:""}">${m}</div></div>`,a=c("Current Annual Spend",x(n.current_spend));s&&(a+=c("Verified Savings",x(n.savings_amount),"green")),a+=c("Optimization Candidates",String(i)),a+=c("Blocked Products",String(o)),a+=c("Verdict",ia(n.verdict));let u="",l=r.warnings.slice(0,2);l.length>0&&(u+='<div class="alert warning" style="margin-top:16px;"><strong>Notices:</strong><br>'+l.map(p=>`\u2022 ${p}`).join("<br>")+"</div>");let d=r.assumptions.slice(0,2);d.length>0&&(u+='<div class="alert info" style="margin-top:12px;"><strong>Commercial Assumptions:</strong><br>'+d.map(p=>`\u2022 ${p}`).join("<br>")+"</div>"),e.innerHTML=`<div class="card"><div class="card-title">Executive Summary</div><div class="exec-summary-grid">${a}</div>${u}</div>`}function aa(r){let e=h("results-product-audit");if(!e)return;let n=ce?.product_inputs??[];if(n.length===0){e.innerHTML="";return}let t=n.map(o=>{let c=X.find(u=>u.id===o.product_id),a=ei(o.product_id,r);return{name:c?.label??o.product_id,usage:Js[o.usage]??o.usage,req:Zs[o.requirement]??o.requirement,dep:Xs[o.dependency]??o.dependency,spend:o.annual_price_usd!=null?x(o.annual_price_usd)+"/yr":"\u2014",candStatus:a.status,why:a.why,savStatus:ti(o.product_id,r)}}),s=t.map(o=>`<tr><td><strong>${o.name}</strong></td><td>${o.usage}</td><td>${o.req}</td><td>${o.dep}</td><td>${o.spend}</td><td>${o.candStatus}</td><td>${o.savStatus||"\u2014"}</td><td>${o.why||"\u2014"}</td></tr>`).join(""),i=t.map(o=>`<div class="audit-card"><div class="audit-card-title">${o.name}</div><div class="audit-card-row"><span class="audit-card-label">Usage</span><span>${o.usage}</span></div><div class="audit-card-row"><span class="audit-card-label">Requirement</span><span>${o.req}</span></div><div class="audit-card-row"><span class="audit-card-label">Dependency</span><span>${o.dep}</span></div><div class="audit-card-row"><span class="audit-card-label">Spend</span><span>${o.spend}</span></div><div class="audit-card-row"><span class="audit-card-label">Status</span><span>${o.candStatus}</span></div>`+(o.savStatus?`<div class="audit-card-row"><span class="audit-card-label">Savings</span><span>${o.savStatus}</span></div>`:"")+(o.why?`<div class="audit-card-row"><span class="audit-card-label">Note</span><span>${o.why}</span></div>`:"")+"</div>").join("");e.innerHTML=`<div class="card"><div class="card-title">Product Audit</div><div style="overflow-x:auto;"><table class="audit-table"><thead><tr><th>Product</th><th>Usage</th><th>Requirement</th><th>Dependency</th><th>Line-item Spend</th><th>Candidate Status</th><th>Savings Status</th><th>Note</th></tr></thead><tbody>${s}</tbody></table></div><div id="audit-cards-mobile">${i}</div></div>`}function ca(r){let e=h("results-counterfactual");if(!e)return;let n=r.counterfactual?.counterfactual_results??[];if(n.length===0){e.innerHTML="";return}let t=n.map(s=>{let o=X.find(m=>m.id===s.candidate.product_id)?.label??s.candidate.product_id,c=s.result_class,a=c==="SAVINGS_IDENTIFIED"&&(s.dollar_saving==null||s.dollar_saving===0),u=c,l=a?"COMMERCIAL OPPORTUNITY":c==="VERIFIED_BEFORE_AFTER"?"VERIFIED BEFORE/AFTER":c==="OPPORTUNITY_NOT_QUANTIFIABLE"?"OPPORTUNITY \u2014 NOT QUANTIFIABLE":c.replace(/_/g," "),d=c==="VERIFIED_BEFORE_AFTER"||c==="SAVINGS_IDENTIFIED"&&!a?"VERIFIED_BEFORE_AFTER":c==="OPPORTUNITY_NOT_QUANTIFIABLE"?"OPPORTUNITY_NOT_QUANTIFIABLE":"NO_DEFENSIBLE_SAVINGS_IDENTIFIED",p="";return c==="VERIFIED_BEFORE_AFTER"&&s.dollar_saving!=null&&s.dollar_saving>0?p=`<div class="cf-saving">Verified quote-to-quote difference: ${x(s.dollar_saving)}/year</div>`:c==="OPPORTUNITY_NOT_QUANTIFIABLE"&&(p='<div class="cf-opportunity">Savings not yet quantifiable</div>'),`<div class="cf-result-card ${u}"><div class="cf-card-header"><span class="cf-product-name">${o}</span><span class="result-badge ${d}">${l}</span></div><div class="cf-explanation">${s.explanation}</div>${p}</div>`}).join("");e.innerHTML=`<div class="card"><div class="card-title">Counterfactual Analysis</div>${t}</div>`}function Qs(r){return r.startsWith("REDDIT-")?"Customer observation (Reddit)":r.startsWith("WEB-")?"Web/secondary source":r.startsWith("PQ-")?"Public procurement quote":"Public observation"}function la(r){let e=h("results-evidence");if(!e)return;let n=r.paid_report.evidence_trail??[],t=r.benchmark?.comparable_evidence_ids??[],s=[...new Set([...n,...t])];if(s.length===0){e.innerHTML="";return}let i=s.map(o=>`<div class="evidence-item"><details><summary>${o} \u2014 ${Qs(o)}</summary><div class="ev-meta"><div class="ev-meta-row"><span class="ev-meta-label">Source type:</span> ${Qs(o)}</div><div class="ev-meta-row"><span class="ev-meta-label">Supports:</span> Benchmark context and effective rate comparison</div><div class="ev-meta-row"><span class="ev-meta-label">Does not support:</span> Exact post-removal renewal pricing</div></div></details></div>`).join("");e.innerHTML=`<div class="card"><div class="card-title">Evidence Trail</div><p class="section-note">Evidence IDs referenced in this analysis. Expand each to see source context.</p>${i}</div>`}function ua(r,e){let n=window.jspdf;if(!n){alert("PDF library not loaded. Please refresh the page and try again.");return}let t=new n.jsPDF({orientation:"portrait",unit:"mm",format:"a4"}),s=210,i=297,o=20,c=s-o*2,a=o,u=i-35,l=[18,59,42],d=[31,138,91],p=[234,247,240],m=[27,31,30],g=[107,114,128],E=[217,119,6],b=[220,38,38],O=new Date().toISOString().split("T")[0].replace(/-/g,""),U=Math.random().toString(16).substring(2,8).toUpperCase(),P=`RS-${O}-${U}`,k=0;function L(){t.addPage(),k++,Fe(),a=32}function f(v=15){a+v>u&&L()}function J(){t.setTextColor(31,138,91),t.setFontSize(60),t.setFont("helvetica","bold");let v="RenewalScope",C=t.getTextWidth(v);t.saveGraphicsState(),t.setGState(new t.GState({opacity:.03})),t.text(v,(s-C)/2,i/2,{angle:-45}),t.restoreGraphicsState()}function Fe(){k!==0&&(t.setFont("helvetica","bold"),t.setFontSize(10),t.setTextColor(...l),t.text("RenewalScope",o,15),t.setFont("helvetica","normal"),t.setFontSize(9),t.setTextColor(...g),t.text("Procore Renewal Analysis",o+45,15),t.setFont("helvetica","normal"),t.setFontSize(8),t.setTextColor(...g),t.text(P,s-o,15,{align:"right"}),t.setDrawColor(...d),t.setLineWidth(.5),t.line(o,18,s-o,18),J())}function le(v,C){let y=i-20;t.setDrawColor(229,231,235),t.setLineWidth(.3),t.line(o,y-5,s-o,y-5),t.setFont("helvetica","bold"),t.setFontSize(8),t.setTextColor(...l),t.text("RenewalScope",o,y),t.setFont("helvetica","normal"),t.setFontSize(7),t.setTextColor(...g),t.text("Evidence-backed renewal intelligence.",o,y+4),t.setFont("helvetica","normal"),t.setFontSize(8),t.setTextColor(...g),v>0&&t.text(`Page ${v} of ${C}`,s-o,y,{align:"right"}),t.setFont("helvetica","normal"),t.setFontSize(6.5),t.setTextColor(...g),t.text("Independent analysis \xB7 Not affiliated with Procore Technologies, Inc.",s/2,y+4,{align:"center"})}function ln(v){f(20),t.setFont("helvetica","bold"),t.setFontSize(18),t.setTextColor(...l),t.text(v,o,a),a+=12}function G(v){f(15),t.setFont("helvetica","bold"),t.setFontSize(14),t.setTextColor(...d),t.text(v,o,a),a+=10}function j(v){f(12),t.setFont("helvetica","bold"),t.setFontSize(11),t.setTextColor(...m),t.text(v,o,a),a+=8}function B(v,C=m){f(10),t.setFont("helvetica","normal"),t.setFontSize(9.5),t.setTextColor(...C),t.splitTextToSize(v,c).forEach(z=>{f(6),t.text(z,o,a),a+=5})}function $e(v,C){let z={green:{bg:[209,250,229],text:[6,95,70]},amber:{bg:[254,243,199],text:[146,64,14]},gray:{bg:[243,244,246],text:[75,85,99]},red:{bg:[254,226,226],text:[153,27,27]}}[C];t.setFillColor(...z.bg),t.setDrawColor(...z.bg);let Q=t.getTextWidth(v)+6;t.roundedRect(o,a-4,Q,6,1.5,1.5,"F"),t.setFont("helvetica","bold"),t.setFontSize(7),t.setTextColor(...z.text),t.text(v,o+3,a),a+=6}function ne(){f(8),t.setDrawColor(229,231,235),t.setLineWidth(.3),t.line(o,a,s-o,a),a+=6}function Ot(v,C,y="default"){return t.setFillColor(255,255,255),t.setDrawColor(229,231,235),t.setLineWidth(.5),t.roundedRect(o,a,85,28,2,2,"FD"),t.setFont("helvetica","bold"),t.setFontSize(7),t.setTextColor(...g),t.text(v.toUpperCase(),o+6,a+8),t.setFont("helvetica","bold"),t.setFontSize(16),y==="green"?t.setTextColor(...d):t.setTextColor(...m),t.text(C,o+6,a+20),{w:85,h:28}}k=0,t.setFillColor(...l),t.rect(0,0,s,70,"F"),t.setFont("helvetica","bold"),t.setFontSize(32),t.setTextColor(255,255,255),t.text("RenewalScope",s/2,35,{align:"center"}),t.setFont("helvetica","normal"),t.setFontSize(10),t.setTextColor(234,247,240),t.text("Evidence-backed renewal intelligence.",s/2,45,{align:"center"}),t.setFillColor(31,138,91),t.saveGraphicsState(),t.setGState(new t.GState({opacity:.15}));let je=[[s*.6,70],[s,70],[s,120],[s*.7,120]];t.triangle(je[0][0],je[0][1],je[1][0],je[1][1],je[2][0],je[2][1],"F"),t.restoreGraphicsState(),a=95,t.setFont("helvetica","bold"),t.setFontSize(24),t.setTextColor(...l),t.text("Procore Renewal Analysis",s/2,a,{align:"center"}),a+=12,t.setFont("helvetica","normal"),t.setFontSize(11),t.setTextColor(...g),t.text("Evidence-based commercial review & negotiation guidance",s/2,a,{align:"center"}),a+=35;let Z=45;t.setFillColor(248,250,249),t.setDrawColor(229,231,235),t.roundedRect(Z,a,120,65,3,3,"FD");let si=a+12,At=10;t.setFont("helvetica","bold"),t.setFontSize(8),t.setTextColor(...g);let M=si;t.text("PREPARED FOR:",Z+10,M),t.setFont("helvetica","normal"),t.setFontSize(9),t.setTextColor(...m),t.text("Customer",Z+10,M+5),M+=At+3,t.setFont("helvetica","bold"),t.setFontSize(8),t.setTextColor(...g),t.text("REPORT ID:",Z+10,M),t.setFont("helvetica","normal"),t.setFontSize(9),t.setTextColor(...m),t.text(P,Z+10,M+5),M+=At+3,t.setFont("helvetica","bold"),t.setFontSize(8),t.setTextColor(...g),t.text("GENERATED:",Z+10,M),t.setFont("helvetica","normal"),t.setFontSize(9),t.setTextColor(...m);let ii=new Date().toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"});t.text(ii,Z+10,M+5),M+=At+3,t.setFont("helvetica","bold"),t.setFontSize(8),t.setTextColor(...g),t.text("ANALYSIS TYPE:",Z+10,M),t.setFont("helvetica","normal"),t.setFontSize(9),t.setTextColor(...m),t.text("Renewal Optimization",Z+10,M+5),M+=At+3,t.setFont("helvetica","bold"),t.setFontSize(8),t.setTextColor(...g),t.text("CONTRACT TERM:",Z+10,M),t.setFont("helvetica","normal"),t.setFontSize(9),t.setTextColor(...m);let Qn=String(e.contract_term??"Annual");t.text(Qn.charAt(0).toUpperCase()+Qn.slice(1),Z+10,M+5),t.setFont("helvetica","normal"),t.setFontSize(7.5),t.setTextColor(...g),t.text("Independent analysis \xB7 Not affiliated with Procore Technologies, Inc.",s/2,i-15,{align:"center"}),le(0,1),L(),ln("Executive Summary"),a+=5;let A=r.free_result;A.verdict==="VERIFIED_BEFORE_AFTER"?$e("VERIFIED SAVINGS IDENTIFIED","green"):A.verdict==="SAVINGS_IDENTIFIED"?$e("SAVINGS IDENTIFIED","green"):A.verdict==="OPPORTUNITY_NOT_QUANTIFIABLE"?$e("OPPORTUNITY IDENTIFIED \u2014 SAVINGS NOT QUANTIFIABLE","amber"):$e("NO DEFENSIBLE SAVINGS IDENTIFIED","gray"),a+=8;let Yn=a;if(Ot("CURRENT ANNUAL SPEND",x(A.current_spend)),A.verdict==="VERIFIED_BEFORE_AFTER"&&A.savings_amount!=null&&A.savings_amount>0){let v=Ot("VERIFIED SAVINGS",x(A.savings_amount)+" / year","green");a=Yn,Ot("CURRENT ANNUAL SPEND",x(A.current_spend)),t.text("",o+90,a),a=Yn;let C=o;t.internal.pageSize.width,t.text("",0,0);let y=a,z=o,Q=95;t.setFillColor(255,255,255),t.setDrawColor(229,231,235),t.roundedRect(o+Q,a,85,28,2,2,"FD"),t.setFont("helvetica","bold"),t.setFontSize(7),t.setTextColor(...g),t.text("VERIFIED SAVINGS",o+Q+6,a+8),t.setFont("helvetica","bold"),t.setFontSize(14),t.setTextColor(...d),t.text(x(A.savings_amount)+" / year",o+Q+6,a+20),a=y+32}else a+=32;let Ct=a,oi=r.candidates?.candidates.length??0;Ot("OPTIMIZATION CANDIDATES",String(oi));let ai=r.candidates?.blocked.length??0;t.setFillColor(255,255,255),t.setDrawColor(229,231,235),t.roundedRect(o+95,Ct,85,28,2,2,"FD"),t.setFont("helvetica","bold"),t.setFontSize(7),t.setTextColor(...g),t.text("BLOCKED PRODUCTS",o+95+6,Ct+8),t.setFont("helvetica","bold"),t.setFontSize(16),t.setTextColor(...m),t.text(String(ai),o+95+6,Ct+20),a=Ct+35,B(A.explanation),a+=5,ne(),f(60),G("Commercial Baseline"),a+=3;let q=(v,C)=>{f(8),t.setFont("helvetica","bold"),t.setFontSize(8.5),t.setTextColor(...g),t.text(v+":",o,a),t.setFont("helvetica","normal"),t.setFontSize(9.5),t.setTextColor(...m),t.text(C,o+55,a),a+=7};q("Annual Spend",x(A.current_spend)),q("ACV",x(Number(e.acv_usd??0))),q("Contract Term",String(e.contract_term??"Annual")),e.renewal_increase_pct&&q("Renewal Increase",e.renewal_increase_pct+"%"),e.discount_pct&&q("Discount",e.discount_pct+"%"),e.bundle_structure&&q("Bundle Structure",String(e.bundle_structure).replace(/_/g," ")),A.effective_rate!=null&&q("Effective Rate",ee(A.effective_rate)+" per $1M ACV"),A.benchmark_position&&q("Benchmark Position",A.benchmark_position.replace(/_/g," ").toUpperCase()),a+=5,ne();let pe=r.benchmark;pe?.min_evidence_count_met&&(G("Benchmark Context"),a+=3,B("Directional benchmark from public observations; not an official Procore price list.",g),a+=5,q("Your Rate",ee(pe.user_rate)+" per $1M ACV"),q("25th Percentile",ee(pe.stats.p25)),q("Median (50th)",ee(pe.stats.p50)),q("75th Percentile",ee(pe.stats.p75)),q("Observed Range",ee(pe.stats.min)+" - "+ee(pe.stats.max)),q("Evidence Count",String(pe.stats.count)),a+=5,ne());let Kn=e.product_inputs??[];Kn.length>0&&(f(40),G("Product Audit"),a+=5,Kn.forEach(v=>{f(25);let y=X.find(be=>be.id===v.product_id)?.label??v.product_id,z=ei(v.product_id,r);t.setFont("helvetica","bold"),t.setFontSize(10.5),t.setTextColor(...l),t.text(y,o,a),a+=7,t.setFont("helvetica","normal"),t.setFontSize(8.5),t.setTextColor(...g);let Q=[`Usage: ${Js[v.usage]??v.usage}`,`Requirement: ${Zs[v.requirement]??v.requirement}`,`Dependency: ${Xs[v.dependency]??v.dependency}`];v.annual_price_usd!=null&&Q.push(`Annual Spend: ${x(v.annual_price_usd)}`),Q.push(`Status: ${z.status}`);let Pt=ti(v.product_id,r);Pt&&Q.push(`Savings: ${Pt}`),Q.forEach(be=>{t.text("  \u2022 "+be,o+2,a),a+=5}),a+=3}),ne());let Jn=r.counterfactual?.counterfactual_results??[];Jn.length>0&&(f(30),G("Counterfactual Analysis"),a+=3,B("Testing alternative configurations against available evidence.",g),a+=8,Jn.forEach(v=>{f(35);let y=X.find(z=>z.id===v.candidate.product_id)?.label??v.candidate.product_id;t.setFont("helvetica","bold"),t.setFontSize(11),t.setTextColor(...d),t.text(y,o,a),a+=7,v.result_class==="VERIFIED_BEFORE_AFTER"?($e("VERIFIED QUOTE-TO-QUOTE DIFFERENCE","green"),a+=2):v.result_class==="OPPORTUNITY_NOT_QUANTIFIABLE"&&($e("SAVINGS NOT YET QUANTIFIABLE","amber"),a+=2),B(v.explanation),a+=3,v.result_class==="VERIFIED_BEFORE_AFTER"&&v.dollar_saving!=null&&v.dollar_saving>0&&(t.setFillColor(...p),t.setDrawColor(...d),t.roundedRect(o,a,c,12,2,2,"FD"),t.setFont("helvetica","bold"),t.setFontSize(10),t.setTextColor(...d),t.text("Verified quote-to-quote difference: "+x(v.dollar_saving)+"/year",o+6,a+8),a+=15,t.setFont("helvetica","italic"),t.setFontSize(8),t.setTextColor(...g),B("Attribution to a specific product is not established from quote amounts alone.",g)),a+=5}),ne());let ci=r.paid_report.evidence_trail??[],li=r.benchmark?.comparable_evidence_ids??[],Zn=[...new Set([...ci,...li])];Zn.length>0&&(f(30),G("Evidence Trail"),a+=3,B("Evidence sources referenced in this analysis.",g),a+=8,Zn.forEach(v=>{f(18),t.setFont("helvetica","bold"),t.setFontSize(9),t.setTextColor(...m),t.text(v,o,a),a+=6;let C=v.startsWith("REDDIT-")?"Customer observation (Reddit)":v.startsWith("WEB-")?"Web/secondary source":v.startsWith("PQ-")?"Public procurement quote":"Public observation";t.setFont("helvetica","normal"),t.setFontSize(8),t.setTextColor(...g),t.text("  Source: "+C,o+2,a),a+=5,t.text("  Supports: Benchmark context and effective rate comparison",o+2,a),a+=5,t.text("  Does not support: Exact post-removal renewal pricing",o+2,a),a+=8}),ne());let Be=r.paid_report.quote_evidence_summary;if(Be&&Be.records.length>0){f(40),G("Public Quote Evidence Summary"),a+=3,B(`${Be.usable_records} usable public quote observations from public procurement records. ${Be.excluded_records} excluded (pooled structure, incomplete, or commercial-structure-only records). These are PUBLIC QUOTE OBSERVATIONS \u2014 not an official Procore price list. No individual record establishes a universal module price or guaranteed removal saving.`,g),a+=8,t.setFillColor(254,243,199),t.setDrawColor(217,119,6),t.roundedRect(o,a,c,9,2,2,"FD"),t.setFont("helvetica","bold"),t.setFontSize(8),t.setTextColor(146,64,14),t.text("CONTEXTUAL EVIDENCE ONLY \u2014 No savings are guaranteed from these observations",o+4,a+5.5),a+=15;let v=Be.records.filter(y=>!y.exclude_from_calculations&&y.quoted_annual_price_usd!==null),C=Be.records.filter(y=>y.exclude_from_calculations);v.length>0&&(j("Usable Observations"),a+=2,v.forEach(y=>{f(38),t.setFont("helvetica","bold"),t.setFontSize(9),t.setTextColor(...m),t.text(`${y.evidence_id}  \xB7  ${y.normalized_product_id??y.product_reported}`,o,a),a+=6,t.setFont("helvetica","normal"),t.setFontSize(8),t.setTextColor(...g),t.text(`Source: ${y.source_description}`,o+2,a),a+=5;let z=y.quoted_annual_price_usd!==null?`$${y.quoted_annual_price_usd.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}/year`:"Price not disclosed";t.text(`Observed price: ${z}   ACV context: ${y.acv_context}   Term: ${y.term}`,o+2,a),a+=5,y.limitation_flags.length>0&&(t.setTextColor(...E),t.text(`Flags: ${y.limitation_flags.join(", ")}`,o+2,a),t.setTextColor(...g),a+=5),t.splitTextToSize(`Supports: ${y.what_it_supports}`,c-8).forEach(be=>{f(5),t.text(be,o+2,a),a+=4.5});let Pt=t.splitTextToSize(`Does not support: ${y.what_it_does_not_support}`,c-8);t.setTextColor(220,38,38),Pt.forEach(be=>{f(5),t.text(be,o+2,a),a+=4.5}),t.setTextColor(...g),a+=5,t.setDrawColor(229,231,235),t.setLineWidth(.2),t.line(o+2,a,s-o-2,a),a+=5})),C.length>0&&(f(20),j("Excluded Records (not used in calculations)"),a+=2,C.forEach(y=>{f(14),t.setFont("helvetica","bold"),t.setFontSize(8),t.setTextColor(...g),t.text(`${y.evidence_id}  \xB7  ${y.normalized_product_id??y.product_reported??"Platform"}`,o,a),a+=5,t.setFont("helvetica","normal"),t.setFontSize(7.5),t.text(`${y.source_description}   Flags: ${y.limitation_flags.join(", ")}`,o+2,a),a+=7})),ne()}(r.assumptions.length>0||r.warnings.length>0)&&(f(40),G("Commercial Assumptions & Notices"),a+=5,r.assumptions.length>0&&(j("Assumptions"),a+=3,r.assumptions.forEach(v=>{f(8),t.setFont("helvetica","normal"),t.setFontSize(9),t.setTextColor(...m),t.splitTextToSize("  \u2022 "+v,c-4).forEach(y=>{f(6),t.text(y,o+2,a),a+=5})}),a+=5),r.warnings.length>0&&(j("Notices"),a+=3,r.warnings.forEach(v=>{f(8),t.setFont("helvetica","normal"),t.setFontSize(9),t.setTextColor(...E),t.splitTextToSize("  \u26A0 "+v,c-4).forEach(y=>{f(6),t.text(y,o+2,a),a+=5})}),a+=5),ne());let re=r.negotiation;re&&(f(50),G("Negotiation Plan"),a+=5,j("What to Ask"),a+=2,B(re.what_to_ask),a+=5,j("Why"),a+=2,B(re.why),a+=5,j("Configuration Requested"),a+=2,B(re.configuration_requested),a+=5,re.target_price!=null&&(f(18),j("Negotiation Target"),a+=2,t.setFillColor(...p),t.setDrawColor(...d),t.roundedRect(o,a,80,22,2,2,"FD"),t.setFont("helvetica","bold"),t.setFontSize(7),t.setTextColor(...g),t.text("TARGET PRICE",o+6,a+7),t.setFont("helvetica","bold"),t.setFontSize(14),t.setTextColor(...d),t.text(x(re.target_price),o+6,a+16),a+=25,t.setFont("helvetica","italic"),t.setFontSize(7.5),t.setTextColor(...g),B("Negotiation target \u2014 not a predicted Procore quote.",g),a+=3),re.max_acceptable_price!=null&&(f(18),j("Maximum Acceptable Price"),a+=2,t.setFillColor(254,226,226),t.setDrawColor(...b),t.roundedRect(o,a,80,22,2,2,"FD"),t.setFont("helvetica","bold"),t.setFontSize(7),t.setTextColor(...g),t.text("WALK-AWAY PRICE",o+6,a+7),t.setFont("helvetica","bold"),t.setFontSize(14),t.setTextColor(...b),t.text(x(re.max_acceptable_price),o+6,a+16),a+=25),re.confirm_in_writing.length>0&&(j("Confirm in Writing"),a+=3,re.confirm_in_writing.forEach(v=>{f(8),t.setFont("helvetica","normal"),t.setFontSize(9),t.setTextColor(...m),t.splitTextToSize("  \u2713 "+v,c-4).forEach(y=>{f(6),t.text(y,o+2,a),a+=5})}),a+=3),ne()),f(50),G("Final Decision Framework"),a+=5,t.setFillColor(240,253,244),t.setDrawColor(167,243,208),t.roundedRect(o,a,c,8,2,2,"FD"),t.setFont("helvetica","bold"),t.setFontSize(8),t.setTextColor(6,95,70),t.text("WHAT WE KNOW",o+4,a+5.5),a+=11;let Nt="";A.verdict==="VERIFIED_BEFORE_AFTER"&&A.savings_amount?Nt=`We have a verified $${A.savings_amount.toLocaleString()}/year quote-to-quote difference.`:A.verdict==="OPPORTUNITY_NOT_QUANTIFIABLE"?Nt="An optimization candidate was identified, but savings cannot be quantified without additional evidence.":Nt="No products survived requirement and dependency checks as optimization candidates.",B(Nt),a+=8,t.setFillColor(254,243,199),t.setDrawColor(252,211,77),t.roundedRect(o,a,c,8,2,2,"FD"),t.setFont("helvetica","bold"),t.setFontSize(8),t.setTextColor(146,64,14),t.text("WHAT WE DON'T KNOW",o+4,a+5.5),a+=11;let kt="";A.verdict==="VERIFIED_BEFORE_AFTER"?kt="Whether this difference is specifically attributable to removing any individual product without configuration-mapped quotes.":A.verdict==="OPPORTUNITY_NOT_QUANTIFIABLE"?kt="The resulting Procore renewal price for the proposed configuration.":kt="Whether future configuration changes could produce eligible candidates.",B(kt),a+=8,t.setFillColor(234,247,240),t.setDrawColor(31,138,91),t.roundedRect(o,a,c,8,2,2,"FD"),t.setFont("helvetica","bold"),t.setFontSize(8),t.setTextColor(...l),t.text("NEXT ACTION",o+4,a+5.5),a+=11;let ui=A.what_to_confirm[0]??"Cross-check findings against your actual Procore renewal quote.";B(ui),a+=8,ne(),f(40),G("Disclaimer"),a+=5,["Independent analysis. Not affiliated with Procore Technologies, Inc.","No savings are guaranteed. All financial calculations are deterministic and evidence-based.","Benchmark figures are directional context from public observations, not official Procore pricing.","Always cross-check findings against your actual Procore renewal quote before making decisions.","This analysis does not constitute legal, financial, or procurement advice. Consult appropriate professionals for specific guidance."].forEach(v=>{f(10),t.setFont("helvetica","normal"),t.setFontSize(9),t.setTextColor(...g),t.splitTextToSize("\u2022 "+v,c-2).forEach(y=>{f(6),t.text(y,o,a),a+=5}),a+=2});let Xn=t.internal.pages.length-1;for(let v=1;v<=Xn;v++)t.setPage(v),le(v-1,Xn-1);let di=new Date().toISOString().split("T")[0];t.save(`RenewalScope_Procore_Renewal_Analysis_${di}.pdf`)}function da(r){let e=h("results-status-hero");if(!e)return;let n=r.free_result.verdict,t=r.free_result.savings_amount,s=t!=null&&t>0&&(n==="VERIFIED_BEFORE_AFTER"||n==="SAVINGS_IDENTIFIED"),i="",o="none",c="Analysis Complete",a="Analysis Complete";n==="VERIFIED_BEFORE_AFTER"?(i="verified",o="verified",c="Verified Savings",a="Verified Savings Identified"):n==="SAVINGS_IDENTIFIED"?(i="verified",o="verified",c="Savings Identified",a="Potential Savings Identified"):n==="OPPORTUNITY_NOT_QUANTIFIABLE"?(i="uncertain",o="uncertain",c="Opportunity Identified",a="Optimization Opportunity"):n==="NO_DEFENSIBLE_SAVINGS_IDENTIFIED"&&(i="none",o="none",c="No Defensible Savings",a="No Defensible Savings Identified");let u=n==="VERIFIED_BEFORE_AFTER"?"Verified Annual Savings":"Identified Savings",l=s?`<div class="spend-item"><div class="spend-label">${u}</div><div class="spend-value savings">${x(t)}</div></div>`:"";e.innerHTML=`<div class="status-hero ${i}"><div class="status-badge ${o}">${c}</div><div class="status-title">${a}</div><div class="status-subtitle">${r.free_result.explanation}</div><div class="spend-display"><div class="spend-item"><div class="spend-label">Current Annual Spend</div><div class="spend-value">${x(r.free_result.current_spend)}</div></div>`+l+"</div></div>"}function ei(r,e){let n=e.candidates;if(!n)return{status:"Not evaluated",why:""};if(n.skipped_product_ids.includes(r))return{status:"Not a candidate (actively used)",why:"Product is actively used"};let t=n.blocked.find(i=>i.product_id===r);if(t)return{status:"Blocked",why:t.blocked_reason??"Blocked by requirement or dependency"};let s=n.candidates.find(i=>i.product_id===r);return s?s.blocked_reason?{status:"Uncertain",why:s.blocked_reason}:{status:"Eligible candidate",why:""}:{status:"Not evaluated",why:""}}function ti(r,e){if(!e.counterfactual)return"";let n=e.counterfactual.counterfactual_results.find(t=>t.candidate.product_id===r);return n?n.result_class==="VERIFIED_BEFORE_AFTER"&&n.dollar_saving!=null&&n.dollar_saving>0?`Verified quote-to-quote difference: ${x(n.dollar_saving)}/year`:n.result_class==="OPPORTUNITY_NOT_QUANTIFIABLE"?"Savings not yet quantifiable":"":""}function ha(r){let e=h("results-benchmark");if(!e)return;let n=r.benchmark;if(!n||!n.min_evidence_count_met){e.innerHTML="";return}let t=n.stats.max-n.stats.min,s=n.user_rate-n.stats.min,i=t>0?Math.min(100,Math.max(0,s/t*100)):50,c={below_p25:"Your rate appears favorable relative to comparable public observations. Confirm any commercial impact in writing before restructuring.",p25_to_p50:"Your rate falls in the lower half of comparable observations.",p50_to_p75:"Your rate is near or above the median of comparable observations.",above_p75:"Your rate is in the upper range of comparable observations."}[n.position]??"";e.innerHTML=`<div class="card"><div class="card-title">Commercial Context</div><div class="benchmark-card"><div class="benchmark-header">Your Effective Rate</div><div class="rate-display"><span class="rate-value">${ee(n.user_rate)}</span><span class="rate-label">per $1M ACV</span></div><div class="benchmark-position">${c}</div><div class="bar-track" style="position:relative;overflow:visible;"><div class="bar-fill" style="width:${i}%"></div><div class="bar-marker" style="left:${i}%"></div></div><div class="bar-stats"><span>p25: <strong>${ee(n.stats.p25)}</strong></span><span>median: <strong>${ee(n.stats.p50)}</strong></span><span>p75: <strong>${ee(n.stats.p75)}</strong></span></div><div style="font-size:0.8125rem;color:var(--text-muted);margin-top:12px;"><strong>Evidence:</strong> ${n.comparable_evidence_ids.join(", ")}</div></div></div>`}function pa(r){let e=h("results-list");if(e){if(r.results.length===0){e.innerHTML='<div class="alert info">No specific findings to report based on the information provided.</div>';return}e.innerHTML=r.results.map(n=>{let t=n.result_type==="SAVINGS_IDENTIFIED"&&(n.dollar_saving==null||n.dollar_saving===0),s=t?"COMMERCIAL_OPPORTUNITY":n.result_type,i=t?"COMMERCIAL OPPORTUNITY":n.result_type.replace(/_/g," "),c=n.result_type==="VERIFIED_BEFORE_AFTER"&&n.dollar_saving!=null&&n.dollar_saving>0?`<div class="result-saving">Verified annual saving: ${x(n.dollar_saving)}</div>`:"",a=n.comparable_evidence.length>0?'<div class="result-evidence">Evidence: '+n.comparable_evidence.map(u=>`<span class="ev-id">${u}</span>`).join("")+"</div>":"";return`<div class="result-item ${s}"><div class="result-header"><span class="result-badge ${s}">${i}</span><span class="conf-badge">${n.confidence}</span></div><div class="result-text">${n.recommendation_text}</div>`+(n.explanation?`<div class="result-explanation">${n.explanation}</div>`:"")+c+a+"</div>"}).join("")}}function _a(r){let e=h("results-warnings");if(!e)return;let n="";r.warnings.length>0&&(n+='<div class="alert warning"><strong>Notices:</strong><br>'+r.warnings.map(t=>`\u2022 ${t}`).join("<br>")+"</div>"),r.assumptions.length>0&&(n+='<div class="alert info"><strong>Assumptions:</strong><br>'+r.assumptions.map(t=>`\u2022 ${t}`).join("<br>")+"</div>"),e.innerHTML=n}function fa(r){let e=h("results-negotiation");if(!e)return;let n=r.negotiation;if(!n){e.innerHTML="";return}let t=(o,c)=>`<div class="price-box"><div class="price-box-label">${o}</div><div class="price-box-value">${x(c)}</div><div class="price-box-note">Not a predicted Procore quote</div></div>`,s=(o,c)=>c.length===0?"":`<div class="neg-section"><div class="neg-label">${o}</div><ul class="neg-list">${c.map(a=>`<li>${a}</li>`).join("")}</ul></div>`,i=`<div class="negotiation-card"><div class="negotiation-title">Negotiation Plan</div><div class="neg-section"><div class="neg-label">What to Ask</div><div class="neg-content">${n.what_to_ask}</div></div><div class="neg-section"><div class="neg-label">Why</div><div class="neg-content">${n.why}</div></div><div class="neg-section"><div class="neg-label">Configuration Requested</div><div class="neg-content">${n.configuration_requested}</div></div>`;n.target_price!=null&&(i+=`<div class="neg-section"><div class="neg-label">Target Price</div>${t("Target",n.target_price)}</div>`),n.max_acceptable_price!=null&&(i+=`<div class="neg-section"><div class="neg-label">Max Acceptable Price</div>${t("Walk-away price",n.max_acceptable_price)}</div>`),i+=s("Unknowns",n.unknowns),i+=s("Risks",n.risks),i+=s("Confirm in Writing",n.confirm_in_writing),i+="</div>",e.innerHTML=i}function ma(r){let e=h("results-confirm");if(!e)return;let n=r.free_result.what_to_confirm;if(!n||n.length===0){e.innerHTML="";return}e.innerHTML=`<div class="card"><div class="card-title">What to Confirm</div><ul class="neg-list">${n.map(t=>`<li>${t}</li>`).join("")}</ul></div>`}function ga(r){let e=h("results-known-unknown");if(!e)return;let n=r.free_result.verdict,t=r.free_result.savings_amount,s="",i="",o="";if(n==="VERIFIED_BEFORE_AFTER"&&t)s=`The two user-supplied quotes differ by $${t.toLocaleString()}/year.`,i="Whether this difference is specifically attributable to removing any individual product.",o="A written quote confirming the exact configuration change between the two quotes.";else if(n==="OPPORTUNITY_NOT_QUANTIFIABLE"){let c=r.candidates?.candidates[0];s=c?`${X.find(a=>a.id===c.product_id)?.label??c.product_id} appears eligible for optimization review.`:"An optimization candidate was identified.",i="The resulting Procore renewal price for the proposed configuration.",o="A comparable written Procore quote for the proposed configuration."}else n==="NO_DEFENSIBLE_SAVINGS_IDENTIFIED"&&(s="No products survived the requirement and dependency checks as optimization candidates.",i="Whether future configuration changes could produce eligible candidates.",o="Updated product usage and requirement information.");if(!s){e.innerHTML="";return}e.innerHTML=`<div class="card">
+"use strict";
+(() => {
+  var __create = Object.create;
+  var __defProp = Object.defineProperty;
+  var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+  var __getOwnPropNames = Object.getOwnPropertyNames;
+  var __getProtoOf = Object.getPrototypeOf;
+  var __hasOwnProp = Object.prototype.hasOwnProperty;
+  var __esm = (fn, res, err) => function __init() {
+    if (err) throw err[0];
+    try {
+      return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+    } catch (e) {
+      throw err = [e], e;
+    }
+  };
+  var __commonJS = (cb, mod) => function __require() {
+    try {
+      return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+    } catch (e) {
+      throw mod = 0, e;
+    }
+  };
+  var __export = (target, all) => {
+    for (var name in all)
+      __defProp(target, name, { get: all[name], enumerable: true });
+  };
+  var __copyProps = (to, from, except, desc) => {
+    if (from && typeof from === "object" || typeof from === "function") {
+      for (let key of __getOwnPropNames(from))
+        if (!__hasOwnProp.call(to, key) && key !== except)
+          __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+    }
+    return to;
+  };
+  var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+    // If the importer is in node compatibility mode or this is not an ESM
+    // file that has been converted to a CommonJS file using a Babel-
+    // compatible transform (i.e. "__esModule" has not been set), then set
+    // "default" to the CommonJS "module.exports" for node compatibility.
+    isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+    mod
+  ));
+  var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+  // node_modules/@supabase/node-fetch/browser.js
+  var browser_exports = {};
+  __export(browser_exports, {
+    Headers: () => Headers2,
+    Request: () => Request,
+    Response: () => Response2,
+    default: () => browser_default,
+    fetch: () => fetch2
+  });
+  var getGlobal, globalObject, fetch2, browser_default, Headers2, Request, Response2;
+  var init_browser = __esm({
+    "node_modules/@supabase/node-fetch/browser.js"() {
+      "use strict";
+      getGlobal = function() {
+        if (typeof self !== "undefined") {
+          return self;
+        }
+        if (typeof window !== "undefined") {
+          return window;
+        }
+        if (typeof global !== "undefined") {
+          return global;
+        }
+        throw new Error("unable to locate global object");
+      };
+      globalObject = getGlobal();
+      fetch2 = globalObject.fetch;
+      browser_default = globalObject.fetch.bind(globalObject);
+      Headers2 = globalObject.Headers;
+      Request = globalObject.Request;
+      Response2 = globalObject.Response;
+    }
+  });
+
+  // node_modules/@supabase/postgrest-js/dist/cjs/PostgrestError.js
+  var require_PostgrestError = __commonJS({
+    "node_modules/@supabase/postgrest-js/dist/cjs/PostgrestError.js"(exports) {
+      "use strict";
+      Object.defineProperty(exports, "__esModule", { value: true });
+      var PostgrestError = class extends Error {
+        constructor(context) {
+          super(context.message);
+          this.name = "PostgrestError";
+          this.details = context.details;
+          this.hint = context.hint;
+          this.code = context.code;
+        }
+      };
+      exports.default = PostgrestError;
+    }
+  });
+
+  // node_modules/@supabase/postgrest-js/dist/cjs/PostgrestBuilder.js
+  var require_PostgrestBuilder = __commonJS({
+    "node_modules/@supabase/postgrest-js/dist/cjs/PostgrestBuilder.js"(exports) {
+      "use strict";
+      var __importDefault = exports && exports.__importDefault || function(mod) {
+        return mod && mod.__esModule ? mod : { "default": mod };
+      };
+      Object.defineProperty(exports, "__esModule", { value: true });
+      var node_fetch_1 = __importDefault((init_browser(), __toCommonJS(browser_exports)));
+      var PostgrestError_1 = __importDefault(require_PostgrestError());
+      var PostgrestBuilder2 = class {
+        constructor(builder) {
+          this.shouldThrowOnError = false;
+          this.method = builder.method;
+          this.url = builder.url;
+          this.headers = builder.headers;
+          this.schema = builder.schema;
+          this.body = builder.body;
+          this.shouldThrowOnError = builder.shouldThrowOnError;
+          this.signal = builder.signal;
+          this.isMaybeSingle = builder.isMaybeSingle;
+          if (builder.fetch) {
+            this.fetch = builder.fetch;
+          } else if (typeof fetch === "undefined") {
+            this.fetch = node_fetch_1.default;
+          } else {
+            this.fetch = fetch;
+          }
+        }
+        /**
+         * If there's an error with the query, throwOnError will reject the promise by
+         * throwing the error instead of returning it as part of a successful response.
+         *
+         * {@link https://github.com/supabase/supabase-js/issues/92}
+         */
+        throwOnError() {
+          this.shouldThrowOnError = true;
+          return this;
+        }
+        /**
+         * Set an HTTP header for the request.
+         */
+        setHeader(name, value) {
+          this.headers = Object.assign({}, this.headers);
+          this.headers[name] = value;
+          return this;
+        }
+        then(onfulfilled, onrejected) {
+          if (this.schema === void 0) {
+          } else if (["GET", "HEAD"].includes(this.method)) {
+            this.headers["Accept-Profile"] = this.schema;
+          } else {
+            this.headers["Content-Profile"] = this.schema;
+          }
+          if (this.method !== "GET" && this.method !== "HEAD") {
+            this.headers["Content-Type"] = "application/json";
+          }
+          const _fetch = this.fetch;
+          let res = _fetch(this.url.toString(), {
+            method: this.method,
+            headers: this.headers,
+            body: JSON.stringify(this.body),
+            signal: this.signal
+          }).then(async (res2) => {
+            var _a, _b, _c;
+            let error = null;
+            let data = null;
+            let count = null;
+            let status = res2.status;
+            let statusText = res2.statusText;
+            if (res2.ok) {
+              if (this.method !== "HEAD") {
+                const body = await res2.text();
+                if (body === "") {
+                } else if (this.headers["Accept"] === "text/csv") {
+                  data = body;
+                } else if (this.headers["Accept"] && this.headers["Accept"].includes("application/vnd.pgrst.plan+text")) {
+                  data = body;
+                } else {
+                  data = JSON.parse(body);
+                }
+              }
+              const countHeader = (_a = this.headers["Prefer"]) === null || _a === void 0 ? void 0 : _a.match(/count=(exact|planned|estimated)/);
+              const contentRange = (_b = res2.headers.get("content-range")) === null || _b === void 0 ? void 0 : _b.split("/");
+              if (countHeader && contentRange && contentRange.length > 1) {
+                count = parseInt(contentRange[1]);
+              }
+              if (this.isMaybeSingle && this.method === "GET" && Array.isArray(data)) {
+                if (data.length > 1) {
+                  error = {
+                    // https://github.com/PostgREST/postgrest/blob/a867d79c42419af16c18c3fb019eba8df992626f/src/PostgREST/Error.hs#L553
+                    code: "PGRST116",
+                    details: `Results contain ${data.length} rows, application/vnd.pgrst.object+json requires 1 row`,
+                    hint: null,
+                    message: "JSON object requested, multiple (or no) rows returned"
+                  };
+                  data = null;
+                  count = null;
+                  status = 406;
+                  statusText = "Not Acceptable";
+                } else if (data.length === 1) {
+                  data = data[0];
+                } else {
+                  data = null;
+                }
+              }
+            } else {
+              const body = await res2.text();
+              try {
+                error = JSON.parse(body);
+                if (Array.isArray(error) && res2.status === 404) {
+                  data = [];
+                  error = null;
+                  status = 200;
+                  statusText = "OK";
+                }
+              } catch (_d) {
+                if (res2.status === 404 && body === "") {
+                  status = 204;
+                  statusText = "No Content";
+                } else {
+                  error = {
+                    message: body
+                  };
+                }
+              }
+              if (error && this.isMaybeSingle && ((_c = error === null || error === void 0 ? void 0 : error.details) === null || _c === void 0 ? void 0 : _c.includes("0 rows"))) {
+                error = null;
+                status = 200;
+                statusText = "OK";
+              }
+              if (error && this.shouldThrowOnError) {
+                throw new PostgrestError_1.default(error);
+              }
+            }
+            const postgrestResponse = {
+              error,
+              data,
+              count,
+              status,
+              statusText
+            };
+            return postgrestResponse;
+          });
+          if (!this.shouldThrowOnError) {
+            res = res.catch((fetchError) => {
+              var _a, _b, _c;
+              return {
+                error: {
+                  message: `${(_a = fetchError === null || fetchError === void 0 ? void 0 : fetchError.name) !== null && _a !== void 0 ? _a : "FetchError"}: ${fetchError === null || fetchError === void 0 ? void 0 : fetchError.message}`,
+                  details: `${(_b = fetchError === null || fetchError === void 0 ? void 0 : fetchError.stack) !== null && _b !== void 0 ? _b : ""}`,
+                  hint: "",
+                  code: `${(_c = fetchError === null || fetchError === void 0 ? void 0 : fetchError.code) !== null && _c !== void 0 ? _c : ""}`
+                },
+                data: null,
+                count: null,
+                status: 0,
+                statusText: ""
+              };
+            });
+          }
+          return res.then(onfulfilled, onrejected);
+        }
+      };
+      exports.default = PostgrestBuilder2;
+    }
+  });
+
+  // node_modules/@supabase/postgrest-js/dist/cjs/PostgrestTransformBuilder.js
+  var require_PostgrestTransformBuilder = __commonJS({
+    "node_modules/@supabase/postgrest-js/dist/cjs/PostgrestTransformBuilder.js"(exports) {
+      "use strict";
+      var __importDefault = exports && exports.__importDefault || function(mod) {
+        return mod && mod.__esModule ? mod : { "default": mod };
+      };
+      Object.defineProperty(exports, "__esModule", { value: true });
+      var PostgrestBuilder_1 = __importDefault(require_PostgrestBuilder());
+      var PostgrestTransformBuilder2 = class extends PostgrestBuilder_1.default {
+        /**
+         * Perform a SELECT on the query result.
+         *
+         * By default, `.insert()`, `.update()`, `.upsert()`, and `.delete()` do not
+         * return modified rows. By calling this method, modified rows are returned in
+         * `data`.
+         *
+         * @param columns - The columns to retrieve, separated by commas
+         */
+        select(columns) {
+          let quoted = false;
+          const cleanedColumns = (columns !== null && columns !== void 0 ? columns : "*").split("").map((c) => {
+            if (/\s/.test(c) && !quoted) {
+              return "";
+            }
+            if (c === '"') {
+              quoted = !quoted;
+            }
+            return c;
+          }).join("");
+          this.url.searchParams.set("select", cleanedColumns);
+          if (this.headers["Prefer"]) {
+            this.headers["Prefer"] += ",";
+          }
+          this.headers["Prefer"] += "return=representation";
+          return this;
+        }
+        /**
+         * Order the query result by `column`.
+         *
+         * You can call this method multiple times to order by multiple columns.
+         *
+         * You can order referenced tables, but it only affects the ordering of the
+         * parent table if you use `!inner` in the query.
+         *
+         * @param column - The column to order by
+         * @param options - Named parameters
+         * @param options.ascending - If `true`, the result will be in ascending order
+         * @param options.nullsFirst - If `true`, `null`s appear first. If `false`,
+         * `null`s appear last.
+         * @param options.referencedTable - Set this to order a referenced table by
+         * its columns
+         * @param options.foreignTable - Deprecated, use `options.referencedTable`
+         * instead
+         */
+        order(column, { ascending = true, nullsFirst, foreignTable, referencedTable = foreignTable } = {}) {
+          const key = referencedTable ? `${referencedTable}.order` : "order";
+          const existingOrder = this.url.searchParams.get(key);
+          this.url.searchParams.set(key, `${existingOrder ? `${existingOrder},` : ""}${column}.${ascending ? "asc" : "desc"}${nullsFirst === void 0 ? "" : nullsFirst ? ".nullsfirst" : ".nullslast"}`);
+          return this;
+        }
+        /**
+         * Limit the query result by `count`.
+         *
+         * @param count - The maximum number of rows to return
+         * @param options - Named parameters
+         * @param options.referencedTable - Set this to limit rows of referenced
+         * tables instead of the parent table
+         * @param options.foreignTable - Deprecated, use `options.referencedTable`
+         * instead
+         */
+        limit(count, { foreignTable, referencedTable = foreignTable } = {}) {
+          const key = typeof referencedTable === "undefined" ? "limit" : `${referencedTable}.limit`;
+          this.url.searchParams.set(key, `${count}`);
+          return this;
+        }
+        /**
+         * Limit the query result by starting at an offset `from` and ending at the offset `to`.
+         * Only records within this range are returned.
+         * This respects the query order and if there is no order clause the range could behave unexpectedly.
+         * The `from` and `to` values are 0-based and inclusive: `range(1, 3)` will include the second, third
+         * and fourth rows of the query.
+         *
+         * @param from - The starting index from which to limit the result
+         * @param to - The last index to which to limit the result
+         * @param options - Named parameters
+         * @param options.referencedTable - Set this to limit rows of referenced
+         * tables instead of the parent table
+         * @param options.foreignTable - Deprecated, use `options.referencedTable`
+         * instead
+         */
+        range(from, to, { foreignTable, referencedTable = foreignTable } = {}) {
+          const keyOffset = typeof referencedTable === "undefined" ? "offset" : `${referencedTable}.offset`;
+          const keyLimit = typeof referencedTable === "undefined" ? "limit" : `${referencedTable}.limit`;
+          this.url.searchParams.set(keyOffset, `${from}`);
+          this.url.searchParams.set(keyLimit, `${to - from + 1}`);
+          return this;
+        }
+        /**
+         * Set the AbortSignal for the fetch request.
+         *
+         * @param signal - The AbortSignal to use for the fetch request
+         */
+        abortSignal(signal) {
+          this.signal = signal;
+          return this;
+        }
+        /**
+         * Return `data` as a single object instead of an array of objects.
+         *
+         * Query result must be one row (e.g. using `.limit(1)`), otherwise this
+         * returns an error.
+         */
+        single() {
+          this.headers["Accept"] = "application/vnd.pgrst.object+json";
+          return this;
+        }
+        /**
+         * Return `data` as a single object instead of an array of objects.
+         *
+         * Query result must be zero or one row (e.g. using `.limit(1)`), otherwise
+         * this returns an error.
+         */
+        maybeSingle() {
+          if (this.method === "GET") {
+            this.headers["Accept"] = "application/json";
+          } else {
+            this.headers["Accept"] = "application/vnd.pgrst.object+json";
+          }
+          this.isMaybeSingle = true;
+          return this;
+        }
+        /**
+         * Return `data` as a string in CSV format.
+         */
+        csv() {
+          this.headers["Accept"] = "text/csv";
+          return this;
+        }
+        /**
+         * Return `data` as an object in [GeoJSON](https://geojson.org) format.
+         */
+        geojson() {
+          this.headers["Accept"] = "application/geo+json";
+          return this;
+        }
+        /**
+         * Return `data` as the EXPLAIN plan for the query.
+         *
+         * You need to enable the
+         * [db_plan_enabled](https://supabase.com/docs/guides/database/debugging-performance#enabling-explain)
+         * setting before using this method.
+         *
+         * @param options - Named parameters
+         *
+         * @param options.analyze - If `true`, the query will be executed and the
+         * actual run time will be returned
+         *
+         * @param options.verbose - If `true`, the query identifier will be returned
+         * and `data` will include the output columns of the query
+         *
+         * @param options.settings - If `true`, include information on configuration
+         * parameters that affect query planning
+         *
+         * @param options.buffers - If `true`, include information on buffer usage
+         *
+         * @param options.wal - If `true`, include information on WAL record generation
+         *
+         * @param options.format - The format of the output, can be `"text"` (default)
+         * or `"json"`
+         */
+        explain({ analyze = false, verbose = false, settings = false, buffers = false, wal = false, format = "text" } = {}) {
+          var _a;
+          const options = [
+            analyze ? "analyze" : null,
+            verbose ? "verbose" : null,
+            settings ? "settings" : null,
+            buffers ? "buffers" : null,
+            wal ? "wal" : null
+          ].filter(Boolean).join("|");
+          const forMediatype = (_a = this.headers["Accept"]) !== null && _a !== void 0 ? _a : "application/json";
+          this.headers["Accept"] = `application/vnd.pgrst.plan+${format}; for="${forMediatype}"; options=${options};`;
+          if (format === "json")
+            return this;
+          else
+            return this;
+        }
+        /**
+         * Rollback the query.
+         *
+         * `data` will still be returned, but the query is not committed.
+         */
+        rollback() {
+          var _a;
+          if (((_a = this.headers["Prefer"]) !== null && _a !== void 0 ? _a : "").trim().length > 0) {
+            this.headers["Prefer"] += ",tx=rollback";
+          } else {
+            this.headers["Prefer"] = "tx=rollback";
+          }
+          return this;
+        }
+        /**
+         * Override the type of the returned `data`.
+         *
+         * @typeParam NewResult - The new result type to override with
+         */
+        returns() {
+          return this;
+        }
+      };
+      exports.default = PostgrestTransformBuilder2;
+    }
+  });
+
+  // node_modules/@supabase/postgrest-js/dist/cjs/PostgrestFilterBuilder.js
+  var require_PostgrestFilterBuilder = __commonJS({
+    "node_modules/@supabase/postgrest-js/dist/cjs/PostgrestFilterBuilder.js"(exports) {
+      "use strict";
+      var __importDefault = exports && exports.__importDefault || function(mod) {
+        return mod && mod.__esModule ? mod : { "default": mod };
+      };
+      Object.defineProperty(exports, "__esModule", { value: true });
+      var PostgrestTransformBuilder_1 = __importDefault(require_PostgrestTransformBuilder());
+      var PostgrestFilterBuilder2 = class extends PostgrestTransformBuilder_1.default {
+        /**
+         * Match only rows where `column` is equal to `value`.
+         *
+         * To check if the value of `column` is NULL, you should use `.is()` instead.
+         *
+         * @param column - The column to filter on
+         * @param value - The value to filter with
+         */
+        eq(column, value) {
+          this.url.searchParams.append(column, `eq.${value}`);
+          return this;
+        }
+        /**
+         * Match only rows where `column` is not equal to `value`.
+         *
+         * @param column - The column to filter on
+         * @param value - The value to filter with
+         */
+        neq(column, value) {
+          this.url.searchParams.append(column, `neq.${value}`);
+          return this;
+        }
+        /**
+         * Match only rows where `column` is greater than `value`.
+         *
+         * @param column - The column to filter on
+         * @param value - The value to filter with
+         */
+        gt(column, value) {
+          this.url.searchParams.append(column, `gt.${value}`);
+          return this;
+        }
+        /**
+         * Match only rows where `column` is greater than or equal to `value`.
+         *
+         * @param column - The column to filter on
+         * @param value - The value to filter with
+         */
+        gte(column, value) {
+          this.url.searchParams.append(column, `gte.${value}`);
+          return this;
+        }
+        /**
+         * Match only rows where `column` is less than `value`.
+         *
+         * @param column - The column to filter on
+         * @param value - The value to filter with
+         */
+        lt(column, value) {
+          this.url.searchParams.append(column, `lt.${value}`);
+          return this;
+        }
+        /**
+         * Match only rows where `column` is less than or equal to `value`.
+         *
+         * @param column - The column to filter on
+         * @param value - The value to filter with
+         */
+        lte(column, value) {
+          this.url.searchParams.append(column, `lte.${value}`);
+          return this;
+        }
+        /**
+         * Match only rows where `column` matches `pattern` case-sensitively.
+         *
+         * @param column - The column to filter on
+         * @param pattern - The pattern to match with
+         */
+        like(column, pattern) {
+          this.url.searchParams.append(column, `like.${pattern}`);
+          return this;
+        }
+        /**
+         * Match only rows where `column` matches all of `patterns` case-sensitively.
+         *
+         * @param column - The column to filter on
+         * @param patterns - The patterns to match with
+         */
+        likeAllOf(column, patterns) {
+          this.url.searchParams.append(column, `like(all).{${patterns.join(",")}}`);
+          return this;
+        }
+        /**
+         * Match only rows where `column` matches any of `patterns` case-sensitively.
+         *
+         * @param column - The column to filter on
+         * @param patterns - The patterns to match with
+         */
+        likeAnyOf(column, patterns) {
+          this.url.searchParams.append(column, `like(any).{${patterns.join(",")}}`);
+          return this;
+        }
+        /**
+         * Match only rows where `column` matches `pattern` case-insensitively.
+         *
+         * @param column - The column to filter on
+         * @param pattern - The pattern to match with
+         */
+        ilike(column, pattern) {
+          this.url.searchParams.append(column, `ilike.${pattern}`);
+          return this;
+        }
+        /**
+         * Match only rows where `column` matches all of `patterns` case-insensitively.
+         *
+         * @param column - The column to filter on
+         * @param patterns - The patterns to match with
+         */
+        ilikeAllOf(column, patterns) {
+          this.url.searchParams.append(column, `ilike(all).{${patterns.join(",")}}`);
+          return this;
+        }
+        /**
+         * Match only rows where `column` matches any of `patterns` case-insensitively.
+         *
+         * @param column - The column to filter on
+         * @param patterns - The patterns to match with
+         */
+        ilikeAnyOf(column, patterns) {
+          this.url.searchParams.append(column, `ilike(any).{${patterns.join(",")}}`);
+          return this;
+        }
+        /**
+         * Match only rows where `column` IS `value`.
+         *
+         * For non-boolean columns, this is only relevant for checking if the value of
+         * `column` is NULL by setting `value` to `null`.
+         *
+         * For boolean columns, you can also set `value` to `true` or `false` and it
+         * will behave the same way as `.eq()`.
+         *
+         * @param column - The column to filter on
+         * @param value - The value to filter with
+         */
+        is(column, value) {
+          this.url.searchParams.append(column, `is.${value}`);
+          return this;
+        }
+        /**
+         * Match only rows where `column` is included in the `values` array.
+         *
+         * @param column - The column to filter on
+         * @param values - The values array to filter with
+         */
+        in(column, values) {
+          const cleanedValues = Array.from(new Set(values)).map((s) => {
+            if (typeof s === "string" && new RegExp("[,()]").test(s))
+              return `"${s}"`;
+            else
+              return `${s}`;
+          }).join(",");
+          this.url.searchParams.append(column, `in.(${cleanedValues})`);
+          return this;
+        }
+        /**
+         * Only relevant for jsonb, array, and range columns. Match only rows where
+         * `column` contains every element appearing in `value`.
+         *
+         * @param column - The jsonb, array, or range column to filter on
+         * @param value - The jsonb, array, or range value to filter with
+         */
+        contains(column, value) {
+          if (typeof value === "string") {
+            this.url.searchParams.append(column, `cs.${value}`);
+          } else if (Array.isArray(value)) {
+            this.url.searchParams.append(column, `cs.{${value.join(",")}}`);
+          } else {
+            this.url.searchParams.append(column, `cs.${JSON.stringify(value)}`);
+          }
+          return this;
+        }
+        /**
+         * Only relevant for jsonb, array, and range columns. Match only rows where
+         * every element appearing in `column` is contained by `value`.
+         *
+         * @param column - The jsonb, array, or range column to filter on
+         * @param value - The jsonb, array, or range value to filter with
+         */
+        containedBy(column, value) {
+          if (typeof value === "string") {
+            this.url.searchParams.append(column, `cd.${value}`);
+          } else if (Array.isArray(value)) {
+            this.url.searchParams.append(column, `cd.{${value.join(",")}}`);
+          } else {
+            this.url.searchParams.append(column, `cd.${JSON.stringify(value)}`);
+          }
+          return this;
+        }
+        /**
+         * Only relevant for range columns. Match only rows where every element in
+         * `column` is greater than any element in `range`.
+         *
+         * @param column - The range column to filter on
+         * @param range - The range to filter with
+         */
+        rangeGt(column, range) {
+          this.url.searchParams.append(column, `sr.${range}`);
+          return this;
+        }
+        /**
+         * Only relevant for range columns. Match only rows where every element in
+         * `column` is either contained in `range` or greater than any element in
+         * `range`.
+         *
+         * @param column - The range column to filter on
+         * @param range - The range to filter with
+         */
+        rangeGte(column, range) {
+          this.url.searchParams.append(column, `nxl.${range}`);
+          return this;
+        }
+        /**
+         * Only relevant for range columns. Match only rows where every element in
+         * `column` is less than any element in `range`.
+         *
+         * @param column - The range column to filter on
+         * @param range - The range to filter with
+         */
+        rangeLt(column, range) {
+          this.url.searchParams.append(column, `sl.${range}`);
+          return this;
+        }
+        /**
+         * Only relevant for range columns. Match only rows where every element in
+         * `column` is either contained in `range` or less than any element in
+         * `range`.
+         *
+         * @param column - The range column to filter on
+         * @param range - The range to filter with
+         */
+        rangeLte(column, range) {
+          this.url.searchParams.append(column, `nxr.${range}`);
+          return this;
+        }
+        /**
+         * Only relevant for range columns. Match only rows where `column` is
+         * mutually exclusive to `range` and there can be no element between the two
+         * ranges.
+         *
+         * @param column - The range column to filter on
+         * @param range - The range to filter with
+         */
+        rangeAdjacent(column, range) {
+          this.url.searchParams.append(column, `adj.${range}`);
+          return this;
+        }
+        /**
+         * Only relevant for array and range columns. Match only rows where
+         * `column` and `value` have an element in common.
+         *
+         * @param column - The array or range column to filter on
+         * @param value - The array or range value to filter with
+         */
+        overlaps(column, value) {
+          if (typeof value === "string") {
+            this.url.searchParams.append(column, `ov.${value}`);
+          } else {
+            this.url.searchParams.append(column, `ov.{${value.join(",")}}`);
+          }
+          return this;
+        }
+        /**
+         * Only relevant for text and tsvector columns. Match only rows where
+         * `column` matches the query string in `query`.
+         *
+         * @param column - The text or tsvector column to filter on
+         * @param query - The query text to match with
+         * @param options - Named parameters
+         * @param options.config - The text search configuration to use
+         * @param options.type - Change how the `query` text is interpreted
+         */
+        textSearch(column, query, { config, type } = {}) {
+          let typePart = "";
+          if (type === "plain") {
+            typePart = "pl";
+          } else if (type === "phrase") {
+            typePart = "ph";
+          } else if (type === "websearch") {
+            typePart = "w";
+          }
+          const configPart = config === void 0 ? "" : `(${config})`;
+          this.url.searchParams.append(column, `${typePart}fts${configPart}.${query}`);
+          return this;
+        }
+        /**
+         * Match only rows where each column in `query` keys is equal to its
+         * associated value. Shorthand for multiple `.eq()`s.
+         *
+         * @param query - The object to filter with, with column names as keys mapped
+         * to their filter values
+         */
+        match(query) {
+          Object.entries(query).forEach(([column, value]) => {
+            this.url.searchParams.append(column, `eq.${value}`);
+          });
+          return this;
+        }
+        /**
+         * Match only rows which doesn't satisfy the filter.
+         *
+         * Unlike most filters, `opearator` and `value` are used as-is and need to
+         * follow [PostgREST
+         * syntax](https://postgrest.org/en/stable/api.html#operators). You also need
+         * to make sure they are properly sanitized.
+         *
+         * @param column - The column to filter on
+         * @param operator - The operator to be negated to filter with, following
+         * PostgREST syntax
+         * @param value - The value to filter with, following PostgREST syntax
+         */
+        not(column, operator, value) {
+          this.url.searchParams.append(column, `not.${operator}.${value}`);
+          return this;
+        }
+        /**
+         * Match only rows which satisfy at least one of the filters.
+         *
+         * Unlike most filters, `filters` is used as-is and needs to follow [PostgREST
+         * syntax](https://postgrest.org/en/stable/api.html#operators). You also need
+         * to make sure it's properly sanitized.
+         *
+         * It's currently not possible to do an `.or()` filter across multiple tables.
+         *
+         * @param filters - The filters to use, following PostgREST syntax
+         * @param options - Named parameters
+         * @param options.referencedTable - Set this to filter on referenced tables
+         * instead of the parent table
+         * @param options.foreignTable - Deprecated, use `referencedTable` instead
+         */
+        or(filters, { foreignTable, referencedTable = foreignTable } = {}) {
+          const key = referencedTable ? `${referencedTable}.or` : "or";
+          this.url.searchParams.append(key, `(${filters})`);
+          return this;
+        }
+        /**
+         * Match only rows which satisfy the filter. This is an escape hatch - you
+         * should use the specific filter methods wherever possible.
+         *
+         * Unlike most filters, `opearator` and `value` are used as-is and need to
+         * follow [PostgREST
+         * syntax](https://postgrest.org/en/stable/api.html#operators). You also need
+         * to make sure they are properly sanitized.
+         *
+         * @param column - The column to filter on
+         * @param operator - The operator to filter with, following PostgREST syntax
+         * @param value - The value to filter with, following PostgREST syntax
+         */
+        filter(column, operator, value) {
+          this.url.searchParams.append(column, `${operator}.${value}`);
+          return this;
+        }
+      };
+      exports.default = PostgrestFilterBuilder2;
+    }
+  });
+
+  // node_modules/@supabase/postgrest-js/dist/cjs/PostgrestQueryBuilder.js
+  var require_PostgrestQueryBuilder = __commonJS({
+    "node_modules/@supabase/postgrest-js/dist/cjs/PostgrestQueryBuilder.js"(exports) {
+      "use strict";
+      var __importDefault = exports && exports.__importDefault || function(mod) {
+        return mod && mod.__esModule ? mod : { "default": mod };
+      };
+      Object.defineProperty(exports, "__esModule", { value: true });
+      var PostgrestFilterBuilder_1 = __importDefault(require_PostgrestFilterBuilder());
+      var PostgrestQueryBuilder2 = class {
+        constructor(url, { headers = {}, schema, fetch: fetch3 }) {
+          this.url = url;
+          this.headers = headers;
+          this.schema = schema;
+          this.fetch = fetch3;
+        }
+        /**
+         * Perform a SELECT query on the table or view.
+         *
+         * @param columns - The columns to retrieve, separated by commas. Columns can be renamed when returned with `customName:columnName`
+         *
+         * @param options - Named parameters
+         *
+         * @param options.head - When set to `true`, `data` will not be returned.
+         * Useful if you only need the count.
+         *
+         * @param options.count - Count algorithm to use to count rows in the table or view.
+         *
+         * `"exact"`: Exact but slow count algorithm. Performs a `COUNT(*)` under the
+         * hood.
+         *
+         * `"planned"`: Approximated but fast count algorithm. Uses the Postgres
+         * statistics under the hood.
+         *
+         * `"estimated"`: Uses exact count for low numbers and planned count for high
+         * numbers.
+         */
+        select(columns, { head: head2 = false, count } = {}) {
+          const method = head2 ? "HEAD" : "GET";
+          let quoted = false;
+          const cleanedColumns = (columns !== null && columns !== void 0 ? columns : "*").split("").map((c) => {
+            if (/\s/.test(c) && !quoted) {
+              return "";
+            }
+            if (c === '"') {
+              quoted = !quoted;
+            }
+            return c;
+          }).join("");
+          this.url.searchParams.set("select", cleanedColumns);
+          if (count) {
+            this.headers["Prefer"] = `count=${count}`;
+          }
+          return new PostgrestFilterBuilder_1.default({
+            method,
+            url: this.url,
+            headers: this.headers,
+            schema: this.schema,
+            fetch: this.fetch,
+            allowEmpty: false
+          });
+        }
+        /**
+         * Perform an INSERT into the table or view.
+         *
+         * By default, inserted rows are not returned. To return it, chain the call
+         * with `.select()`.
+         *
+         * @param values - The values to insert. Pass an object to insert a single row
+         * or an array to insert multiple rows.
+         *
+         * @param options - Named parameters
+         *
+         * @param options.count - Count algorithm to use to count inserted rows.
+         *
+         * `"exact"`: Exact but slow count algorithm. Performs a `COUNT(*)` under the
+         * hood.
+         *
+         * `"planned"`: Approximated but fast count algorithm. Uses the Postgres
+         * statistics under the hood.
+         *
+         * `"estimated"`: Uses exact count for low numbers and planned count for high
+         * numbers.
+         *
+         * @param options.defaultToNull - Make missing fields default to `null`.
+         * Otherwise, use the default value for the column. Only applies for bulk
+         * inserts.
+         */
+        insert(values, { count, defaultToNull = true } = {}) {
+          const method = "POST";
+          const prefersHeaders = [];
+          if (this.headers["Prefer"]) {
+            prefersHeaders.push(this.headers["Prefer"]);
+          }
+          if (count) {
+            prefersHeaders.push(`count=${count}`);
+          }
+          if (!defaultToNull) {
+            prefersHeaders.push("missing=default");
+          }
+          this.headers["Prefer"] = prefersHeaders.join(",");
+          if (Array.isArray(values)) {
+            const columns = values.reduce((acc, x) => acc.concat(Object.keys(x)), []);
+            if (columns.length > 0) {
+              const uniqueColumns = [...new Set(columns)].map((column) => `"${column}"`);
+              this.url.searchParams.set("columns", uniqueColumns.join(","));
+            }
+          }
+          return new PostgrestFilterBuilder_1.default({
+            method,
+            url: this.url,
+            headers: this.headers,
+            schema: this.schema,
+            body: values,
+            fetch: this.fetch,
+            allowEmpty: false
+          });
+        }
+        /**
+         * Perform an UPSERT on the table or view. Depending on the column(s) passed
+         * to `onConflict`, `.upsert()` allows you to perform the equivalent of
+         * `.insert()` if a row with the corresponding `onConflict` columns doesn't
+         * exist, or if it does exist, perform an alternative action depending on
+         * `ignoreDuplicates`.
+         *
+         * By default, upserted rows are not returned. To return it, chain the call
+         * with `.select()`.
+         *
+         * @param values - The values to upsert with. Pass an object to upsert a
+         * single row or an array to upsert multiple rows.
+         *
+         * @param options - Named parameters
+         *
+         * @param options.onConflict - Comma-separated UNIQUE column(s) to specify how
+         * duplicate rows are determined. Two rows are duplicates if all the
+         * `onConflict` columns are equal.
+         *
+         * @param options.ignoreDuplicates - If `true`, duplicate rows are ignored. If
+         * `false`, duplicate rows are merged with existing rows.
+         *
+         * @param options.count - Count algorithm to use to count upserted rows.
+         *
+         * `"exact"`: Exact but slow count algorithm. Performs a `COUNT(*)` under the
+         * hood.
+         *
+         * `"planned"`: Approximated but fast count algorithm. Uses the Postgres
+         * statistics under the hood.
+         *
+         * `"estimated"`: Uses exact count for low numbers and planned count for high
+         * numbers.
+         *
+         * @param options.defaultToNull - Make missing fields default to `null`.
+         * Otherwise, use the default value for the column. This only applies when
+         * inserting new rows, not when merging with existing rows under
+         * `ignoreDuplicates: false`. This also only applies when doing bulk upserts.
+         */
+        upsert(values, { onConflict, ignoreDuplicates = false, count, defaultToNull = true } = {}) {
+          const method = "POST";
+          const prefersHeaders = [`resolution=${ignoreDuplicates ? "ignore" : "merge"}-duplicates`];
+          if (onConflict !== void 0)
+            this.url.searchParams.set("on_conflict", onConflict);
+          if (this.headers["Prefer"]) {
+            prefersHeaders.push(this.headers["Prefer"]);
+          }
+          if (count) {
+            prefersHeaders.push(`count=${count}`);
+          }
+          if (!defaultToNull) {
+            prefersHeaders.push("missing=default");
+          }
+          this.headers["Prefer"] = prefersHeaders.join(",");
+          if (Array.isArray(values)) {
+            const columns = values.reduce((acc, x) => acc.concat(Object.keys(x)), []);
+            if (columns.length > 0) {
+              const uniqueColumns = [...new Set(columns)].map((column) => `"${column}"`);
+              this.url.searchParams.set("columns", uniqueColumns.join(","));
+            }
+          }
+          return new PostgrestFilterBuilder_1.default({
+            method,
+            url: this.url,
+            headers: this.headers,
+            schema: this.schema,
+            body: values,
+            fetch: this.fetch,
+            allowEmpty: false
+          });
+        }
+        /**
+         * Perform an UPDATE on the table or view.
+         *
+         * By default, updated rows are not returned. To return it, chain the call
+         * with `.select()` after filters.
+         *
+         * @param values - The values to update with
+         *
+         * @param options - Named parameters
+         *
+         * @param options.count - Count algorithm to use to count updated rows.
+         *
+         * `"exact"`: Exact but slow count algorithm. Performs a `COUNT(*)` under the
+         * hood.
+         *
+         * `"planned"`: Approximated but fast count algorithm. Uses the Postgres
+         * statistics under the hood.
+         *
+         * `"estimated"`: Uses exact count for low numbers and planned count for high
+         * numbers.
+         */
+        update(values, { count } = {}) {
+          const method = "PATCH";
+          const prefersHeaders = [];
+          if (this.headers["Prefer"]) {
+            prefersHeaders.push(this.headers["Prefer"]);
+          }
+          if (count) {
+            prefersHeaders.push(`count=${count}`);
+          }
+          this.headers["Prefer"] = prefersHeaders.join(",");
+          return new PostgrestFilterBuilder_1.default({
+            method,
+            url: this.url,
+            headers: this.headers,
+            schema: this.schema,
+            body: values,
+            fetch: this.fetch,
+            allowEmpty: false
+          });
+        }
+        /**
+         * Perform a DELETE on the table or view.
+         *
+         * By default, deleted rows are not returned. To return it, chain the call
+         * with `.select()` after filters.
+         *
+         * @param options - Named parameters
+         *
+         * @param options.count - Count algorithm to use to count deleted rows.
+         *
+         * `"exact"`: Exact but slow count algorithm. Performs a `COUNT(*)` under the
+         * hood.
+         *
+         * `"planned"`: Approximated but fast count algorithm. Uses the Postgres
+         * statistics under the hood.
+         *
+         * `"estimated"`: Uses exact count for low numbers and planned count for high
+         * numbers.
+         */
+        delete({ count } = {}) {
+          const method = "DELETE";
+          const prefersHeaders = [];
+          if (count) {
+            prefersHeaders.push(`count=${count}`);
+          }
+          if (this.headers["Prefer"]) {
+            prefersHeaders.unshift(this.headers["Prefer"]);
+          }
+          this.headers["Prefer"] = prefersHeaders.join(",");
+          return new PostgrestFilterBuilder_1.default({
+            method,
+            url: this.url,
+            headers: this.headers,
+            schema: this.schema,
+            fetch: this.fetch,
+            allowEmpty: false
+          });
+        }
+      };
+      exports.default = PostgrestQueryBuilder2;
+    }
+  });
+
+  // node_modules/@supabase/postgrest-js/dist/cjs/version.js
+  var require_version = __commonJS({
+    "node_modules/@supabase/postgrest-js/dist/cjs/version.js"(exports) {
+      "use strict";
+      Object.defineProperty(exports, "__esModule", { value: true });
+      exports.version = void 0;
+      exports.version = "0.0.0-automated";
+    }
+  });
+
+  // node_modules/@supabase/postgrest-js/dist/cjs/constants.js
+  var require_constants = __commonJS({
+    "node_modules/@supabase/postgrest-js/dist/cjs/constants.js"(exports) {
+      "use strict";
+      Object.defineProperty(exports, "__esModule", { value: true });
+      exports.DEFAULT_HEADERS = void 0;
+      var version_1 = require_version();
+      exports.DEFAULT_HEADERS = { "X-Client-Info": `postgrest-js/${version_1.version}` };
+    }
+  });
+
+  // node_modules/@supabase/postgrest-js/dist/cjs/PostgrestClient.js
+  var require_PostgrestClient = __commonJS({
+    "node_modules/@supabase/postgrest-js/dist/cjs/PostgrestClient.js"(exports) {
+      "use strict";
+      var __importDefault = exports && exports.__importDefault || function(mod) {
+        return mod && mod.__esModule ? mod : { "default": mod };
+      };
+      Object.defineProperty(exports, "__esModule", { value: true });
+      var PostgrestQueryBuilder_1 = __importDefault(require_PostgrestQueryBuilder());
+      var PostgrestFilterBuilder_1 = __importDefault(require_PostgrestFilterBuilder());
+      var constants_1 = require_constants();
+      var PostgrestClient2 = class _PostgrestClient {
+        // TODO: Add back shouldThrowOnError once we figure out the typings
+        /**
+         * Creates a PostgREST client.
+         *
+         * @param url - URL of the PostgREST endpoint
+         * @param options - Named parameters
+         * @param options.headers - Custom headers
+         * @param options.schema - Postgres schema to switch to
+         * @param options.fetch - Custom fetch
+         */
+        constructor(url, { headers = {}, schema, fetch: fetch3 } = {}) {
+          this.url = url;
+          this.headers = Object.assign(Object.assign({}, constants_1.DEFAULT_HEADERS), headers);
+          this.schemaName = schema;
+          this.fetch = fetch3;
+        }
+        /**
+         * Perform a query on a table or a view.
+         *
+         * @param relation - The table or view name to query
+         */
+        from(relation) {
+          const url = new URL(`${this.url}/${relation}`);
+          return new PostgrestQueryBuilder_1.default(url, {
+            headers: Object.assign({}, this.headers),
+            schema: this.schemaName,
+            fetch: this.fetch
+          });
+        }
+        /**
+         * Select a schema to query or perform an function (rpc) call.
+         *
+         * The schema needs to be on the list of exposed schemas inside Supabase.
+         *
+         * @param schema - The schema to query
+         */
+        schema(schema) {
+          return new _PostgrestClient(this.url, {
+            headers: this.headers,
+            schema,
+            fetch: this.fetch
+          });
+        }
+        /**
+         * Perform a function call.
+         *
+         * @param fn - The function name to call
+         * @param args - The arguments to pass to the function call
+         * @param options - Named parameters
+         * @param options.head - When set to `true`, `data` will not be returned.
+         * Useful if you only need the count.
+         * @param options.get - When set to `true`, the function will be called with
+         * read-only access mode.
+         * @param options.count - Count algorithm to use to count rows returned by the
+         * function. Only applicable for [set-returning
+         * functions](https://www.postgresql.org/docs/current/functions-srf.html).
+         *
+         * `"exact"`: Exact but slow count algorithm. Performs a `COUNT(*)` under the
+         * hood.
+         *
+         * `"planned"`: Approximated but fast count algorithm. Uses the Postgres
+         * statistics under the hood.
+         *
+         * `"estimated"`: Uses exact count for low numbers and planned count for high
+         * numbers.
+         */
+        rpc(fn, args = {}, { head: head2 = false, get: get2 = false, count } = {}) {
+          let method;
+          const url = new URL(`${this.url}/rpc/${fn}`);
+          let body;
+          if (head2 || get2) {
+            method = head2 ? "HEAD" : "GET";
+            Object.entries(args).filter(([_, value]) => value !== void 0).map(([name, value]) => [name, Array.isArray(value) ? `{${value.join(",")}}` : `${value}`]).forEach(([name, value]) => {
+              url.searchParams.append(name, value);
+            });
+          } else {
+            method = "POST";
+            body = args;
+          }
+          const headers = Object.assign({}, this.headers);
+          if (count) {
+            headers["Prefer"] = `count=${count}`;
+          }
+          return new PostgrestFilterBuilder_1.default({
+            method,
+            url,
+            headers,
+            schema: this.schemaName,
+            body,
+            fetch: this.fetch,
+            allowEmpty: false
+          });
+        }
+      };
+      exports.default = PostgrestClient2;
+    }
+  });
+
+  // node_modules/@supabase/postgrest-js/dist/cjs/index.js
+  var require_cjs = __commonJS({
+    "node_modules/@supabase/postgrest-js/dist/cjs/index.js"(exports) {
+      "use strict";
+      var __importDefault = exports && exports.__importDefault || function(mod) {
+        return mod && mod.__esModule ? mod : { "default": mod };
+      };
+      Object.defineProperty(exports, "__esModule", { value: true });
+      exports.PostgrestBuilder = exports.PostgrestTransformBuilder = exports.PostgrestFilterBuilder = exports.PostgrestQueryBuilder = exports.PostgrestClient = void 0;
+      var PostgrestClient_1 = __importDefault(require_PostgrestClient());
+      exports.PostgrestClient = PostgrestClient_1.default;
+      var PostgrestQueryBuilder_1 = __importDefault(require_PostgrestQueryBuilder());
+      exports.PostgrestQueryBuilder = PostgrestQueryBuilder_1.default;
+      var PostgrestFilterBuilder_1 = __importDefault(require_PostgrestFilterBuilder());
+      exports.PostgrestFilterBuilder = PostgrestFilterBuilder_1.default;
+      var PostgrestTransformBuilder_1 = __importDefault(require_PostgrestTransformBuilder());
+      exports.PostgrestTransformBuilder = PostgrestTransformBuilder_1.default;
+      var PostgrestBuilder_1 = __importDefault(require_PostgrestBuilder());
+      exports.PostgrestBuilder = PostgrestBuilder_1.default;
+      exports.default = {
+        PostgrestClient: PostgrestClient_1.default,
+        PostgrestQueryBuilder: PostgrestQueryBuilder_1.default,
+        PostgrestFilterBuilder: PostgrestFilterBuilder_1.default,
+        PostgrestTransformBuilder: PostgrestTransformBuilder_1.default,
+        PostgrestBuilder: PostgrestBuilder_1.default
+      };
+    }
+  });
+
+  // node_modules/ws/browser.js
+  var require_browser = __commonJS({
+    "node_modules/ws/browser.js"(exports, module) {
+      "use strict";
+      module.exports = function() {
+        throw new Error(
+          "ws does not work in the browser. Browser clients must use the native WebSocket object"
+        );
+      };
+    }
+  });
+
+  // src/types.ts
+  var UsageRating = /* @__PURE__ */ ((UsageRating2) => {
+    UsageRating2["CRITICAL"] = "CRITICAL";
+    UsageRating2["REGULAR"] = "REGULAR";
+    UsageRating2["OCCASIONAL"] = "OCCASIONAL";
+    UsageRating2["RARELY"] = "RARELY";
+    UsageRating2["NOT_USED"] = "NOT_USED";
+    UsageRating2["NOT_SURE"] = "NOT_SURE";
+    return UsageRating2;
+  })(UsageRating || {});
+  var RequirementStatus = /* @__PURE__ */ ((RequirementStatus2) => {
+    RequirementStatus2["BUSINESS_CRITICAL"] = "BUSINESS_CRITICAL";
+    RequirementStatus2["CLIENT_CONTRACT"] = "CLIENT_CONTRACT";
+    RequirementStatus2["INTERNAL_POLICY"] = "INTERNAL_POLICY";
+    RequirementStatus2["NOT_REQUIRED"] = "NOT_REQUIRED";
+    RequirementStatus2["NOT_SURE"] = "NOT_SURE";
+    return RequirementStatus2;
+  })(RequirementStatus || {});
+  var ReplacementOption = /* @__PURE__ */ ((ReplacementOption2) => {
+    ReplacementOption2["ANOTHER_TOOL"] = "ANOTHER_TOOL";
+    ReplacementOption2["INTERNAL_PROCESS"] = "INTERNAL_PROCESS";
+    ReplacementOption2["NOT_NEEDED"] = "NOT_NEEDED";
+    ReplacementOption2["NO_REPLACEMENT"] = "NO_REPLACEMENT";
+    ReplacementOption2["NOT_SURE"] = "NOT_SURE";
+    return ReplacementOption2;
+  })(ReplacementOption || {});
+  var DependencyFlag = /* @__PURE__ */ ((DependencyFlag2) => {
+    DependencyFlag2["YES"] = "YES";
+    DependencyFlag2["NO"] = "NO";
+    DependencyFlag2["NOT_SURE"] = "NOT_SURE";
+    return DependencyFlag2;
+  })(DependencyFlag || {});
+  var DiscountStatus = /* @__PURE__ */ ((DiscountStatus2) => {
+    DiscountStatus2["PCT_KNOWN"] = "PCT_KNOWN";
+    DiscountStatus2["USD_KNOWN"] = "USD_KNOWN";
+    DiscountStatus2["SHOWN_IN_QUOTE"] = "SHOWN_IN_QUOTE";
+    DiscountStatus2["DONT_KNOW"] = "DONT_KNOW";
+    return DiscountStatus2;
+  })(DiscountStatus || {});
+  var BundleStructure = /* @__PURE__ */ ((BundleStructure3) => {
+    BundleStructure3["BUNDLED"] = "BUNDLED";
+    BundleStructure3["POOLED"] = "POOLED";
+    BundleStructure3["STANDARD"] = "STANDARD";
+    BundleStructure3["UNKNOWN"] = "UNKNOWN";
+    return BundleStructure3;
+  })(BundleStructure || {});
+  var TierChangedFlag = /* @__PURE__ */ ((TierChangedFlag2) => {
+    TierChangedFlag2["YES"] = "YES";
+    TierChangedFlag2["NO"] = "NO";
+    TierChangedFlag2["NOT_SURE"] = "NOT_SURE";
+    return TierChangedFlag2;
+  })(TierChangedFlag || {});
+
+  // src/products.ts
+  function tool(id, label) {
+    return { id, label };
+  }
+  var PRODUCT_CATALOG = [
+    {
+      id: "project_management",
+      label: "Project Management",
+      category: "UNCATEGORIZED" /* UNCATEGORIZED */,
+      // source does not state an explicit top-level category
+      capabilities: [
+        tool("rfis", "RFIs"),
+        tool("submittals", "Submittals"),
+        tool("schedule", "Schedule"),
+        tool("punch_list", "Punch List"),
+        tool("documents", "Documents"),
+        tool("photos_videos", "Photos & Videos")
+      ],
+      mvp_supported: true,
+      pricing_basis: "acv",
+      guard: "Do not treat every tool as a separately priced product."
+    },
+    {
+      id: "quality_safety",
+      label: "Quality & Safety",
+      category: "UNCATEGORIZED" /* UNCATEGORIZED */,
+      // commercially marketed product; tools organized under PM in navigation
+      capabilities: [
+        tool("inspections", "Inspections"),
+        tool("incidents", "Incidents"),
+        tool("observations", "Observations"),
+        tool("deficiency_list", "Deficiency List"),
+        tool("daily_log", "Daily Log"),
+        tool("forms", "Forms")
+      ],
+      mvp_supported: true,
+      pricing_basis: "acv",
+      guard: "Commercial product/category/tool hierarchy must stay separate."
+    },
+    {
+      id: "project_financials",
+      label: "Project Financials",
+      category: "FINANCIAL_MANAGEMENT" /* FINANCIAL_MANAGEMENT */,
+      capabilities: [
+        tool("budgets", "Budgets"),
+        tool("cost_management", "Cost Management"),
+        tool("financial_workflows", "Financial Workflows")
+      ],
+      mvp_supported: true,
+      pricing_basis: "acv",
+      guard: "Flag ERP/accounting integrations before removal."
+    },
+    {
+      id: "invoice_management",
+      label: "Invoice Management",
+      category: "FINANCIAL_MANAGEMENT" /* FINANCIAL_MANAGEMENT */,
+      capabilities: [
+        tool("invoice_workflows", "Invoice Workflows"),
+        tool("billing", "Billing")
+      ],
+      mvp_supported: true,
+      pricing_basis: "acv",
+      guard: "Line-item spend is not automatically removal savings."
+    },
+    {
+      id: "analytics",
+      label: "Analytics",
+      category: "UNCATEGORIZED" /* UNCATEGORIZED */,
+      // source does not state an explicit top-level category
+      capabilities: [
+        tool("reporting", "Reporting"),
+        tool("dashboards", "Dashboards"),
+        tool("unified_data", "Unified Data")
+      ],
+      mvp_supported: true,
+      pricing_basis: "acv",
+      guard: "Do not infer operational-module dependency from analytics alone."
+    },
+    {
+      id: "pay",
+      label: "Pay",
+      category: "FINANCIAL_MANAGEMENT" /* FINANCIAL_MANAGEMENT */,
+      capabilities: [
+        tool("subcontractor_payments", "Subcontractor Payments"),
+        tool("compliance", "Compliance"),
+        tool("lien_waiver_workflows", "Lien-Waiver Workflows")
+      ],
+      mvp_supported: true,
+      pricing_basis: "unknown",
+      guard: "Use UNKNOWN where counterfactual pricing is unsupported."
+    },
+    {
+      id: "resource_tracking",
+      label: "Resource Tracking",
+      category: "RESOURCE_MANAGEMENT" /* RESOURCE_MANAGEMENT */,
+      capabilities: [
+        tool("labor_tracking", "Labor Tracking"),
+        tool("productivity_tracking", "Productivity Tracking"),
+        tool("resource_tracking", "Resource Tracking")
+      ],
+      mvp_supported: true,
+      pricing_basis: "unknown",
+      guard: "Do not apply ACV formula to FTE-priced products without evidence."
+    },
+    {
+      id: "estimating",
+      label: "Estimating",
+      category: "PRECONSTRUCTION" /* PRECONSTRUCTION */,
+      capabilities: [
+        tool("estimating", "Estimating"),
+        tool("takeoff", "Takeoff")
+      ],
+      mvp_supported: true,
+      pricing_basis: "unknown",
+      guard: "Validate industry/product eligibility."
+    },
+    {
+      id: "bid_management",
+      label: "Bid Management",
+      category: "PRECONSTRUCTION" /* PRECONSTRUCTION */,
+      capabilities: [
+        tool("bid_distribution", "Bid Distribution"),
+        tool("bid_collection", "Bid Collection"),
+        tool("bid_coverage", "Bid Coverage")
+      ],
+      mvp_supported: true,
+      pricing_basis: "unknown",
+      guard: "Validate industry/product eligibility."
+    },
+    {
+      id: "field_productivity",
+      label: "Field Productivity",
+      category: "RESOURCE_MANAGEMENT" /* RESOURCE_MANAGEMENT */,
+      capabilities: [
+        tool("field_productivity_tracking", "Field Productivity Tracking")
+      ],
+      mvp_supported: "conditional",
+      pricing_basis: "fte",
+      guard: "Do not calculate with ACV pricing logic unless contract evidence supports it."
+    },
+    {
+      id: "other",
+      label: "Other Procore capabilities",
+      category: "UNCATEGORIZED" /* UNCATEGORIZED */,
+      capabilities: [],
+      mvp_supported: "conditional",
+      pricing_basis: "unknown",
+      guard: "If evidence is insufficient, return UNKNOWN rather than inventing."
+    }
+  ];
+  function getProduct(id) {
+    return PRODUCT_CATALOG.find((p) => p.id === id);
+  }
+  var DEPENDENCY_RULES = [
+    {
+      source_product_id: "quality_safety",
+      dependent_id: "inspections",
+      dependent_label: "Inspections",
+      relation_type: "CAPABILITY_LICENSING" /* CAPABILITY_LICENSING */,
+      user_confirmation_needed: true,
+      removal_guard: "If inspections are required, do not recommend removing the commercial capability without validating impact.",
+      evidence_status: "FACT / official Procore documentation"
+    },
+    {
+      source_product_id: "quality_safety",
+      dependent_id: "incidents",
+      dependent_label: "Incidents",
+      relation_type: "CAPABILITY_WORKFLOW" /* CAPABILITY_WORKFLOW */,
+      user_confirmation_needed: true,
+      removal_guard: "Check active incident workflow before removal.",
+      evidence_status: "FACT / official product documentation"
+    },
+    {
+      source_product_id: "quality_safety",
+      dependent_id: "observations",
+      dependent_label: "Observations",
+      relation_type: "CAPABILITY_WORKFLOW" /* CAPABILITY_WORKFLOW */,
+      user_confirmation_needed: true,
+      removal_guard: "Check active observations workflow before removal.",
+      evidence_status: "FACT / official product documentation"
+    },
+    {
+      source_product_id: "quality_safety",
+      dependent_id: "forms",
+      dependent_label: "Forms",
+      relation_type: "CAPABILITY_WORKFLOW" /* CAPABILITY_WORKFLOW */,
+      user_confirmation_needed: true,
+      removal_guard: "Check whether forms are used for Q&S-critical processes.",
+      evidence_status: "FACT / official product documentation"
+    },
+    {
+      source_product_id: "quality_safety",
+      dependent_id: "daily_log",
+      dependent_label: "Daily Log",
+      relation_type: "CAPABILITY_WORKFLOW" /* CAPABILITY_WORKFLOW */,
+      user_confirmation_needed: true,
+      removal_guard: "Daily Log can remain part of PM workflows; do not assume removing Q&S removes all PM tools.",
+      evidence_status: "FACT / official documentation"
+    },
+    {
+      source_product_id: "project_financials",
+      dependent_id: "accounting_erp_integration",
+      dependent_label: "Accounting / ERP integration",
+      relation_type: "INTEGRATION" /* INTEGRATION */,
+      user_confirmation_needed: true,
+      removal_guard: "Flag integration and validate replacement before removal.",
+      evidence_status: "FACT / official Procore support evidence"
+    },
+    {
+      source_product_id: "analytics",
+      dependent_id: "operational_modules",
+      dependent_label: "Operational modules",
+      relation_type: "SOFT_DATA_CONSUMPTION" /* SOFT_DATA_CONSUMPTION */,
+      user_confirmation_needed: false,
+      removal_guard: "Do not infer a module dependency merely because analytics consumes data.",
+      evidence_status: "FACT / official Procore support evidence"
+    },
+    {
+      source_product_id: "*",
+      dependent_id: "customer_specific_workflow",
+      dependent_label: "Customer-specific workflow",
+      relation_type: "BUSINESS_DEPENDENCY" /* BUSINESS_DEPENDENCY */,
+      user_confirmation_needed: true,
+      removal_guard: "Client contract, compliance, internal policy or required workflow blocks removal.",
+      evidence_status: "Customer input"
+    }
+  ];
+  function getDependencyRules(productId) {
+    return DEPENDENCY_RULES.filter(
+      (r) => r.source_product_id === productId || r.source_product_id === "*"
+    );
+  }
+  function requirementEligibility(requirement) {
+    switch (requirement) {
+      case "BUSINESS_CRITICAL":
+      case "CLIENT_CONTRACT":
+      case "INTERNAL_POLICY":
+        return "BLOCKED";
+      case "NOT_REQUIRED":
+        return "ELIGIBLE";
+      case "NOT_SURE":
+        return "UNCERTAIN";
+      default:
+        return "UNCERTAIN";
+    }
+  }
+  function dependencyFlagEligibility(dependency) {
+    switch (dependency) {
+      case "YES":
+        return "BLOCKED";
+      case "NO":
+        return "ELIGIBLE";
+      case "NOT_SURE":
+        return "UNCERTAIN";
+      default:
+        return "UNCERTAIN";
+    }
+  }
+  function evaluateProductEligibility(productId, requirement, dependency) {
+    const reasons = [];
+    const applicableRules = getDependencyRules(productId);
+    const reqElig = requirementEligibility(requirement);
+    if (reqElig === "BLOCKED") {
+      reasons.push(`Requirement status "${requirement}" blocks removal.`);
+      return { eligibility: "BLOCKED", reasons, applicable_rules: applicableRules };
+    }
+    const depElig = dependencyFlagEligibility(dependency);
+    if (depElig === "BLOCKED") {
+      reasons.push("User-confirmed dependency blocks removal.");
+      return { eligibility: "BLOCKED", reasons, applicable_rules: applicableRules };
+    }
+    if (reqElig === "UNCERTAIN") {
+      reasons.push("Requirement status is not confirmed.");
+    }
+    if (depElig === "UNCERTAIN") {
+      reasons.push("Dependency status is not confirmed.");
+    }
+    const confirmationNeeded = applicableRules.filter(
+      // The '*' wildcard business-dependency rule restates what the `requirement` field
+      // already captures (client contract / internal policy / business-critical); it is
+      // surfaced via applicable_rules for traceability but must not double-count here.
+      (r) => r.user_confirmation_needed && r.source_product_id !== "*"
+    );
+    if (confirmationNeeded.length > 0) {
+      reasons.push(...confirmationNeeded.map((r) => r.removal_guard));
+    }
+    if (reqElig === "UNCERTAIN" || depElig === "UNCERTAIN" || confirmationNeeded.length > 0) {
+      return { eligibility: "UNCERTAIN", reasons, applicable_rules: applicableRules };
+    }
+    return { eligibility: "ELIGIBLE", reasons, applicable_rules: applicableRules };
+  }
+
+  // src/validation.ts
+  var VALID_CONTRACT_TERMS = /* @__PURE__ */ new Set(["annual", "multi_year", "other"]);
+  var VALID_USAGE = new Set(Object.values(UsageRating));
+  var VALID_REQUIREMENT = new Set(Object.values(RequirementStatus));
+  var VALID_REPLACEMENT = new Set(Object.values(ReplacementOption));
+  var VALID_DEPENDENCY = new Set(Object.values(DependencyFlag));
+  var VALID_DISCOUNT_STATUS = new Set(Object.values(DiscountStatus));
+  var VALID_BUNDLE = new Set(Object.values(BundleStructure));
+  var VALID_TIER_CHANGED = new Set(Object.values(TierChangedFlag));
+  var VALID_RATE_PROTECTION = /* @__PURE__ */ new Set(["active", "unclear", "none"]);
+  var VALID_CONSTRUCTION_TYPE = /* @__PURE__ */ new Set(["commercial", "industrial", "civil_infrastructure", "other"]);
+  var VALID_TARGET_SAVINGS = /* @__PURE__ */ new Set([5, 10, 15, 20, null]);
+  function required(field, message) {
+    return { field, severity: "MISSING_REQUIRED", message };
+  }
+  function invalid(field, message) {
+    return { field, severity: "INVALID_VALUE", message };
+  }
+  function unknown(field, message) {
+    return { field, severity: "UNKNOWN_ACCEPTABLE", message };
+  }
+  function preventsCalc(field, message) {
+    return { field, severity: "PREVENTS_CALCULATION", message };
+  }
+  function validateUserInput(input) {
+    const hardErrors = [];
+    const softWarnings = [];
+    if (typeof input !== "object" || input === null) {
+      return {
+        valid: false,
+        can_calculate: false,
+        errors: [required("root", "Input must be a non-null object")],
+        warnings: []
+      };
+    }
+    const u = input;
+    if (typeof u.annual_cost_usd !== "number" || u.annual_cost_usd <= 0) {
+      hardErrors.push(required("annual_cost_usd", "Must be a positive number"));
+    }
+    if (typeof u.acv_usd !== "number" || u.acv_usd <= 0) {
+      hardErrors.push(required("acv_usd", "Must be a positive number"));
+    }
+    if (!Array.isArray(u.products) || u.products.length === 0) {
+      hardErrors.push(required("products", "Must be a non-empty array of product IDs from the catalog"));
+    } else {
+      const prods = u.products;
+      for (let i = 0; i < prods.length; i++) {
+        if (typeof prods[i] !== "string") {
+          hardErrors.push(invalid(`products[${i}]`, "Each product ID must be a string"));
+        } else if (!getProduct(prods[i])) {
+          hardErrors.push(invalid(`products[${i}]`, `Unknown product ID "${prods[i]}". Use a catalog ID from products.ts`));
+        }
+      }
+    }
+    if (!VALID_CONTRACT_TERMS.has(u.contract_term)) {
+      hardErrors.push(invalid("contract_term", 'Must be "annual", "multi_year", or "other"'));
+    }
+    if (u.product_inputs !== void 0) {
+      if (!Array.isArray(u.product_inputs)) {
+        hardErrors.push(invalid("product_inputs", "Must be an array"));
+      } else {
+        const pi = u.product_inputs;
+        if (pi.length === 0) {
+          hardErrors.push(required("product_inputs", "Must be non-empty when provided"));
+        }
+        for (let i = 0; i < pi.length; i++) {
+          validateProductInput(pi[i], i, hardErrors, softWarnings);
+        }
+      }
+    } else {
+      softWarnings.push(
+        unknown(
+          "product_inputs",
+          "No per-product usage/requirement/dependency information provided. Analysis will be limited to benchmarking and commercial-structure rules; candidate generation and savings classification require product_inputs."
+        )
+      );
+    }
+    if (u.discount_status !== void 0) {
+      if (!VALID_DISCOUNT_STATUS.has(u.discount_status)) {
+        hardErrors.push(invalid("discount_status", `Must be one of: ${[...VALID_DISCOUNT_STATUS].join(", ")}`));
+      } else {
+        if (u.discount_status === "DONT_KNOW" /* DONT_KNOW */) {
+          softWarnings.push(
+            preventsCalc(
+              "discount_status",
+              "Discount is unknown. Any savings estimate that depends on the current discount surviving a reconfiguration cannot be defended."
+            )
+          );
+        }
+        if (u.discount_status === "PCT_KNOWN" /* PCT_KNOWN */) {
+          if (typeof u.discount_pct !== "number" || u.discount_pct < 0 || u.discount_pct > 100) {
+            hardErrors.push(invalid("discount_pct", "Must be a number between 0 and 100 when discount_status is PCT_KNOWN"));
+          }
+        }
+        if (u.discount_status === "USD_KNOWN" /* USD_KNOWN */) {
+          if (typeof u.discount_usd !== "number" || u.discount_usd < 0) {
+            hardErrors.push(invalid("discount_usd", "Must be a non-negative number when discount_status is USD_KNOWN"));
+          }
+        }
+      }
+    } else {
+      softWarnings.push(unknown("discount_status", "Discount status not provided. Analysis will treat discount as unknown."));
+    }
+    if (u.bundle_structure !== void 0) {
+      if (!VALID_BUNDLE.has(u.bundle_structure)) {
+        hardErrors.push(invalid("bundle_structure", `Must be one of: ${[...VALID_BUNDLE].join(", ")}`));
+      } else if (u.bundle_structure === "BUNDLED" /* BUNDLED */ || u.bundle_structure === "POOLED" /* POOLED */) {
+        softWarnings.push(
+          preventsCalc(
+            "bundle_structure",
+            "Contract uses a bundled/pooled structure. Line-item removal does not automatically reduce total renewal by that amount."
+          )
+        );
+      }
+    } else {
+      softWarnings.push(unknown("bundle_structure", "Bundle/pool structure not provided. Analysis will treat as unknown."));
+    }
+    if (u.credits_usd !== void 0) {
+      if (typeof u.credits_usd !== "number" || u.credits_usd < 0) {
+        hardErrors.push(invalid("credits_usd", "Must be a non-negative number"));
+      }
+    }
+    if (u.renewal_increase_pct !== void 0) {
+      if (typeof u.renewal_increase_pct !== "number" || u.renewal_increase_pct < 0) {
+        hardErrors.push(invalid("renewal_increase_pct", "Must be a non-negative number"));
+      }
+    }
+    if (u.tier_changed !== void 0 && !VALID_TIER_CHANGED.has(u.tier_changed)) {
+      hardErrors.push(invalid("tier_changed", `Must be one of: ${[...VALID_TIER_CHANGED].join(", ")}`));
+    }
+    if (u.packaging_changed !== void 0 && !VALID_TIER_CHANGED.has(u.packaging_changed)) {
+      hardErrors.push(invalid("packaging_changed", `Must be one of: ${[...VALID_TIER_CHANGED].join(", ")}`));
+    }
+    if (u.rate_protection_status !== void 0 && !VALID_RATE_PROTECTION.has(u.rate_protection_status)) {
+      hardErrors.push(invalid("rate_protection_status", 'Must be "active", "unclear", or "none"'));
+    }
+    if (u.expected_next_year_acv_usd !== void 0) {
+      if (typeof u.expected_next_year_acv_usd !== "number" || u.expected_next_year_acv_usd <= 0) {
+        hardErrors.push(invalid("expected_next_year_acv_usd", "Must be a positive number"));
+      } else if (typeof u.acv_usd === "number" && u.expected_next_year_acv_usd < u.acv_usd) {
+        hardErrors.push(invalid("expected_next_year_acv_usd", "Must be greater than or equal to current ACV"));
+      }
+    }
+    if (u.target_savings_pct !== void 0 && u.target_savings_pct !== null) {
+      if (!VALID_TARGET_SAVINGS.has(u.target_savings_pct)) {
+        hardErrors.push(invalid("target_savings_pct", "Must be 5, 10, 15, 20, or null"));
+      }
+    }
+    if (u.construction_type !== void 0 && !VALID_CONSTRUCTION_TYPE.has(u.construction_type)) {
+      hardErrors.push(invalid("construction_type", `Must be one of: ${[...VALID_CONSTRUCTION_TYPE].join(", ")}`));
+    }
+    if (u.before_annual_cost_usd !== void 0) {
+      if (typeof u.before_annual_cost_usd !== "number" || u.before_annual_cost_usd <= 0) {
+        hardErrors.push(invalid("before_annual_cost_usd", "Must be a positive number"));
+      }
+    }
+    if (u.after_annual_cost_usd !== void 0) {
+      if (typeof u.after_annual_cost_usd !== "number" || u.after_annual_cost_usd <= 0) {
+        hardErrors.push(invalid("after_annual_cost_usd", "Must be a positive number"));
+      }
+    }
+    if (u.prior_rate_per_1m_usd !== void 0) {
+      if (typeof u.prior_rate_per_1m_usd !== "number" || u.prior_rate_per_1m_usd <= 0) {
+        hardErrors.push(invalid("prior_rate_per_1m_usd", "Must be a positive number"));
+      }
+    }
+    const preventsCalcItems = softWarnings.filter((w) => w.severity === "PREVENTS_CALCULATION");
+    return {
+      valid: hardErrors.length === 0,
+      can_calculate: hardErrors.length === 0 && preventsCalcItems.length === 0,
+      errors: hardErrors,
+      warnings: softWarnings
+    };
+  }
+  function validateProductInput(raw, index2, hardErrors, softWarnings) {
+    const prefix = `product_inputs[${index2}]`;
+    if (typeof raw !== "object" || raw === null) {
+      hardErrors.push(invalid(prefix, "Each product input must be an object"));
+      return;
+    }
+    const p = raw;
+    if (typeof p.product_id !== "string" || p.product_id.trim() === "") {
+      hardErrors.push(required(`${prefix}.product_id`, "Must be a non-empty string"));
+    } else if (!getProduct(p.product_id)) {
+      hardErrors.push(invalid(`${prefix}.product_id`, `Unknown product ID "${p.product_id}". Use a catalog ID from products.ts`));
+    }
+    if (!VALID_USAGE.has(p.usage)) {
+      hardErrors.push(required(`${prefix}.usage`, `Must be one of: ${[...VALID_USAGE].join(", ")}`));
+    } else if (p.usage === "NOT_SURE" /* NOT_SURE */) {
+      softWarnings.push(unknown(`${prefix}.usage`, "Usage is not sure; candidate eligibility may be uncertain"));
+    }
+    if (!VALID_REQUIREMENT.has(p.requirement)) {
+      hardErrors.push(required(`${prefix}.requirement`, `Must be one of: ${[...VALID_REQUIREMENT].join(", ")}`));
+    } else if (p.requirement === "NOT_SURE" /* NOT_SURE */) {
+      softWarnings.push(unknown(`${prefix}.requirement`, "Requirement status is uncertain; candidate removal cannot be confirmed safe"));
+    }
+    if (p.replacement === void 0) {
+      softWarnings.push(unknown(`${prefix}.replacement`, "Replacement workflow not provided"));
+    } else if (!VALID_REPLACEMENT.has(p.replacement)) {
+      hardErrors.push(invalid(`${prefix}.replacement`, `Must be one of: ${[...VALID_REPLACEMENT].join(", ")}`));
+    } else if (p.replacement === "NOT_SURE" /* NOT_SURE */) {
+      softWarnings.push(unknown(`${prefix}.replacement`, "Replacement workflow is not sure"));
+    } else if (p.replacement === "NO_REPLACEMENT" /* NO_REPLACEMENT */) {
+      softWarnings.push(
+        preventsCalc(
+          `${prefix}.replacement`,
+          "No replacement exists for this capability. Removal may have operational impact."
+        )
+      );
+    }
+    if (p.dependency === void 0) {
+      softWarnings.push(unknown(`${prefix}.dependency`, "Dependency status not provided"));
+    } else if (!VALID_DEPENDENCY.has(p.dependency)) {
+      hardErrors.push(invalid(`${prefix}.dependency`, `Must be one of: ${[...VALID_DEPENDENCY].join(", ")}`));
+    } else if (p.dependency === "NOT_SURE" /* NOT_SURE */) {
+      softWarnings.push(
+        preventsCalc(
+          `${prefix}.dependency`,
+          "Dependency is unconfirmed. Candidate cannot advance to counterfactual pricing until resolved."
+        )
+      );
+    }
+    if (p.annual_price_usd !== void 0) {
+      if (typeof p.annual_price_usd !== "number" || p.annual_price_usd <= 0) {
+        hardErrors.push(invalid(`${prefix}.annual_price_usd`, "Must be a positive number when provided"));
+      }
+    } else {
+      softWarnings.push(unknown(`${prefix}.annual_price_usd`, "No line-item price provided; attributable spend cannot be reported"));
+    }
+  }
+  function assertUserInput(input) {
+    const result = validateUserInput(input);
+    if (!result.valid) {
+      throw new Error(
+        `Invalid UserInput: ${result.errors.map((e) => `${e.field}: ${e.message}`).join("; ")}`
+      );
+    }
+    return input;
+  }
+
+  // src/data/procore_public_quotes.ts
+  var PUBLIC_QUOTES_DATASET_META = {
+    dataset_name: "RenewalScope Public Procore Quote Evidence Dataset",
+    dataset_version: "1.0",
+    dataset_date: "2026-08-16",
+    primary_source: "PROCORE_BRAIN_RESEARCH_MASTER_PHASE8.xlsx",
+    total_records: 22,
+    records_excluded_from_calculations: 7,
+    usable_for_product_benchmarks: 15,
+    coverage_notes: "Public procurement quotes and order forms, 2022-2026. Products: PM Pro, Q&S, Project Financials, Invoice Management, Analytics. These are PUBLIC QUOTE observations - not a proprietary Procore price list."
+  };
+  var PUBLIC_QUOTE_ROWS = [
+    // Simi Valley USD (2022)
+    {
+      evidence_id: "PQ-001",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "company",
+      acv_usd: 1e7,
+      source_type: "PUBLIC_QUOTE",
+      source_description: "Simi Valley USD public procurement quote (2022)",
+      source_date: "2022-01-01",
+      normalized_product_id: "project_management",
+      quoted_product_annual_price_usd: 13782.67,
+      limitation_flags: ["ESTIMATE_NOT_FINAL", "RESELLER_QUOTE"],
+      exclude_from_rate_benchmark: true
+    },
+    {
+      evidence_id: "PQ-002",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "company",
+      acv_usd: 1e7,
+      source_type: "PUBLIC_QUOTE",
+      source_description: "Simi Valley USD public procurement quote (2022)",
+      source_date: "2022-01-01",
+      normalized_product_id: "quality_safety",
+      quoted_product_annual_price_usd: 4499.09,
+      limitation_flags: ["ESTIMATE_NOT_FINAL", "RESELLER_QUOTE"],
+      exclude_from_rate_benchmark: true
+    },
+    // City of Pasadena TX (2026-01-29)
+    {
+      evidence_id: "PQ-003",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "company",
+      acv_band_min_usd: 5e7,
+      acv_band_max_usd: 75e6,
+      source_type: "PUBLIC_QUOTE",
+      source_description: "City of Pasadena TX public procurement quote (2026-01-29)",
+      source_date: "2026-01-29",
+      normalized_product_id: "project_management",
+      quoted_product_annual_price_usd: 47451.74,
+      limitation_flags: ["BAND_NORMALIZED", "RESELLER_QUOTE"],
+      exclude_from_rate_benchmark: true
+    },
+    {
+      evidence_id: "PQ-004",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "company",
+      acv_band_min_usd: 5e7,
+      acv_band_max_usd: 75e6,
+      source_type: "PUBLIC_QUOTE",
+      source_description: "City of Pasadena TX public procurement quote (2026-01-29)",
+      source_date: "2026-01-29",
+      normalized_product_id: "quality_safety",
+      quoted_product_annual_price_usd: 17824.75,
+      limitation_flags: ["BAND_NORMALIZED", "RESELLER_QUOTE"],
+      exclude_from_rate_benchmark: true
+    },
+    {
+      evidence_id: "PQ-005",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "company",
+      acv_band_min_usd: 5e7,
+      acv_band_max_usd: 75e6,
+      source_type: "PUBLIC_QUOTE",
+      source_description: "City of Pasadena TX public procurement quote (2026-01-29)",
+      source_date: "2026-01-29",
+      normalized_product_id: "project_financials",
+      quoted_product_annual_price_usd: 22938.85,
+      limitation_flags: ["BAND_NORMALIZED", "RESELLER_QUOTE"],
+      exclude_from_rate_benchmark: true
+    },
+    {
+      evidence_id: "PQ-006",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "company",
+      acv_band_min_usd: 5e7,
+      acv_band_max_usd: 75e6,
+      source_type: "PUBLIC_QUOTE",
+      source_description: "City of Pasadena TX public procurement quote (2026-01-29)",
+      source_date: "2026-01-29",
+      normalized_product_id: "invoice_management",
+      quoted_product_annual_price_usd: 13636.17,
+      limitation_flags: ["BAND_NORMALIZED", "RESELLER_QUOTE"],
+      exclude_from_rate_benchmark: true
+    },
+    // City of Denton TX (2025-11-18) - exclude_from_calculations
+    {
+      evidence_id: "PQ-007",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "company",
+      acv_usd: 54e7,
+      source_type: "PUBLIC_QUOTE",
+      source_description: "City of Denton TX public procurement quote (2025-11-18)",
+      source_date: "2025-11-18",
+      normalized_product_id: "project_management",
+      quoted_product_annual_price_usd: 184266.33,
+      limitation_flags: ["POOLED_CV", "RESELLER_QUOTE"],
+      exclude_from_rate_benchmark: true,
+      exclude_from_calculations: true
+    },
+    {
+      evidence_id: "PQ-008",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "company",
+      acv_usd: 54e7,
+      source_type: "PUBLIC_QUOTE",
+      source_description: "City of Denton TX public procurement quote (2025-11-18)",
+      source_date: "2025-11-18",
+      normalized_product_id: "quality_safety",
+      quoted_product_annual_price_usd: 91452.72,
+      limitation_flags: ["POOLED_CV", "RESELLER_QUOTE"],
+      exclude_from_rate_benchmark: true,
+      exclude_from_calculations: true
+    },
+    {
+      evidence_id: "PQ-009",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "company",
+      acv_band_min_usd: 1e8,
+      acv_band_max_usd: 15e7,
+      source_type: "PUBLIC_QUOTE",
+      source_description: "City of Denton TX public procurement quote (2025-11-18)",
+      source_date: "2025-11-18",
+      normalized_product_id: "project_financials",
+      quoted_product_annual_price_usd: 52799.78,
+      limitation_flags: ["POOLED_CV", "BAND_NORMALIZED", "RESELLER_QUOTE"],
+      exclude_from_rate_benchmark: true,
+      exclude_from_calculations: true
+    },
+    {
+      evidence_id: "PQ-010",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "company",
+      acv_band_min_usd: 1e8,
+      acv_band_max_usd: 15e7,
+      source_type: "PUBLIC_QUOTE",
+      source_description: "City of Denton TX public procurement quote (2025-11-18)",
+      source_date: "2025-11-18",
+      normalized_product_id: "invoice_management",
+      quoted_product_annual_price_usd: 27317.5,
+      limitation_flags: ["POOLED_CV", "BAND_NORMALIZED", "RESELLER_QUOTE"],
+      exclude_from_rate_benchmark: true,
+      exclude_from_calculations: true
+    },
+    // Public cooperative quote (2025-08-25)
+    {
+      evidence_id: "PQ-011",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "company",
+      acv_band_min_usd: 5e7,
+      acv_band_max_usd: 75e6,
+      source_type: "PUBLIC_QUOTE",
+      source_description: "Public cooperative procurement quote (2025-08-25)",
+      source_date: "2025-08-25",
+      normalized_product_id: "quality_safety",
+      quoted_product_annual_price_usd: 46865.91,
+      limitation_flags: ["BAND_NORMALIZED"],
+      exclude_from_rate_benchmark: true
+    },
+    {
+      evidence_id: "PQ-012",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "company",
+      acv_band_min_usd: 5e7,
+      acv_band_max_usd: 75e6,
+      source_type: "PUBLIC_QUOTE",
+      source_description: "Public cooperative procurement quote (2025-08-25)",
+      source_date: "2025-08-25",
+      normalized_product_id: "project_financials",
+      limitation_flags: ["INCOMPLETE_RECORD", "BAND_NORMALIZED"],
+      exclude_from_rate_benchmark: true,
+      exclude_from_calculations: true
+    },
+    {
+      evidence_id: "PQ-013",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "company",
+      acv_band_min_usd: 5e7,
+      acv_band_max_usd: 75e6,
+      source_type: "PUBLIC_QUOTE",
+      source_description: "Public cooperative procurement quote (2025-08-25)",
+      source_date: "2025-08-25",
+      normalized_product_id: "invoice_management",
+      quoted_product_annual_price_usd: 13636.17,
+      limitation_flags: ["BAND_NORMALIZED"],
+      exclude_from_rate_benchmark: true
+    },
+    {
+      evidence_id: "PQ-014",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "company",
+      acv_band_min_usd: 5e7,
+      acv_band_max_usd: 75e6,
+      source_type: "PUBLIC_QUOTE",
+      source_description: "Public cooperative procurement quote (2025-08-25)",
+      source_date: "2025-08-25",
+      normalized_product_id: "analytics",
+      quoted_product_annual_price_usd: 17604.7,
+      limitation_flags: ["BAND_NORMALIZED"],
+      exclude_from_rate_benchmark: true
+    },
+    // Highline Public Schools (2026)
+    {
+      evidence_id: "PQ-015",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "company",
+      acv_usd: 12e7,
+      source_type: "PUBLIC_QUOTE",
+      source_description: "Highline Public Schools procurement quote (2026)",
+      source_date: "2026-01-01",
+      normalized_product_id: "project_management",
+      quoted_product_annual_price_usd: 99303.13,
+      exclude_from_rate_benchmark: true
+    },
+    {
+      evidence_id: "PQ-016",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "company",
+      acv_usd: 12e7,
+      source_type: "PUBLIC_QUOTE",
+      source_description: "Highline Public Schools procurement quote (2026)",
+      source_date: "2026-01-01",
+      normalized_product_id: "project_financials",
+      quoted_product_annual_price_usd: 49963.92,
+      exclude_from_rate_benchmark: true
+    },
+    {
+      evidence_id: "PQ-017",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "company",
+      acv_usd: 12e7,
+      source_type: "PUBLIC_QUOTE",
+      source_description: "Highline Public Schools procurement quote (2026)",
+      source_date: "2026-01-01",
+      normalized_product_id: "invoice_management",
+      quoted_product_annual_price_usd: 22592.4,
+      exclude_from_rate_benchmark: true
+    },
+    {
+      evidence_id: "PQ-018",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "company",
+      acv_usd: 12e7,
+      source_type: "PUBLIC_QUOTE",
+      source_description: "Highline Public Schools procurement quote (2026)",
+      source_date: "2026-01-01",
+      normalized_product_id: "analytics",
+      quoted_product_annual_price_usd: 22974,
+      exclude_from_rate_benchmark: true
+    },
+    // Nassau County
+    {
+      evidence_id: "PQ-019",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "company",
+      acv_band_min_usd: 5e7,
+      acv_band_max_usd: 75e6,
+      source_type: "PUBLIC_QUOTE",
+      source_description: "Nassau County public max-price quote",
+      source_date: "2025-01-01",
+      normalized_product_id: "project_management",
+      quoted_product_annual_price_usd: 55606.38,
+      limitation_flags: ["MAX_PRICE_QUOTE", "BAND_NORMALIZED"],
+      exclude_from_rate_benchmark: true
+    },
+    {
+      evidence_id: "PQ-020",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "company",
+      acv_band_min_usd: 5e7,
+      acv_band_max_usd: 75e6,
+      source_type: "PUBLIC_QUOTE",
+      source_description: "Nassau County public max-price quote",
+      source_date: "2025-01-01",
+      normalized_product_id: "project_financials",
+      quoted_product_annual_price_usd: 26881.07,
+      limitation_flags: ["MAX_PRICE_QUOTE", "BAND_NORMALIZED"],
+      exclude_from_rate_benchmark: true
+    },
+    // Port Canaveral (2026-02-26) - exclude_from_calculations
+    {
+      evidence_id: "PQ-021",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "company",
+      acv_usd: 2e8,
+      source_type: "PUBLIC_QUOTE",
+      source_description: "Port Canaveral public procurement quote (2026-02-26)",
+      source_date: "2026-02-26",
+      quoted_product_annual_price_usd: 318223.7,
+      limitation_flags: ["POOLED_CV", "PROJECT_SPECIFIC_LICENSE"],
+      exclude_from_rate_benchmark: true,
+      exclude_from_calculations: true,
+      note: "Procore platform total NTE; pooled 3yr $200M CV. No individual product breakdown."
+    },
+    {
+      evidence_id: "PQ-022",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "company",
+      acv_usd: 2e8,
+      source_type: "PUBLIC_QUOTE",
+      source_description: "Port Canaveral public procurement quote (2026-02-26)",
+      source_date: "2026-02-26",
+      limitation_flags: ["POOLED_CV"],
+      exclude_from_rate_benchmark: true,
+      exclude_from_calculations: true,
+      note: "Route price differential: direct $27,672 cheaper than reseller. Commercial structure evidence only."
+    }
+  ];
+
+  // src/evidence.ts
+  var EVIDENCE_ROWS = [
+    {
+      evidence_id: "REDDIT-001",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "unknown",
+      rate_per_1m: 1e3,
+      renewal_increase_pct: 10.4,
+      prev_rate_per_1m: 500,
+      products: ["Project Management Pro", "Quality & Safety"],
+      note: "Typical renewal 2\u20135%; this renewal 10.4%. No total ACV or annual invoice. Rate doubled despite downgrade.",
+      source_url: "https://www.reddit.com/r/Construction/comments/199uliq/procore_renewal_costs_escalating/"
+    },
+    {
+      evidence_id: "REDDIT-002",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "unknown",
+      renewal_increase_pct: 150,
+      note: "Single case: 150% price jump after five years; described as non-negotiable. Do not generalize.",
+      source_url: "https://www.reddit.com/r/Construction/comments/199uliq/procore_renewal_costs_escalating/"
+    },
+    {
+      evidence_id: "REDDIT-003",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "unknown",
+      annual_cost_usd: 3e4,
+      note: "Range $30k\u2013$60k; cannot derive ACV or savings.",
+      source_url: "https://www.reddit.com/r/Construction/comments/199uliq/procore_renewal_costs_escalating/"
+    },
+    {
+      evidence_id: "REDDIT-004",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "company",
+      acv_usd: 2e8,
+      annual_cost_usd: 385e3,
+      rate_per_1m: 1925,
+      contract_term: "multi_year",
+      note: "Pass-through cost-recovery strategy; not evidence of a Procore discount.",
+      source_url: "https://www.reddit.com/r/ConstructionManagers/comments/1j1188g/procore_renewal/"
+    },
+    {
+      evidence_id: "REDDIT-005",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "company",
+      acv_usd: 15e6,
+      rate_per_1m: 1e3,
+      note: "$1k/$1M used for pass-through allocation, not necessarily the actual Procore invoice rate.",
+      source_url: "https://www.reddit.com/r/ConstructionManagers/comments/1j1188g/procore_renewal/"
+    },
+    {
+      evidence_id: "REDDIT-006",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "unknown",
+      products: ["Submittals", "RFIs", "Change Orders", "Inspections"],
+      note: "Fit/demand evidence only; does not establish commercial removability of a module.",
+      source_url: "https://www.reddit.com/r/Construction/comments/ack53j/anyone_know_what_they_pay_for_procore/"
+    },
+    {
+      evidence_id: "REDDIT-007",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "project",
+      acv_usd: 15e6,
+      annual_cost_usd: 2e4,
+      rate_per_1m: 1333.33,
+      note: 'Source says "$15M job", not company ACV. Project-level observation; do not use as company-ACV benchmark.',
+      source_url: "https://www.reddit.com/r/Construction/comments/ack53j/anyone_know_what_they_pay_for_procore/"
+    },
+    {
+      evidence_id: "REDDIT-008",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "company",
+      acv_usd: 4e6,
+      annual_cost_usd: 6e3,
+      rate_per_1m: 1500,
+      products: ["Project Management", "Financial Management"],
+      contract_term: "annual",
+      note: "Annual cost from $500/month PM quote only; Financial is excluded (range estimate).",
+      source_url: "https://www.reddit.com/r/Construction/comments/1iqb442/construction_software_pricing_comparison_based_on/"
+    },
+    {
+      evidence_id: "REDDIT-009",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "unknown",
+      contract_term: "annual",
+      note: "Process observation only; does not establish pricing algorithm.",
+      source_url: "https://www.reddit.com/r/Construction/comments/10gh7ej"
+    },
+    {
+      evidence_id: "REDDIT-010",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "unknown",
+      contract_term: "multi_year",
+      note: "Pain/alternative evidence; not a pricing benchmark.",
+      source_url: "https://www.reddit.com/r/ConstructionManagers/comments/1j1188g/procore_renewal/"
+    },
+    {
+      evidence_id: "WEB-011",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "company",
+      acv_usd: 4e8,
+      annual_cost_usd: 324e3,
+      rate_per_1m: 810,
+      contract_term: "multi_year",
+      note: "Annualized from $27k/month. Distinct from REDDIT-004; do not infer identical product bundles.",
+      source_url: "https://www.reddit.com/r/Construction/comments/1iqb442/construction_software_pricing_comparison_based_on/"
+    },
+    {
+      evidence_id: "WEB-014",
+      confidence: "BENCHMARK" /* BENCHMARK */,
+      acvType: "project",
+      acv_usd: 59e6,
+      annual_cost_usd: 8e4,
+      rate_per_1m: 1355.93,
+      products: ["Project Management"],
+      note: "Secondary source; Financial module explicitly excluded. Not independently verified primary post.",
+      source_url: "https://downtobid.com/blog/how-much-is-procore-software"
+    },
+    {
+      evidence_id: "WEB-015",
+      confidence: "BENCHMARK" /* BENCHMARK */,
+      acvType: "company",
+      acv_usd: 55e6,
+      annual_cost_usd: 55e3,
+      rate_per_1m: 1e3,
+      note: "Secondary source; do not count as new independent customer.",
+      source_url: "https://www.getonecrew.com/post/procore-reviews"
+    },
+    {
+      evidence_id: "WEB-016",
+      confidence: "VERIFIED_PUBLIC_DOCUMENT" /* VERIFIED_PUBLIC_DOCUMENT */,
+      acvType: "project",
+      acv_usd: 85e6,
+      annual_cost_usd: 85e3,
+      rate_per_1m: 1e3,
+      contract_term: "annual",
+      products: ["Procore CMIS"],
+      note: "Project-specific license; year-1 estimate. Not a standard commercial customer contract.",
+      source_url: "https://mccmeetings.blob.core.usgovcloudapi.net/escondidca-pubu/MEET-Packet-1c066802b58043ba9504a911b624394f.pdf"
+    },
+    {
+      evidence_id: "WEB-017",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "project",
+      acv_usd: 4e6,
+      annual_cost_usd: 7500,
+      rate_per_1m: 1875,
+      products: ["Project Management Pro"],
+      note: 'Older 2021 observation; source says "project revenue" not explicit ACV.',
+      source_url: "https://www.reddit.com/r/Construction/comments/lvpcvg"
+    },
+    {
+      evidence_id: "WEB-018",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "company",
+      acv_usd: 1e7,
+      annual_cost_usd: 1e4,
+      rate_per_1m: 1e3,
+      products: ["PM Starter"],
+      note: "$10k/year for PM Starter at $10\u201315M revenue; full-package ~$35k retained in notes only.",
+      source_url: "https://www.reddit.com/r/Construction/comments/oghlhi/any_of_you_specialty_subs_use_procore_if_so_how/"
+    },
+    {
+      evidence_id: "WEB-019",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "company",
+      acv_usd: 2e7,
+      annual_cost_usd: 4e4,
+      rate_per_1m: 2e3,
+      note: "Source says >$20M; $20M is a conservative normalization, not an exact rate.",
+      source_url: "https://www.reddit.com/r/ConstructionManagers/comments/1bvtinw/procore_capabilities/"
+    },
+    {
+      evidence_id: "WEB-021",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "company",
+      acv_usd: 25e6,
+      note: "No quote; demand/negotiation evidence only.",
+      source_url: "https://www.reddit.com/r/Construction/comments/1nr3j7q/procore_for_small_commercial_gc/"
+    },
+    {
+      evidence_id: "WEB-022",
+      confidence: "OBSERVATION" /* OBSERVATION */,
+      acvType: "unknown",
+      products: ["Analytics", "BIM", "PM"],
+      note: "Qualitative renewal pain signal; does not prove removability or savings.",
+      source_url: "https://cafe.cfma.org/discussion/procore-renewals-requiring-wip-financial-statements-1"
+    }
+  ];
+  var ALL_EVIDENCE_ROWS = [...EVIDENCE_ROWS, ...PUBLIC_QUOTE_ROWS];
+  function getProductQuoteRows() {
+    return PUBLIC_QUOTE_ROWS.filter(
+      (r) => r.exclude_from_calculations !== true && r.quoted_product_annual_price_usd !== void 0
+    );
+  }
+
+  // src/benchmark.ts
+  function calcEffectiveRate(annual_cost_usd, acv_usd, credits_usd) {
+    if (acv_usd <= 0) throw new Error("acv_usd must be positive");
+    const netCost = annual_cost_usd - (credits_usd ?? 0);
+    return netCost / acv_usd * 1e6;
+  }
+  function findComparableRows(user_acv, acvType, rows = ALL_EVIDENCE_ROWS) {
+    const acvLow = user_acv * 0.1;
+    const acvHigh = user_acv * 10;
+    return rows.filter((r) => {
+      if (r.confidence === "DUPLICATE" /* DUPLICATE */) return false;
+      if (r.rate_per_1m === void 0) return false;
+      if (r.acvType === "project" && acvType === "company") return false;
+      if (r.acvType === "company" && acvType === "project") return false;
+      if (r.acv_usd !== void 0 && (r.acv_usd < acvLow || r.acv_usd > acvHigh)) return false;
+      return true;
+    });
+  }
+  function percentile(sorted, p) {
+    if (sorted.length === 0) return 0;
+    const idx = p / 100 * (sorted.length - 1);
+    const lo = Math.floor(idx);
+    const hi = Math.ceil(idx);
+    if (lo === hi) return sorted[lo];
+    return sorted[lo] + (sorted[hi] - sorted[lo]) * (idx - lo);
+  }
+  function calcRateStats(rows) {
+    const rates = rows.map((r) => r.rate_per_1m).filter((v) => v !== void 0).sort((a, b) => a - b);
+    if (rates.length === 0) {
+      return { min: 0, max: 0, p25: 0, p50: 0, p75: 0, mean: 0, count: 0 };
+    }
+    const mean = rates.reduce((a, b) => a + b, 0) / rates.length;
+    return {
+      min: rates[0],
+      max: rates[rates.length - 1],
+      p25: percentile(rates, 25),
+      p50: percentile(rates, 50),
+      p75: percentile(rates, 75),
+      mean,
+      count: rates.length
+    };
+  }
+  function ratePosition(rate, stats) {
+    if (rate < stats.p25) return "below_p25";
+    if (rate < stats.p50) return "p25_to_p50";
+    if (rate < stats.p75) return "p50_to_p75";
+    return "above_p75";
+  }
+  function buildBenchmarkResult(user_acv, user_annual_cost, acvType = "company", credits_usd) {
+    const comparables = findComparableRows(user_acv, acvType);
+    if (comparables.length === 0) return null;
+    const user_rate = calcEffectiveRate(user_annual_cost, user_acv, credits_usd);
+    const stats = calcRateStats(comparables);
+    const position = ratePosition(user_rate, stats);
+    return {
+      user_rate,
+      stats,
+      position,
+      comparable_evidence_ids: comparables.map((r) => r.evidence_id),
+      min_evidence_count_met: comparables.length >= 3
+    };
+  }
+  function findProductQuoteRows(normalized_product_id, user_acv_usd, rows) {
+    const pool = rows ?? PUBLIC_QUOTE_ROWS;
+    const candidates = pool.filter(
+      (r) => r.normalized_product_id === normalized_product_id && r.quoted_product_annual_price_usd !== void 0 && r.exclude_from_calculations !== true
+    );
+    const results = [];
+    for (const row of candidates) {
+      let repAcv;
+      if (row.acv_usd !== void 0) {
+        repAcv = row.acv_usd;
+      } else if (row.acv_band_min_usd !== void 0 && row.acv_band_max_usd !== void 0) {
+        repAcv = (row.acv_band_min_usd + row.acv_band_max_usd) / 2;
+      }
+      if (repAcv === void 0) continue;
+      const ratio = repAcv / user_acv_usd;
+      let comparability;
+      let comparability_reason;
+      if (ratio >= 0.5 && ratio <= 2) {
+        comparability = "HIGH";
+        comparability_reason = `Representative ACV $${repAcv.toLocaleString()} is within 0.5x-2x of user ACV $${user_acv_usd.toLocaleString()}`;
+      } else if (ratio >= 0.2 && ratio <= 5) {
+        comparability = "MEDIUM";
+        comparability_reason = `Representative ACV $${repAcv.toLocaleString()} is within 0.2x-5x of user ACV $${user_acv_usd.toLocaleString()}`;
+      } else {
+        comparability = "LOW";
+        comparability_reason = `Representative ACV $${repAcv.toLocaleString()} is outside 0.2x-5x of user ACV $${user_acv_usd.toLocaleString()}`;
+      }
+      results.push({ row, comparability, comparability_reason });
+    }
+    const order = { HIGH: 0, MEDIUM: 1, LOW: 2 };
+    return results.sort((a, b) => order[a.comparability] - order[b.comparability]);
+  }
+
+  // src/rules.ts
+  function ruleCommercialStructures(input) {
+    if (input.contract_term === "multi_year") {
+      return {
+        result_type: "SAVINGS_IDENTIFIED" /* SAVINGS_IDENTIFIED */,
+        confidence: "FACT" /* FACT */,
+        recommendation_text: "Ask Procore whether a pooled-volume or renewal-rate-protection clause is available within your multi-year agreement.",
+        comparable_evidence: [],
+        explanation: "Procore SEC filings confirm that multi-year and pooled-volume structures exist as official commercial options. Whether your specific account qualifies is unconfirmed; request a written confirmation from your Procore rep."
+      };
+    }
+    return {
+      result_type: "SAVINGS_IDENTIFIED" /* SAVINGS_IDENTIFIED */,
+      confidence: "FACT" /* FACT */,
+      recommendation_text: "Ask Procore whether converting to a multi-year pooled agreement would provide a renewal rate cap.",
+      comparable_evidence: [],
+      explanation: "Procore offers multi-year and pooled-volume structures (per SEC filings). Your current annual contract may be eligible to convert; eligibility and any price change are unconfirmed without a quote."
+    };
+  }
+  function ruleAcvGrowth(input) {
+    if (input.expected_next_year_acv_usd === void 0 || input.expected_next_year_acv_usd <= input.acv_usd * 1.15) {
+      return null;
+    }
+    return {
+      result_type: "SAVINGS_IDENTIFIED" /* SAVINGS_IDENTIFIED */,
+      confidence: "FACT" /* FACT */,
+      recommendation_text: "Your expected ACV growth exceeds 15%. Ask Procore whether your renewal can pre-price the additional volume at today's rate before the increase is applied.",
+      comparable_evidence: [],
+      explanation: "Procore pricing is generally based on contracted ACV. A significant ACV increase can materially raise the renewal cost. Asking to pre-price the incremental volume is a documented commercial structure option; eligibility is account-specific."
+    };
+  }
+  function ruleRateProtection(input) {
+    const noProtection = input.contract_term === "annual" || input.rate_protection_status === "unclear" || input.rate_protection_status === "none";
+    if (!noProtection) return null;
+    return {
+      result_type: "SAVINGS_IDENTIFIED" /* SAVINGS_IDENTIFIED */,
+      confidence: "FACT" /* FACT */,
+      recommendation_text: "Ask Procore whether a renewal rate-protection clause can be added to limit future annual increases.",
+      comparable_evidence: ["REDDIT-001"],
+      explanation: "Customer evidence (REDDIT-001) shows renewal increases of 10%+ are possible. Rate-protection language is a documented commercial structure; whether it is available for your account is unconfirmed without a quote."
+    };
+  }
+  function ruleBenchmarkHighRate(benchmark) {
+    if (!benchmark.min_evidence_count_met) return null;
+    if (benchmark.position !== "above_p75") return null;
+    return {
+      result_type: "SAVINGS_IDENTIFIED" /* SAVINGS_IDENTIFIED */,
+      confidence: "BENCHMARK" /* BENCHMARK */,
+      recommendation_text: `Your effective rate of $${benchmark.user_rate.toFixed(0)}/1M ACV sits above the 75th percentile of comparable public observations (range $${benchmark.stats.min.toFixed(0)}\u2013$${benchmark.stats.max.toFixed(0)}/1M, n=${benchmark.stats.count}). Ask Procore for a rate comparison relative to current market conditions.`,
+      comparable_evidence: benchmark.comparable_evidence_ids,
+      explanation: "This is a directional benchmark from public customer observations, not an official Procore price list. Do not cite this as a guaranteed saving. Use it to frame a negotiation question."
+    };
+  }
+  function ruleLegacyRateWarning(benchmark) {
+    if (!benchmark.min_evidence_count_met) return null;
+    if (benchmark.position !== "below_p25") return null;
+    return {
+      result_type: "WARNING" /* WARNING */,
+      confidence: "BENCHMARK" /* BENCHMARK */,
+      recommendation_text: `Your effective rate of $${benchmark.user_rate.toFixed(0)}/1M ACV appears favorable relative to comparable public observations (p25=$${benchmark.stats.p25.toFixed(0)}/1M, n=${benchmark.stats.count}). Confirm the commercial impact in writing before restructuring the contract; changing a legacy configuration can expose you to current-market pricing.`,
+      comparable_evidence: benchmark.comparable_evidence_ids,
+      explanation: "Do not recommend restructuring solely because a benchmark suggests a lower current-market rate. This observation is directional; it is not proof that your rate is negotiable downward."
+    };
+  }
+  function ruleRenewalIncrease(input) {
+    if (input.renewal_increase_pct === void 0) return null;
+    if (input.renewal_increase_pct > 14) {
+      return {
+        result_type: "WARNING" /* WARNING */,
+        confidence: "OBSERVATION" /* OBSERVATION */,
+        recommendation_text: `Your reported renewal increase of ${input.renewal_increase_pct}% exceeds the highest increase reported in the evidence dataset (14%). Ask Procore for a written justification and request renewal-rate protection.`,
+        comparable_evidence: ["REDDIT-001"],
+        explanation: "REDDIT-001 reports a rep saying the highest renewal seen was 14%. Your figure exceeds this. This is OBSERVATION-level evidence from a single customer interaction, not an official Procore cap."
+      };
+    }
+    if (input.renewal_increase_pct > 5) {
+      return {
+        result_type: "WARNING" /* WARNING */,
+        confidence: "OBSERVATION" /* OBSERVATION */,
+        recommendation_text: `Your renewal increase of ${input.renewal_increase_pct}% is above the typical 2\u20135% range reported in customer evidence. Ask Procore for a written justification and request renewal-rate protection language.`,
+        comparable_evidence: ["REDDIT-001"],
+        explanation: "REDDIT-001 reports a customer saying typical increases are 2\u20135%. This is OBSERVATION-level evidence, not an official Procore policy."
+      };
+    }
+    return null;
+  }
+  function ruleDiscountUnknown(input) {
+    if (input.discount_status !== "DONT_KNOW" /* DONT_KNOW */) return null;
+    return {
+      result_type: "WARNING" /* WARNING */,
+      confidence: "FACT" /* FACT */,
+      recommendation_text: "Your current discount status is unknown. Before requesting any configuration change, confirm in writing whether your existing discount applies to the proposed configuration.",
+      comparable_evidence: [],
+      explanation: "Procore discounts are account- and configuration-specific. A discount on the current contract does not automatically transfer to a reconfigured renewal. Any savings estimate that depends on a discount surviving the change would be unreliable."
+    };
+  }
+  function ruleBundleOrPoolGuard(input) {
+    if (input.bundle_structure !== "BUNDLED" /* BUNDLED */ && input.bundle_structure !== "POOLED" /* POOLED */) {
+      return null;
+    }
+    const structureLabel = input.bundle_structure === "BUNDLED" /* BUNDLED */ ? "bundled" : "pooled-volume";
+    return {
+      result_type: "WARNING" /* WARNING */,
+      confidence: "FACT" /* FACT */,
+      recommendation_text: `Your contract appears to use a ${structureLabel} commercial structure. Request a written quote for the proposed configuration before assuming a line-item removal will reduce your renewal by that line-item amount.`,
+      comparable_evidence: [],
+      explanation: "In a bundled or pooled contract, the renewal price reflects the overall structure, not the sum of independent line items. Removing a product may not reduce total cost by the attributable line-item amount. A comparable written quote is required before any savings can be claimed."
+    };
+  }
+  function ruleRequirementGuard(input) {
+    if (!input.product_inputs || input.product_inputs.length === 0) return null;
+    const required2 = input.product_inputs.filter(
+      (p) => p.requirement === "BUSINESS_CRITICAL" /* BUSINESS_CRITICAL */ || p.requirement === "CLIENT_CONTRACT" /* CLIENT_CONTRACT */ || p.requirement === "INTERNAL_POLICY" /* INTERNAL_POLICY */
+    );
+    if (required2.length === 0) return null;
+    const labels = required2.map((p) => p.product_id).join(", ");
+    return {
+      result_type: "WARNING" /* WARNING */,
+      confidence: "FACT" /* FACT */,
+      recommendation_text: `The following products are marked as required: ${labels}. These have been excluded from optimization candidates. Do not recommend removal.`,
+      comparable_evidence: [],
+      explanation: "A product required by client contract, internal policy, or business-critical workflow must not be treated as a removal candidate. Verify the requirement in writing before reconsidering."
+    };
+  }
+  function ruleDependencyUnknown(input) {
+    if (!input.product_inputs || input.product_inputs.length === 0) return null;
+    const uncertain = input.product_inputs.filter(
+      (p) => p.dependency === "NOT_SURE" /* NOT_SURE */
+    );
+    if (uncertain.length === 0) return null;
+    const labels = uncertain.map((p) => p.product_id).join(", ");
+    return {
+      result_type: "OPPORTUNITY_NOT_QUANTIFIABLE" /* OPPORTUNITY_NOT_QUANTIFIABLE */,
+      confidence: "UNKNOWN" /* UNKNOWN */,
+      recommendation_text: `Dependency status is unconfirmed for: ${labels}. Resolve whether a technical or workflow dependency exists before treating these as removal candidates.`,
+      comparable_evidence: [],
+      explanation: "The engine cannot assume removability when a dependency is unknown. Confirm the dependency status before advancing these products to counterfactual pricing."
+    };
+  }
+  function ruleVerifiedSaving(input) {
+    if (input.before_annual_cost_usd === void 0 || input.after_annual_cost_usd === void 0) {
+      return null;
+    }
+    const saving = input.before_annual_cost_usd - input.after_annual_cost_usd;
+    if (saving <= 0) {
+      return {
+        result_type: "WARNING" /* WARNING */,
+        confidence: "FACT" /* FACT */,
+        recommendation_text: "The after-restructuring cost equals or exceeds the current cost. No saving is achieved by this change.",
+        comparable_evidence: [],
+        explanation: "before_annual_cost_usd minus after_annual_cost_usd is not positive."
+      };
+    }
+    return {
+      result_type: "VERIFIED_BEFORE_AFTER" /* VERIFIED_BEFORE_AFTER */,
+      confidence: "FACT" /* FACT */,
+      recommendation_text: `The two quotes you provided show a verified annual saving of $${saving.toLocaleString()}.`,
+      comparable_evidence: [],
+      explanation: "Saving is calculated as the difference between the two user-supplied quotes. This is a VERIFIED_BEFORE_AFTER result only if both quotes are official written Procore proposals for comparable configurations.",
+      dollar_saving: saving
+    };
+  }
+
+  // src/candidates.ts
+  function generateCandidates(input) {
+    if (!input.product_inputs || input.product_inputs.length === 0) {
+      return { candidates: [], blocked: [], skipped_product_ids: [] };
+    }
+    const candidates = [];
+    const blocked = [];
+    const skipped = [];
+    for (const p of input.product_inputs) {
+      if (p.usage === "CRITICAL" /* CRITICAL */ || p.usage === "REGULAR" /* REGULAR */) {
+        skipped.push(p.product_id);
+        continue;
+      }
+      const elig = evaluateProductEligibility(p.product_id, p.requirement, p.dependency);
+      const base = {
+        product_id: p.product_id,
+        usage: p.usage,
+        requirement: p.requirement,
+        replacement: p.replacement,
+        dependency: p.dependency,
+        annual_price_usd: p.annual_price_usd
+      };
+      if (elig.eligibility === "BLOCKED") {
+        blocked.push({ ...base, blocked_reason: elig.reasons.join("; ") });
+      } else if (elig.eligibility === "UNCERTAIN") {
+        candidates.push({ ...base, blocked_reason: elig.reasons.join("; ") });
+      } else {
+        candidates.push(base);
+      }
+    }
+    return { candidates, blocked, skipped_product_ids: skipped };
+  }
+
+  // src/counterfactual.ts
+  function evaluateCandidates(input, generation) {
+    const target_prices = [];
+    const global_assumptions = [];
+    if (input.discount_status === "DONT_KNOW" /* DONT_KNOW */ || input.discount_status === void 0) {
+      global_assumptions.push(
+        "Discount status unknown: any savings estimate depending on the current discount surviving a reconfiguration cannot be defended."
+      );
+    }
+    if (input.bundle_structure === "BUNDLED" /* BUNDLED */ || input.bundle_structure === "POOLED" /* POOLED */) {
+      const label = input.bundle_structure === "BUNDLED" /* BUNDLED */ ? "bundled" : "pooled-volume";
+      global_assumptions.push(
+        `Contract uses a ${label} structure: line-item removal does not automatically reduce total renewal by the attributable line-item amount.`
+      );
+    }
+    if (generation.candidates.length === 0) {
+      return {
+        overall_result: "NO_DEFENSIBLE_SAVINGS_IDENTIFIED" /* NO_DEFENSIBLE_SAVINGS_IDENTIFIED */,
+        counterfactual_results: [],
+        target_prices: [],
+        global_assumptions
+      };
+    }
+    const hasBefore = typeof input.before_annual_cost_usd === "number" && input.before_annual_cost_usd > 0;
+    const hasAfter = typeof input.after_annual_cost_usd === "number" && input.after_annual_cost_usd > 0;
+    if (hasBefore && hasAfter) {
+      const saving = input.before_annual_cost_usd - input.after_annual_cost_usd;
+      const candidate = generation.candidates[0];
+      const result = {
+        result_class: saving > 0 ? "VERIFIED_BEFORE_AFTER" /* VERIFIED_BEFORE_AFTER */ : "WARNING" /* WARNING */,
+        candidate,
+        dollar_saving: saving > 0 ? saving : void 0,
+        assumptions: [
+          ...global_assumptions,
+          "Saving is the arithmetic difference between the two user-supplied quotes.",
+          "VERIFIED_BEFORE_AFTER only when both quotes are official written Procore proposals for comparable configurations."
+        ],
+        evidence_ids: [],
+        confidence: "FACT" /* FACT */,
+        explanation: saving > 0 ? `The two user-supplied quotes differ by $${saving.toLocaleString()}/year. This is a verified quote-to-quote difference. Whether this difference is attributable to a specific product removal cannot be determined from the quote amounts alone \u2014 request a written quote confirming which configuration changed.` : "The after-restructuring cost equals or exceeds the current cost. No saving is achieved by this change."
+      };
+      return {
+        overall_result: result.result_class,
+        counterfactual_results: [result],
+        target_prices: [],
+        global_assumptions
+      };
+    }
+    const counterfactual_results = [];
+    let bestResult = "NO_DEFENSIBLE_SAVINGS_IDENTIFIED" /* NO_DEFENSIBLE_SAVINGS_IDENTIFIED */;
+    for (const candidate of generation.candidates) {
+      const result = evaluateSingleCandidate(candidate, input, global_assumptions);
+      counterfactual_results.push(result);
+      if (input.target_savings_pct != null && result.result_class !== "NO_DEFENSIBLE_SAVINGS_IDENTIFIED" /* NO_DEFENSIBLE_SAVINGS_IDENTIFIED */) {
+        target_prices.push(calcTargetPrice(input, candidate, input.target_savings_pct));
+      }
+      if (resultPriority(result.result_class) > resultPriority(bestResult)) {
+        bestResult = result.result_class;
+      }
+    }
+    return {
+      overall_result: bestResult,
+      counterfactual_results,
+      target_prices,
+      global_assumptions
+    };
+  }
+  function evaluateSingleCandidate(candidate, input, globalAssumptions) {
+    const assumptions = [...globalAssumptions];
+    const spendNote = candidate.annual_price_usd ? ` Your current attributable spend is $${candidate.annual_price_usd.toLocaleString()}/year.` : "";
+    const pqMatches = findProductQuoteRows(candidate.product_id, input.acv_usd).filter((m) => m.comparability === "HIGH" || m.comparability === "MEDIUM");
+    const pqIds = pqMatches.map((m) => m.row.evidence_id);
+    const pqNote = pqIds.length > 0 ? ` Comparable public quote observations exist for ${candidate.product_id} (${pqIds.length} observation${pqIds.length > 1 ? "s" : ""}, see evidence trail). Directional context only \u2014 not a savings guarantee.` : "";
+    if (candidate.blocked_reason) {
+      return {
+        result_class: "OPPORTUNITY_NOT_QUANTIFIABLE" /* OPPORTUNITY_NOT_QUANTIFIABLE */,
+        candidate,
+        assumptions,
+        evidence_ids: pqIds,
+        confidence: "UNKNOWN" /* UNKNOWN */,
+        explanation: `${candidate.product_id} may be an optimization candidate, but removal cannot be confirmed safe.${spendNote} Confirmation needed: ${candidate.blocked_reason} Request a comparable quote before treating this as a dollar saving.` + pqNote
+      };
+    }
+    const preventsCalc2 = input.discount_status === "DONT_KNOW" /* DONT_KNOW */ || input.discount_status === void 0 || input.bundle_structure === "BUNDLED" /* BUNDLED */ || input.bundle_structure === "POOLED" /* POOLED */;
+    if (preventsCalc2) {
+      return {
+        result_class: "OPPORTUNITY_NOT_QUANTIFIABLE" /* OPPORTUNITY_NOT_QUANTIFIABLE */,
+        candidate,
+        assumptions,
+        evidence_ids: pqIds,
+        confidence: "UNKNOWN" /* UNKNOWN */,
+        explanation: `${candidate.product_id} is reported as not actively used and no known requirement prevents a configuration change.${spendNote} However, commercial structure or discount uncertainty prevents a defensible savings calculation. Request a comparable written quote before treating this as a dollar saving.` + pqNote
+      };
+    }
+    return {
+      result_class: "OPPORTUNITY_NOT_QUANTIFIABLE" /* OPPORTUNITY_NOT_QUANTIFIABLE */,
+      candidate,
+      assumptions,
+      evidence_ids: pqIds,
+      confidence: "UNKNOWN" /* UNKNOWN */,
+      explanation: `${candidate.product_id} is reported as not actively used and no known requirement prevents a configuration change.${spendNote} However, available evidence is insufficient to defensibly determine the resulting renewal price. Request a comparable quote before treating this as a dollar saving.` + pqNote
+    };
+  }
+  function calcTargetPrice(input, candidate, targetPct) {
+    const maxAcceptable = Math.round(input.annual_cost_usd * (1 - targetPct / 100) * 100) / 100;
+    return {
+      product_id: candidate.product_id,
+      current_spend: input.annual_cost_usd,
+      target_savings_pct: targetPct,
+      max_acceptable_price: maxAcceptable
+    };
+  }
+  function resultPriority(r) {
+    switch (r) {
+      case "VERIFIED_BEFORE_AFTER" /* VERIFIED_BEFORE_AFTER */:
+        return 5;
+      case "WARNING" /* WARNING */:
+        return 4;
+      case "SAVINGS_IDENTIFIED" /* SAVINGS_IDENTIFIED */:
+        return 3;
+      case "OPPORTUNITY_NOT_QUANTIFIABLE" /* OPPORTUNITY_NOT_QUANTIFIABLE */:
+        return 2;
+      case "NO_DEFENSIBLE_SAVINGS_IDENTIFIED" /* NO_DEFENSIBLE_SAVINGS_IDENTIFIED */:
+        return 1;
+      default:
+        return 0;
+    }
+  }
+
+  // src/negotiation.ts
+  function fmt(n) {
+    return n.toLocaleString("en-US", { maximumFractionDigits: 2 });
+  }
+  function buildWhatToAsk(candidate, input) {
+    const base = `Request a written quote from Procore for your current configuration with ${candidate.product_id} removed, holding all other contract terms constant.`;
+    if (input.contract_term === "annual") {
+      return base + " Also ask whether converting to a multi-year agreement would provide better pricing.";
+    }
+    return base;
+  }
+  function buildConfigRequested(candidate, input) {
+    const others = input.products.filter((p) => p !== candidate.product_id);
+    const otherStr = others.length > 0 ? others.join(", ") : "remaining products";
+    return `Current configuration minus ${candidate.product_id}; retaining ${otherStr}.`;
+  }
+  function buildUnknowns(candidate, input) {
+    const unknowns = [
+      "The resulting renewal price for the proposed configuration is not known until Procore provides a written quote.",
+      "Whether your current discount rate will be preserved in the reconfigured contract."
+    ];
+    if (candidate.blocked_reason) {
+      unknowns.push(`Dependency/requirement confirmation still needed: ${candidate.blocked_reason}`);
+    }
+    if (input.bundle_structure === "BUNDLED" /* BUNDLED */ || input.bundle_structure === "POOLED" /* POOLED */) {
+      unknowns.push(
+        "The commercial impact of removing a line item from a bundled/pooled contract structure is not known without a comparable written quote."
+      );
+    }
+    return unknowns;
+  }
+  function buildConfirmInWriting(candidate, input) {
+    const items = [
+      "A written Procore quote for the proposed configuration.",
+      "Confirmation that the quoted price is comparable (same ACV, same term, same other products).",
+      "Whether your current discount and rate protection apply to the reconfigured contract."
+    ];
+    if (input.bundle_structure === "BUNDLED" /* BUNDLED */ || input.bundle_structure === "POOLED" /* POOLED */) {
+      items.push(
+        `The commercial impact of removing ${candidate.product_id} from your current bundled/pooled pricing structure.`
+      );
+    }
+    if (candidate.blocked_reason?.includes("ERP") || candidate.product_id === "project_financials") {
+      items.push(
+        "That removing Project Financials will not break your active ERP/accounting integration."
+      );
+    }
+    return items;
+  }
+  function buildRisks(candidate, input) {
+    const risks = [
+      "If your current contract has a favorable legacy rate, reconfiguration may expose you to current-market pricing.",
+      "Removing a product without a written comparable quote means the actual savings cannot be verified in advance."
+    ];
+    if (input.discount_status === "DONT_KNOW" /* DONT_KNOW */) {
+      risks.push(
+        "Your current discount is unknown. It may not survive a reconfiguration, making the net saving smaller than expected."
+      );
+    }
+    if (candidate.blocked_reason) {
+      risks.push(
+        `Unresolved eligibility: ${candidate.blocked_reason} If this dependency exists, removal could disrupt active workflows.`
+      );
+    }
+    return risks;
+  }
+  function buildNegotiationOutput(input, summary) {
+    if (summary.overall_result === "NO_DEFENSIBLE_SAVINGS_IDENTIFIED" /* NO_DEFENSIBLE_SAVINGS_IDENTIFIED */) return null;
+    if (summary.counterfactual_results.length === 0) return null;
+    const cfResult = summary.counterfactual_results[0];
+    const candidate = cfResult.candidate;
+    const targetPriceEntry = summary.target_prices.find(
+      (tp) => tp.product_id === candidate.product_id
+    );
+    const why = cfResult.result_class === "VERIFIED_BEFORE_AFTER" /* VERIFIED_BEFORE_AFTER */ ? `The two user-supplied quotes differ by $${fmt(cfResult.dollar_saving)} per year. This is a verified quote-to-quote difference. This amount cannot automatically be attributed to the removal of a specific product without a written quote confirming the configuration change.` : `${candidate.product_id} has been identified as a potential optimization candidate. A comparable written quote is required to determine whether a defensible saving exists.`;
+    return {
+      what_to_ask: buildWhatToAsk(candidate, input),
+      why,
+      configuration_requested: buildConfigRequested(candidate, input),
+      target_price: targetPriceEntry?.max_acceptable_price,
+      max_acceptable_price: targetPriceEntry ? targetPriceEntry.max_acceptable_price : void 0,
+      evidence_ids: cfResult.evidence_ids,
+      unknowns: buildUnknowns(candidate, input),
+      confirm_in_writing: buildConfirmInWriting(candidate, input),
+      risks: buildRisks(candidate, input)
+    };
+  }
+
+  // src/report.ts
+  function headline(verdict) {
+    switch (verdict) {
+      case "VERIFIED_BEFORE_AFTER" /* VERIFIED_BEFORE_AFTER */:
+        return "Verified savings identified";
+      case "SAVINGS_IDENTIFIED" /* SAVINGS_IDENTIFIED */:
+        return "Potential savings identified";
+      case "OPPORTUNITY_NOT_QUANTIFIABLE" /* OPPORTUNITY_NOT_QUANTIFIABLE */:
+        return "Optimization opportunity identified \u2014 savings not yet quantifiable";
+      case "NO_DEFENSIBLE_SAVINGS_IDENTIFIED" /* NO_DEFENSIBLE_SAVINGS_IDENTIFIED */:
+        return "No defensible savings identified";
+      default:
+        return "Analysis complete";
+    }
+  }
+  function primaryConfidenceLevel(summary) {
+    const first = summary.counterfactual_results[0];
+    return first?.confidence ?? "UNKNOWN";
+  }
+  function primaryOpportunity(summary) {
+    const first = summary.counterfactual_results[0];
+    if (!first) return void 0;
+    return first.explanation;
+  }
+  function keyWarnings(summary) {
+    return summary.global_assumptions.slice();
+  }
+  function whatToConfirm(summary) {
+    const items = [];
+    for (const r of summary.counterfactual_results) {
+      if (r.result_class === "OPPORTUNITY_NOT_QUANTIFIABLE" /* OPPORTUNITY_NOT_QUANTIFIABLE */) {
+        items.push(
+          `Request a written Procore quote for configuration without ${r.candidate.product_id} to determine the renewal impact.`
+        );
+      }
+    }
+    if (items.length === 0) {
+      items.push("Cross-check any estimate against your actual Procore renewal quote before making decisions.");
+    }
+    return items;
+  }
+  function buildFreeResult(input, summary, benchmark) {
+    const verdict = summary.overall_result;
+    let effective_rate;
+    let benchmark_position;
+    if (benchmark?.min_evidence_count_met) {
+      effective_rate = benchmark.user_rate;
+      benchmark_position = benchmark.position;
+    }
+    const first = summary.counterfactual_results[0];
+    const savings_amount = verdict === "VERIFIED_BEFORE_AFTER" /* VERIFIED_BEFORE_AFTER */ && first?.dollar_saving != null ? first.dollar_saving : void 0;
+    const userProducts = input.product_inputs?.map((p) => p.product_id) ?? input.products ?? [];
+    const pqCount = getProductQuoteRows().filter((r) => userProducts.includes(r.normalized_product_id ?? "")).length;
+    const benchmark_evidence_note = pqCount > 0 ? `${pqCount} public quote observation${pqCount > 1 ? "s" : ""} available for your product mix. Directional context only \u2014 not an official Procore price list.` : void 0;
+    return {
+      verdict,
+      current_spend: input.annual_cost_usd,
+      effective_rate,
+      benchmark_position,
+      main_opportunity: primaryOpportunity(summary),
+      savings_amount,
+      savings_range: void 0,
+      // SAVINGS_IDENTIFIED range not yet produced from evidence
+      confidence: primaryConfidenceLevel(summary),
+      explanation: headline(verdict),
+      warnings: keyWarnings(summary),
+      what_to_confirm: whatToConfirm(summary),
+      benchmark_evidence_note
+    };
+  }
+  function buildPaidReport(input, generation, summary, benchmark, negotiation) {
+    const current_configuration = input.product_inputs ?? [];
+    const candidate_configurations = generation.candidates.length > 0 ? [generation.candidates] : [];
+    const evidence_trail = [
+      ...new Set(summary.counterfactual_results.flatMap((r) => r.evidence_ids))
+    ];
+    if (benchmark?.comparable_evidence_ids) {
+      for (const id of benchmark.comparable_evidence_ids) {
+        if (!evidence_trail.includes(id)) evidence_trail.push(id);
+      }
+    }
+    const assumptions = [
+      ...summary.global_assumptions,
+      ...summary.counterfactual_results.flatMap((r) => r.assumptions)
+    ];
+    if (input.credits_usd != null && input.credits_usd > 0) {
+      assumptions.push(
+        `Credits of $${input.credits_usd.toLocaleString()} applied \u2014 effective rate reflects net annual spend after credits.`
+      );
+    }
+    const seen = /* @__PURE__ */ new Set();
+    const uniqueAssumptions = assumptions.filter((a) => {
+      if (seen.has(a)) return false;
+      seen.add(a);
+      return true;
+    });
+    const dependency_findings = [
+      ...generation.blocked.map(
+        (b) => `${b.product_id} blocked: ${b.blocked_reason}`
+      ),
+      ...generation.candidates.filter((c) => c.blocked_reason).map((c) => `${c.product_id} uncertain: ${c.blocked_reason}`)
+    ];
+    const legacy_rate_warnings = [];
+    if (benchmark?.min_evidence_count_met && benchmark.position === "below_p25") {
+      legacy_rate_warnings.push(
+        `Your effective rate of $${benchmark.user_rate.toFixed(0)}/1M ACV appears favorable relative to comparable public observations. Confirm the commercial impact in writing before restructuring the contract.`
+      );
+    }
+    const commercial_risks = [
+      "Savings estimates are not verified unless explicitly marked VERIFIED_BEFORE_AFTER.",
+      "Customer-specific pricing can differ from any benchmark or estimate shown.",
+      "Discount and rate-protection terms may not survive a reconfiguration."
+    ];
+    if (input.bundle_structure === "BUNDLED" || input.bundle_structure === "POOLED") {
+      commercial_risks.push(
+        "Bundled/pooled contract: removing a product may not reduce total renewal by the line-item amount."
+      );
+    }
+    if (input.tier_changed === "YES") {
+      commercial_risks.push(
+        "Pricing tier changed since last year \u2014 renewal pricing may reflect new tier structure."
+      );
+    }
+    if (input.packaging_changed === "YES") {
+      commercial_risks.push(
+        "Packaging structure changed since last year \u2014 bundle lock-in risk may apply to current configuration."
+      );
+    }
+    const suggested_questions = [
+      `Request a written quote for your current configuration with any candidate products removed.`,
+      "Ask Procore to hold all other terms constant in the alternative quote.",
+      "Ask whether your current discount and rate protection apply to the proposed configuration."
+    ];
+    if (input.contract_term === "annual") {
+      suggested_questions.push(
+        "Ask whether a multi-year pooled agreement would provide a renewal rate cap."
+      );
+    }
+    if (input.rate_protection_status === "active") {
+      suggested_questions.push(
+        "Invoke your rate protection clause if the renewal increase exceeds the contractual cap."
+      );
+    }
+    if (input.expected_next_year_acv_usd != null && input.expected_next_year_acv_usd > input.acv_usd * 1.15) {
+      suggested_questions.push(
+        `Expected ACV growth exceeds 15%. Ask whether your renewal can pre-price the additional volume at today's rate.`
+      );
+    }
+    if (input.target_savings_pct != null && summary.target_prices.length > 0) {
+      const tp = summary.target_prices[0];
+      suggested_questions.push(
+        `Target negotiation maximum: $${tp.max_acceptable_price.toLocaleString()} (${tp.target_savings_pct}% below current spend). Label this as your walk-away price, not an expected Procore quote.`
+      );
+    }
+    const renewal_strategy = summary.overall_result === "VERIFIED_BEFORE_AFTER" /* VERIFIED_BEFORE_AFTER */ ? "You have a verified savings opportunity. Present both quotes to Procore and negotiate the lower-cost configuration." : summary.overall_result === "OPPORTUNITY_NOT_QUANTIFIABLE" /* OPPORTUNITY_NOT_QUANTIFIABLE */ ? "Request a written comparable quote for the candidate configuration. Do not negotiate on the basis of the current line-item price alone." : "No configuration change with a defensible saving was identified. Focus on renewal rate protection and multi-year structure options.";
+    const audit_trail = [
+      `Analysis date: ${(/* @__PURE__ */ new Date()).toISOString().split("T")[0]}`,
+      `Input: annual_cost_usd=${input.annual_cost_usd}, acv_usd=${input.acv_usd}, contract_term=${input.contract_term}`,
+      `Candidates evaluated: ${generation.candidates.length}`,
+      `Blocked products: ${generation.blocked.length}`,
+      `Overall result: ${summary.overall_result}`,
+      ...summary.counterfactual_results.map(
+        (r) => `  ${r.candidate.product_id}: ${r.result_class}` + (r.dollar_saving != null ? ` ($${r.dollar_saving.toLocaleString()})` : "")
+      )
+    ];
+    function acvContext(r) {
+      if (r.acv_usd) return `$${(r.acv_usd / 1e6).toFixed(0)}M ACV`;
+      if (r.acv_band_min_usd && r.acv_band_max_usd) {
+        return `$${(r.acv_band_min_usd / 1e6).toFixed(0)}M\u2013$${(r.acv_band_max_usd / 1e6).toFixed(0)}M ACV band`;
+      }
+      return "ACV not disclosed";
+    }
+    const qeRecords = PUBLIC_QUOTE_ROWS.map((r) => ({
+      evidence_id: r.evidence_id,
+      source_description: r.source_description ?? "",
+      product_reported: r.products?.[0] ?? r.normalized_product_id ?? "Platform total",
+      normalized_product_id: r.normalized_product_id,
+      acv_context: acvContext(r),
+      quoted_annual_price_usd: r.quoted_product_annual_price_usd ?? null,
+      term: r.contract_term ?? "Quote",
+      limitation_flags: r.limitation_flags ?? [],
+      what_it_supports: r.quoted_product_annual_price_usd ? `Observed public quote price for ${r.normalized_product_id ?? "this product"} at ${acvContext(r)}` : "Non-calculational context evidence",
+      what_it_does_not_support: "Universal module price or guaranteed removal saving for any customer",
+      exclude_from_calculations: r.exclude_from_calculations === true
+    }));
+    const usable = qeRecords.filter((r) => !r.exclude_from_calculations && r.quoted_annual_price_usd !== null).length;
+    const productsCovered = [...new Set(
+      PUBLIC_QUOTE_ROWS.filter((r) => r.normalized_product_id && !r.exclude_from_calculations).map((r) => r.normalized_product_id)
+    )];
+    const quote_evidence_summary = {
+      dataset_name: PUBLIC_QUOTES_DATASET_META.dataset_name,
+      total_records: PUBLIC_QUOTES_DATASET_META.total_records,
+      usable_records: usable,
+      excluded_records: PUBLIC_QUOTES_DATASET_META.total_records - usable,
+      products_covered: productsCovered,
+      records: qeRecords
+    };
+    return {
+      current_configuration,
+      candidate_configurations,
+      counterfactual_results: summary.counterfactual_results,
+      benchmark: benchmark ?? void 0,
+      evidence_trail,
+      assumptions: uniqueAssumptions,
+      confidence_rationale: `Overall confidence: ${primaryConfidenceLevel(summary)}. Financial claims are deterministic from user inputs and explicit assumptions. No LLM-generated numbers are used in calculations.`,
+      dependency_findings,
+      legacy_rate_warnings,
+      commercial_risks,
+      negotiation: negotiation ?? void 0,
+      suggested_questions,
+      renewal_strategy,
+      audit_trail,
+      quote_evidence_summary
+    };
+  }
+
+  // src/engine.ts
+  var RESULT_PRIORITY = {
+    ["VERIFIED_BEFORE_AFTER" /* VERIFIED_BEFORE_AFTER */]: 5,
+    ["WARNING" /* WARNING */]: 4,
+    ["SAVINGS_IDENTIFIED" /* SAVINGS_IDENTIFIED */]: 3,
+    ["OPPORTUNITY_NOT_QUANTIFIABLE" /* OPPORTUNITY_NOT_QUANTIFIABLE */]: 2,
+    ["NO_DEFENSIBLE_SAVINGS_IDENTIFIED" /* NO_DEFENSIBLE_SAVINGS_IDENTIFIED */]: 1
+  };
+  function sortByPriority(results) {
+    return [...results].sort((a, b) => RESULT_PRIORITY[b.result_type] - RESULT_PRIORITY[a.result_type]);
+  }
+  function runEngine(raw) {
+    const input = assertUserInput(raw);
+    const validation = validateUserInput(raw);
+    const ruleResults = [];
+    const warnings = [];
+    const commercial = ruleCommercialStructures(input);
+    if (commercial) ruleResults.push(commercial);
+    const acvGrowth = ruleAcvGrowth(input);
+    if (acvGrowth) ruleResults.push(acvGrowth);
+    const rateProtection = ruleRateProtection(input);
+    if (rateProtection) ruleResults.push(rateProtection);
+    const discountWarn = ruleDiscountUnknown(input);
+    if (discountWarn) ruleResults.push(discountWarn);
+    const bundleWarn = ruleBundleOrPoolGuard(input);
+    if (bundleWarn) ruleResults.push(bundleWarn);
+    const benchmark = buildBenchmarkResult(input.acv_usd, input.annual_cost_usd, "company", input.credits_usd);
+    if (benchmark) {
+      const highRate = ruleBenchmarkHighRate(benchmark);
+      if (highRate) ruleResults.push(highRate);
+      const legacyWarn = ruleLegacyRateWarning(benchmark);
+      if (legacyWarn) ruleResults.push(legacyWarn);
+    } else {
+      warnings.push("No comparable evidence rows found for the provided ACV; benchmark skipped.");
+    }
+    const renewalResult = ruleRenewalIncrease(input);
+    if (renewalResult) ruleResults.push(renewalResult);
+    const savingResult = ruleVerifiedSaving(input);
+    if (savingResult) ruleResults.push(savingResult);
+    const reqGuard = ruleRequirementGuard(input);
+    if (reqGuard) ruleResults.push(reqGuard);
+    const depGuard = ruleDependencyUnknown(input);
+    if (depGuard) ruleResults.push(depGuard);
+    let candidateResult = null;
+    let cfSummary = null;
+    let negotiation = null;
+    if (input.product_inputs && input.product_inputs.length > 0) {
+      candidateResult = generateCandidates(input);
+      cfSummary = evaluateCandidates(input, candidateResult);
+      negotiation = buildNegotiationOutput(input, cfSummary);
+      ruleResults.push({
+        result_type: cfSummary.overall_result,
+        confidence: "UNKNOWN" /* UNKNOWN */,
+        recommendation_text: cfSummary.counterfactual_results[0]?.explanation ?? "No defensible savings identified based on the provided inputs.",
+        comparable_evidence: cfSummary.counterfactual_results[0]?.evidence_ids ?? [],
+        explanation: cfSummary.global_assumptions.join(" "),
+        dollar_saving: cfSummary.counterfactual_results[0]?.dollar_saving,
+        assumptions: cfSummary.global_assumptions
+      });
+    } else {
+      const hasBefore = typeof input.before_annual_cost_usd === "number" && input.before_annual_cost_usd > 0;
+      const hasAfter = typeof input.after_annual_cost_usd === "number" && input.after_annual_cost_usd > 0;
+      const verifiedSaving = hasBefore && hasAfter ? input.before_annual_cost_usd - input.after_annual_cost_usd : null;
+      const fallbackOverall = verifiedSaving != null && verifiedSaving > 0 ? "VERIFIED_BEFORE_AFTER" /* VERIFIED_BEFORE_AFTER */ : "OPPORTUNITY_NOT_QUANTIFIABLE" /* OPPORTUNITY_NOT_QUANTIFIABLE */;
+      const fallbackCR = verifiedSaving != null && verifiedSaving > 0 ? [{
+        result_class: "VERIFIED_BEFORE_AFTER" /* VERIFIED_BEFORE_AFTER */,
+        candidate: {
+          product_id: "__quote_pair__",
+          usage: "NOT_SURE",
+          requirement: "NOT_SURE",
+          replacement: "NOT_SURE",
+          dependency: "NOT_SURE"
+        },
+        dollar_saving: verifiedSaving,
+        assumptions: [
+          "Saving is the arithmetic difference between the two user-supplied quotes.",
+          "VERIFIED only when both quotes are official written Procore proposals for comparable configurations."
+        ],
+        evidence_ids: [],
+        confidence: "FACT" /* FACT */,
+        explanation: `The two quotes provided show a verified annual saving of $${verifiedSaving.toLocaleString()}.`
+      }] : [];
+      ruleResults.push({
+        result_type: "OPPORTUNITY_NOT_QUANTIFIABLE" /* OPPORTUNITY_NOT_QUANTIFIABLE */,
+        confidence: "UNKNOWN" /* UNKNOWN */,
+        recommendation_text: "Ask Procore for a written quote with your proposed configuration change, then compare that quote against your current contract.",
+        comparable_evidence: [],
+        explanation: "No per-product usage/requirement/dependency information was provided. Analysis is limited to benchmarking and commercial-structure rules."
+      });
+      cfSummary = {
+        overall_result: fallbackOverall,
+        counterfactual_results: fallbackCR,
+        target_prices: [],
+        global_assumptions: validation.warnings.filter((w) => w.severity === "PREVENTS_CALCULATION").map((w) => w.message)
+      };
+      candidateResult = { candidates: [], blocked: [], skipped_product_ids: [] };
+    }
+    for (const w of validation.warnings) {
+      if (w.severity === "PREVENTS_CALCULATION") {
+        warnings.push(w.message);
+      }
+    }
+    let seenVerified = false;
+    const deduped = ruleResults.filter((r) => {
+      if (r.result_type === "VERIFIED_BEFORE_AFTER" /* VERIFIED_BEFORE_AFTER */) {
+        if (seenVerified) return false;
+        seenVerified = true;
+      }
+      return true;
+    });
+    const sorted = sortByPriority(deduped);
+    const freeResult = buildFreeResult(input, cfSummary, benchmark);
+    const paidReport = buildPaidReport(input, candidateResult, cfSummary, benchmark, negotiation);
+    return {
+      results: sorted,
+      benchmark,
+      warnings,
+      assumptions: cfSummary.global_assumptions,
+      candidates: candidateResult,
+      counterfactual: cfSummary,
+      negotiation,
+      free_result: freeResult,
+      paid_report: paidReport
+    };
+  }
+
+  // node_modules/@supabase/functions-js/dist/module/helper.js
+  var resolveFetch = (customFetch) => {
+    let _fetch;
+    if (customFetch) {
+      _fetch = customFetch;
+    } else if (typeof fetch === "undefined") {
+      _fetch = (...args) => Promise.resolve().then(() => (init_browser(), browser_exports)).then(({ default: fetch3 }) => fetch3(...args));
+    } else {
+      _fetch = fetch;
+    }
+    return (...args) => _fetch(...args);
+  };
+
+  // node_modules/@supabase/functions-js/dist/module/types.js
+  var FunctionsError = class extends Error {
+    constructor(message, name = "FunctionsError", context) {
+      super(message);
+      this.name = name;
+      this.context = context;
+    }
+  };
+  var FunctionsFetchError = class extends FunctionsError {
+    constructor(context) {
+      super("Failed to send a request to the Edge Function", "FunctionsFetchError", context);
+    }
+  };
+  var FunctionsRelayError = class extends FunctionsError {
+    constructor(context) {
+      super("Relay Error invoking the Edge Function", "FunctionsRelayError", context);
+    }
+  };
+  var FunctionsHttpError = class extends FunctionsError {
+    constructor(context) {
+      super("Edge Function returned a non-2xx status code", "FunctionsHttpError", context);
+    }
+  };
+  var FunctionRegion;
+  (function(FunctionRegion2) {
+    FunctionRegion2["Any"] = "any";
+    FunctionRegion2["ApNortheast1"] = "ap-northeast-1";
+    FunctionRegion2["ApNortheast2"] = "ap-northeast-2";
+    FunctionRegion2["ApSouth1"] = "ap-south-1";
+    FunctionRegion2["ApSoutheast1"] = "ap-southeast-1";
+    FunctionRegion2["ApSoutheast2"] = "ap-southeast-2";
+    FunctionRegion2["CaCentral1"] = "ca-central-1";
+    FunctionRegion2["EuCentral1"] = "eu-central-1";
+    FunctionRegion2["EuWest1"] = "eu-west-1";
+    FunctionRegion2["EuWest2"] = "eu-west-2";
+    FunctionRegion2["EuWest3"] = "eu-west-3";
+    FunctionRegion2["SaEast1"] = "sa-east-1";
+    FunctionRegion2["UsEast1"] = "us-east-1";
+    FunctionRegion2["UsWest1"] = "us-west-1";
+    FunctionRegion2["UsWest2"] = "us-west-2";
+  })(FunctionRegion || (FunctionRegion = {}));
+
+  // node_modules/@supabase/functions-js/dist/module/FunctionsClient.js
+  var __awaiter = function(thisArg, _arguments, P, generator) {
+    function adopt(value) {
+      return value instanceof P ? value : new P(function(resolve) {
+        resolve(value);
+      });
+    }
+    return new (P || (P = Promise))(function(resolve, reject) {
+      function fulfilled(value) {
+        try {
+          step(generator.next(value));
+        } catch (e) {
+          reject(e);
+        }
+      }
+      function rejected(value) {
+        try {
+          step(generator["throw"](value));
+        } catch (e) {
+          reject(e);
+        }
+      }
+      function step(result) {
+        result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+      }
+      step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+  };
+  var FunctionsClient = class {
+    constructor(url, { headers = {}, customFetch, region = FunctionRegion.Any } = {}) {
+      this.url = url;
+      this.headers = headers;
+      this.region = region;
+      this.fetch = resolveFetch(customFetch);
+    }
+    /**
+     * Updates the authorization header
+     * @param token - the new jwt token sent in the authorisation header
+     */
+    setAuth(token) {
+      this.headers.Authorization = `Bearer ${token}`;
+    }
+    /**
+     * Invokes a function
+     * @param functionName - The name of the Function to invoke.
+     * @param options - Options for invoking the Function.
+     */
+    invoke(functionName, options = {}) {
+      var _a;
+      return __awaiter(this, void 0, void 0, function* () {
+        try {
+          const { headers, method, body: functionArgs } = options;
+          let _headers = {};
+          let { region } = options;
+          if (!region) {
+            region = this.region;
+          }
+          if (region && region !== "any") {
+            _headers["x-region"] = region;
+          }
+          let body;
+          if (functionArgs && (headers && !Object.prototype.hasOwnProperty.call(headers, "Content-Type") || !headers)) {
+            if (typeof Blob !== "undefined" && functionArgs instanceof Blob || functionArgs instanceof ArrayBuffer) {
+              _headers["Content-Type"] = "application/octet-stream";
+              body = functionArgs;
+            } else if (typeof functionArgs === "string") {
+              _headers["Content-Type"] = "text/plain";
+              body = functionArgs;
+            } else if (typeof FormData !== "undefined" && functionArgs instanceof FormData) {
+              body = functionArgs;
+            } else {
+              _headers["Content-Type"] = "application/json";
+              body = JSON.stringify(functionArgs);
+            }
+          }
+          const response = yield this.fetch(`${this.url}/${functionName}`, {
+            method: method || "POST",
+            // headers priority is (high to low):
+            // 1. invoke-level headers
+            // 2. client-level headers
+            // 3. default Content-Type header
+            headers: Object.assign(Object.assign(Object.assign({}, _headers), this.headers), headers),
+            body
+          }).catch((fetchError) => {
+            throw new FunctionsFetchError(fetchError);
+          });
+          const isRelayError = response.headers.get("x-relay-error");
+          if (isRelayError && isRelayError === "true") {
+            throw new FunctionsRelayError(response);
+          }
+          if (!response.ok) {
+            throw new FunctionsHttpError(response);
+          }
+          let responseType = ((_a = response.headers.get("Content-Type")) !== null && _a !== void 0 ? _a : "text/plain").split(";")[0].trim();
+          let data;
+          if (responseType === "application/json") {
+            data = yield response.json();
+          } else if (responseType === "application/octet-stream") {
+            data = yield response.blob();
+          } else if (responseType === "text/event-stream") {
+            data = response;
+          } else if (responseType === "multipart/form-data") {
+            data = yield response.formData();
+          } else {
+            data = yield response.text();
+          }
+          return { data, error: null };
+        } catch (error) {
+          return { data: null, error };
+        }
+      });
+    }
+  };
+
+  // node_modules/@supabase/postgrest-js/dist/esm/wrapper.mjs
+  var import_cjs = __toESM(require_cjs(), 1);
+  var {
+    PostgrestClient,
+    PostgrestQueryBuilder,
+    PostgrestFilterBuilder,
+    PostgrestTransformBuilder,
+    PostgrestBuilder
+  } = import_cjs.default;
+
+  // node_modules/@supabase/realtime-js/dist/module/lib/version.js
+  var version = "2.10.2";
+
+  // node_modules/@supabase/realtime-js/dist/module/lib/constants.js
+  var DEFAULT_HEADERS = { "X-Client-Info": `realtime-js/${version}` };
+  var VSN = "1.0.0";
+  var DEFAULT_TIMEOUT = 1e4;
+  var WS_CLOSE_NORMAL = 1e3;
+  var SOCKET_STATES;
+  (function(SOCKET_STATES2) {
+    SOCKET_STATES2[SOCKET_STATES2["connecting"] = 0] = "connecting";
+    SOCKET_STATES2[SOCKET_STATES2["open"] = 1] = "open";
+    SOCKET_STATES2[SOCKET_STATES2["closing"] = 2] = "closing";
+    SOCKET_STATES2[SOCKET_STATES2["closed"] = 3] = "closed";
+  })(SOCKET_STATES || (SOCKET_STATES = {}));
+  var CHANNEL_STATES;
+  (function(CHANNEL_STATES2) {
+    CHANNEL_STATES2["closed"] = "closed";
+    CHANNEL_STATES2["errored"] = "errored";
+    CHANNEL_STATES2["joined"] = "joined";
+    CHANNEL_STATES2["joining"] = "joining";
+    CHANNEL_STATES2["leaving"] = "leaving";
+  })(CHANNEL_STATES || (CHANNEL_STATES = {}));
+  var CHANNEL_EVENTS;
+  (function(CHANNEL_EVENTS2) {
+    CHANNEL_EVENTS2["close"] = "phx_close";
+    CHANNEL_EVENTS2["error"] = "phx_error";
+    CHANNEL_EVENTS2["join"] = "phx_join";
+    CHANNEL_EVENTS2["reply"] = "phx_reply";
+    CHANNEL_EVENTS2["leave"] = "phx_leave";
+    CHANNEL_EVENTS2["access_token"] = "access_token";
+  })(CHANNEL_EVENTS || (CHANNEL_EVENTS = {}));
+  var TRANSPORTS;
+  (function(TRANSPORTS2) {
+    TRANSPORTS2["websocket"] = "websocket";
+  })(TRANSPORTS || (TRANSPORTS = {}));
+  var CONNECTION_STATE;
+  (function(CONNECTION_STATE2) {
+    CONNECTION_STATE2["Connecting"] = "connecting";
+    CONNECTION_STATE2["Open"] = "open";
+    CONNECTION_STATE2["Closing"] = "closing";
+    CONNECTION_STATE2["Closed"] = "closed";
+  })(CONNECTION_STATE || (CONNECTION_STATE = {}));
+
+  // node_modules/@supabase/realtime-js/dist/module/lib/serializer.js
+  var Serializer = class {
+    constructor() {
+      this.HEADER_LENGTH = 1;
+    }
+    decode(rawPayload, callback) {
+      if (rawPayload.constructor === ArrayBuffer) {
+        return callback(this._binaryDecode(rawPayload));
+      }
+      if (typeof rawPayload === "string") {
+        return callback(JSON.parse(rawPayload));
+      }
+      return callback({});
+    }
+    _binaryDecode(buffer) {
+      const view = new DataView(buffer);
+      const decoder = new TextDecoder();
+      return this._decodeBroadcast(buffer, view, decoder);
+    }
+    _decodeBroadcast(buffer, view, decoder) {
+      const topicSize = view.getUint8(1);
+      const eventSize = view.getUint8(2);
+      let offset = this.HEADER_LENGTH + 2;
+      const topic = decoder.decode(buffer.slice(offset, offset + topicSize));
+      offset = offset + topicSize;
+      const event = decoder.decode(buffer.slice(offset, offset + eventSize));
+      offset = offset + eventSize;
+      const data = JSON.parse(decoder.decode(buffer.slice(offset, buffer.byteLength)));
+      return { ref: null, topic, event, payload: data };
+    }
+  };
+
+  // node_modules/@supabase/realtime-js/dist/module/lib/timer.js
+  var Timer = class {
+    constructor(callback, timerCalc) {
+      this.callback = callback;
+      this.timerCalc = timerCalc;
+      this.timer = void 0;
+      this.tries = 0;
+      this.callback = callback;
+      this.timerCalc = timerCalc;
+    }
+    reset() {
+      this.tries = 0;
+      clearTimeout(this.timer);
+    }
+    // Cancels any previous scheduleTimeout and schedules callback
+    scheduleTimeout() {
+      clearTimeout(this.timer);
+      this.timer = setTimeout(() => {
+        this.tries = this.tries + 1;
+        this.callback();
+      }, this.timerCalc(this.tries + 1));
+    }
+  };
+
+  // node_modules/@supabase/realtime-js/dist/module/lib/transformers.js
+  var PostgresTypes;
+  (function(PostgresTypes2) {
+    PostgresTypes2["abstime"] = "abstime";
+    PostgresTypes2["bool"] = "bool";
+    PostgresTypes2["date"] = "date";
+    PostgresTypes2["daterange"] = "daterange";
+    PostgresTypes2["float4"] = "float4";
+    PostgresTypes2["float8"] = "float8";
+    PostgresTypes2["int2"] = "int2";
+    PostgresTypes2["int4"] = "int4";
+    PostgresTypes2["int4range"] = "int4range";
+    PostgresTypes2["int8"] = "int8";
+    PostgresTypes2["int8range"] = "int8range";
+    PostgresTypes2["json"] = "json";
+    PostgresTypes2["jsonb"] = "jsonb";
+    PostgresTypes2["money"] = "money";
+    PostgresTypes2["numeric"] = "numeric";
+    PostgresTypes2["oid"] = "oid";
+    PostgresTypes2["reltime"] = "reltime";
+    PostgresTypes2["text"] = "text";
+    PostgresTypes2["time"] = "time";
+    PostgresTypes2["timestamp"] = "timestamp";
+    PostgresTypes2["timestamptz"] = "timestamptz";
+    PostgresTypes2["timetz"] = "timetz";
+    PostgresTypes2["tsrange"] = "tsrange";
+    PostgresTypes2["tstzrange"] = "tstzrange";
+  })(PostgresTypes || (PostgresTypes = {}));
+  var convertChangeData = (columns, record, options = {}) => {
+    var _a;
+    const skipTypes = (_a = options.skipTypes) !== null && _a !== void 0 ? _a : [];
+    return Object.keys(record).reduce((acc, rec_key) => {
+      acc[rec_key] = convertColumn(rec_key, columns, record, skipTypes);
+      return acc;
+    }, {});
+  };
+  var convertColumn = (columnName, columns, record, skipTypes) => {
+    const column = columns.find((x) => x.name === columnName);
+    const colType = column === null || column === void 0 ? void 0 : column.type;
+    const value = record[columnName];
+    if (colType && !skipTypes.includes(colType)) {
+      return convertCell(colType, value);
+    }
+    return noop(value);
+  };
+  var convertCell = (type, value) => {
+    if (type.charAt(0) === "_") {
+      const dataType = type.slice(1, type.length);
+      return toArray(value, dataType);
+    }
+    switch (type) {
+      case PostgresTypes.bool:
+        return toBoolean(value);
+      case PostgresTypes.float4:
+      case PostgresTypes.float8:
+      case PostgresTypes.int2:
+      case PostgresTypes.int4:
+      case PostgresTypes.int8:
+      case PostgresTypes.numeric:
+      case PostgresTypes.oid:
+        return toNumber(value);
+      case PostgresTypes.json:
+      case PostgresTypes.jsonb:
+        return toJson(value);
+      case PostgresTypes.timestamp:
+        return toTimestampString(value);
+      // Format to be consistent with PostgREST
+      case PostgresTypes.abstime:
+      // To allow users to cast it based on Timezone
+      case PostgresTypes.date:
+      // To allow users to cast it based on Timezone
+      case PostgresTypes.daterange:
+      case PostgresTypes.int4range:
+      case PostgresTypes.int8range:
+      case PostgresTypes.money:
+      case PostgresTypes.reltime:
+      // To allow users to cast it based on Timezone
+      case PostgresTypes.text:
+      case PostgresTypes.time:
+      // To allow users to cast it based on Timezone
+      case PostgresTypes.timestamptz:
+      // To allow users to cast it based on Timezone
+      case PostgresTypes.timetz:
+      // To allow users to cast it based on Timezone
+      case PostgresTypes.tsrange:
+      case PostgresTypes.tstzrange:
+        return noop(value);
+      default:
+        return noop(value);
+    }
+  };
+  var noop = (value) => {
+    return value;
+  };
+  var toBoolean = (value) => {
+    switch (value) {
+      case "t":
+        return true;
+      case "f":
+        return false;
+      default:
+        return value;
+    }
+  };
+  var toNumber = (value) => {
+    if (typeof value === "string") {
+      const parsedValue = parseFloat(value);
+      if (!Number.isNaN(parsedValue)) {
+        return parsedValue;
+      }
+    }
+    return value;
+  };
+  var toJson = (value) => {
+    if (typeof value === "string") {
+      try {
+        return JSON.parse(value);
+      } catch (error) {
+        console.log(`JSON parse error: ${error}`);
+        return value;
+      }
+    }
+    return value;
+  };
+  var toArray = (value, type) => {
+    if (typeof value !== "string") {
+      return value;
+    }
+    const lastIdx = value.length - 1;
+    const closeBrace = value[lastIdx];
+    const openBrace = value[0];
+    if (openBrace === "{" && closeBrace === "}") {
+      let arr;
+      const valTrim = value.slice(1, lastIdx);
+      try {
+        arr = JSON.parse("[" + valTrim + "]");
+      } catch (_) {
+        arr = valTrim ? valTrim.split(",") : [];
+      }
+      return arr.map((val) => convertCell(type, val));
+    }
+    return value;
+  };
+  var toTimestampString = (value) => {
+    if (typeof value === "string") {
+      return value.replace(" ", "T");
+    }
+    return value;
+  };
+  var httpEndpointURL = (socketUrl) => {
+    let url = socketUrl;
+    url = url.replace(/^ws/i, "http");
+    url = url.replace(/(\/socket\/websocket|\/socket|\/websocket)\/?$/i, "");
+    return url.replace(/\/+$/, "");
+  };
+
+  // node_modules/@supabase/realtime-js/dist/module/lib/push.js
+  var Push = class {
+    /**
+     * Initializes the Push
+     *
+     * @param channel The Channel
+     * @param event The event, for example `"phx_join"`
+     * @param payload The payload, for example `{user_id: 123}`
+     * @param timeout The push timeout in milliseconds
+     */
+    constructor(channel, event, payload = {}, timeout = DEFAULT_TIMEOUT) {
+      this.channel = channel;
+      this.event = event;
+      this.payload = payload;
+      this.timeout = timeout;
+      this.sent = false;
+      this.timeoutTimer = void 0;
+      this.ref = "";
+      this.receivedResp = null;
+      this.recHooks = [];
+      this.refEvent = null;
+    }
+    resend(timeout) {
+      this.timeout = timeout;
+      this._cancelRefEvent();
+      this.ref = "";
+      this.refEvent = null;
+      this.receivedResp = null;
+      this.sent = false;
+      this.send();
+    }
+    send() {
+      if (this._hasReceived("timeout")) {
+        return;
+      }
+      this.startTimeout();
+      this.sent = true;
+      this.channel.socket.push({
+        topic: this.channel.topic,
+        event: this.event,
+        payload: this.payload,
+        ref: this.ref,
+        join_ref: this.channel._joinRef()
+      });
+    }
+    updatePayload(payload) {
+      this.payload = Object.assign(Object.assign({}, this.payload), payload);
+    }
+    receive(status, callback) {
+      var _a;
+      if (this._hasReceived(status)) {
+        callback((_a = this.receivedResp) === null || _a === void 0 ? void 0 : _a.response);
+      }
+      this.recHooks.push({ status, callback });
+      return this;
+    }
+    startTimeout() {
+      if (this.timeoutTimer) {
+        return;
+      }
+      this.ref = this.channel.socket._makeRef();
+      this.refEvent = this.channel._replyEventName(this.ref);
+      const callback = (payload) => {
+        this._cancelRefEvent();
+        this._cancelTimeout();
+        this.receivedResp = payload;
+        this._matchReceive(payload);
+      };
+      this.channel._on(this.refEvent, {}, callback);
+      this.timeoutTimer = setTimeout(() => {
+        this.trigger("timeout", {});
+      }, this.timeout);
+    }
+    trigger(status, response) {
+      if (this.refEvent)
+        this.channel._trigger(this.refEvent, { status, response });
+    }
+    destroy() {
+      this._cancelRefEvent();
+      this._cancelTimeout();
+    }
+    _cancelRefEvent() {
+      if (!this.refEvent) {
+        return;
+      }
+      this.channel._off(this.refEvent, {});
+    }
+    _cancelTimeout() {
+      clearTimeout(this.timeoutTimer);
+      this.timeoutTimer = void 0;
+    }
+    _matchReceive({ status, response }) {
+      this.recHooks.filter((h) => h.status === status).forEach((h) => h.callback(response));
+    }
+    _hasReceived(status) {
+      return this.receivedResp && this.receivedResp.status === status;
+    }
+  };
+
+  // node_modules/@supabase/realtime-js/dist/module/RealtimePresence.js
+  var REALTIME_PRESENCE_LISTEN_EVENTS;
+  (function(REALTIME_PRESENCE_LISTEN_EVENTS2) {
+    REALTIME_PRESENCE_LISTEN_EVENTS2["SYNC"] = "sync";
+    REALTIME_PRESENCE_LISTEN_EVENTS2["JOIN"] = "join";
+    REALTIME_PRESENCE_LISTEN_EVENTS2["LEAVE"] = "leave";
+  })(REALTIME_PRESENCE_LISTEN_EVENTS || (REALTIME_PRESENCE_LISTEN_EVENTS = {}));
+  var RealtimePresence = class _RealtimePresence {
+    /**
+     * Initializes the Presence.
+     *
+     * @param channel - The RealtimeChannel
+     * @param opts - The options,
+     *        for example `{events: {state: 'state', diff: 'diff'}}`
+     */
+    constructor(channel, opts) {
+      this.channel = channel;
+      this.state = {};
+      this.pendingDiffs = [];
+      this.joinRef = null;
+      this.caller = {
+        onJoin: () => {
+        },
+        onLeave: () => {
+        },
+        onSync: () => {
+        }
+      };
+      const events = (opts === null || opts === void 0 ? void 0 : opts.events) || {
+        state: "presence_state",
+        diff: "presence_diff"
+      };
+      this.channel._on(events.state, {}, (newState) => {
+        const { onJoin, onLeave, onSync } = this.caller;
+        this.joinRef = this.channel._joinRef();
+        this.state = _RealtimePresence.syncState(this.state, newState, onJoin, onLeave);
+        this.pendingDiffs.forEach((diff) => {
+          this.state = _RealtimePresence.syncDiff(this.state, diff, onJoin, onLeave);
+        });
+        this.pendingDiffs = [];
+        onSync();
+      });
+      this.channel._on(events.diff, {}, (diff) => {
+        const { onJoin, onLeave, onSync } = this.caller;
+        if (this.inPendingSyncState()) {
+          this.pendingDiffs.push(diff);
+        } else {
+          this.state = _RealtimePresence.syncDiff(this.state, diff, onJoin, onLeave);
+          onSync();
+        }
+      });
+      this.onJoin((key, currentPresences, newPresences) => {
+        this.channel._trigger("presence", {
+          event: "join",
+          key,
+          currentPresences,
+          newPresences
+        });
+      });
+      this.onLeave((key, currentPresences, leftPresences) => {
+        this.channel._trigger("presence", {
+          event: "leave",
+          key,
+          currentPresences,
+          leftPresences
+        });
+      });
+      this.onSync(() => {
+        this.channel._trigger("presence", { event: "sync" });
+      });
+    }
+    /**
+     * Used to sync the list of presences on the server with the
+     * client's state.
+     *
+     * An optional `onJoin` and `onLeave` callback can be provided to
+     * react to changes in the client's local presences across
+     * disconnects and reconnects with the server.
+     *
+     * @internal
+     */
+    static syncState(currentState, newState, onJoin, onLeave) {
+      const state2 = this.cloneDeep(currentState);
+      const transformedState = this.transformState(newState);
+      const joins = {};
+      const leaves = {};
+      this.map(state2, (key, presences) => {
+        if (!transformedState[key]) {
+          leaves[key] = presences;
+        }
+      });
+      this.map(transformedState, (key, newPresences) => {
+        const currentPresences = state2[key];
+        if (currentPresences) {
+          const newPresenceRefs = newPresences.map((m) => m.presence_ref);
+          const curPresenceRefs = currentPresences.map((m) => m.presence_ref);
+          const joinedPresences = newPresences.filter((m) => curPresenceRefs.indexOf(m.presence_ref) < 0);
+          const leftPresences = currentPresences.filter((m) => newPresenceRefs.indexOf(m.presence_ref) < 0);
+          if (joinedPresences.length > 0) {
+            joins[key] = joinedPresences;
+          }
+          if (leftPresences.length > 0) {
+            leaves[key] = leftPresences;
+          }
+        } else {
+          joins[key] = newPresences;
+        }
+      });
+      return this.syncDiff(state2, { joins, leaves }, onJoin, onLeave);
+    }
+    /**
+     * Used to sync a diff of presence join and leave events from the
+     * server, as they happen.
+     *
+     * Like `syncState`, `syncDiff` accepts optional `onJoin` and
+     * `onLeave` callbacks to react to a user joining or leaving from a
+     * device.
+     *
+     * @internal
+     */
+    static syncDiff(state2, diff, onJoin, onLeave) {
+      const { joins, leaves } = {
+        joins: this.transformState(diff.joins),
+        leaves: this.transformState(diff.leaves)
+      };
+      if (!onJoin) {
+        onJoin = () => {
+        };
+      }
+      if (!onLeave) {
+        onLeave = () => {
+        };
+      }
+      this.map(joins, (key, newPresences) => {
+        var _a;
+        const currentPresences = (_a = state2[key]) !== null && _a !== void 0 ? _a : [];
+        state2[key] = this.cloneDeep(newPresences);
+        if (currentPresences.length > 0) {
+          const joinedPresenceRefs = state2[key].map((m) => m.presence_ref);
+          const curPresences = currentPresences.filter((m) => joinedPresenceRefs.indexOf(m.presence_ref) < 0);
+          state2[key].unshift(...curPresences);
+        }
+        onJoin(key, currentPresences, newPresences);
+      });
+      this.map(leaves, (key, leftPresences) => {
+        let currentPresences = state2[key];
+        if (!currentPresences)
+          return;
+        const presenceRefsToRemove = leftPresences.map((m) => m.presence_ref);
+        currentPresences = currentPresences.filter((m) => presenceRefsToRemove.indexOf(m.presence_ref) < 0);
+        state2[key] = currentPresences;
+        onLeave(key, currentPresences, leftPresences);
+        if (currentPresences.length === 0)
+          delete state2[key];
+      });
+      return state2;
+    }
+    /** @internal */
+    static map(obj, func) {
+      return Object.getOwnPropertyNames(obj).map((key) => func(key, obj[key]));
+    }
+    /**
+     * Remove 'metas' key
+     * Change 'phx_ref' to 'presence_ref'
+     * Remove 'phx_ref' and 'phx_ref_prev'
+     *
+     * @example
+     * // returns {
+     *  abc123: [
+     *    { presence_ref: '2', user_id: 1 },
+     *    { presence_ref: '3', user_id: 2 }
+     *  ]
+     * }
+     * RealtimePresence.transformState({
+     *  abc123: {
+     *    metas: [
+     *      { phx_ref: '2', phx_ref_prev: '1' user_id: 1 },
+     *      { phx_ref: '3', user_id: 2 }
+     *    ]
+     *  }
+     * })
+     *
+     * @internal
+     */
+    static transformState(state2) {
+      state2 = this.cloneDeep(state2);
+      return Object.getOwnPropertyNames(state2).reduce((newState, key) => {
+        const presences = state2[key];
+        if ("metas" in presences) {
+          newState[key] = presences.metas.map((presence) => {
+            presence["presence_ref"] = presence["phx_ref"];
+            delete presence["phx_ref"];
+            delete presence["phx_ref_prev"];
+            return presence;
+          });
+        } else {
+          newState[key] = presences;
+        }
+        return newState;
+      }, {});
+    }
+    /** @internal */
+    static cloneDeep(obj) {
+      return JSON.parse(JSON.stringify(obj));
+    }
+    /** @internal */
+    onJoin(callback) {
+      this.caller.onJoin = callback;
+    }
+    /** @internal */
+    onLeave(callback) {
+      this.caller.onLeave = callback;
+    }
+    /** @internal */
+    onSync(callback) {
+      this.caller.onSync = callback;
+    }
+    /** @internal */
+    inPendingSyncState() {
+      return !this.joinRef || this.joinRef !== this.channel._joinRef();
+    }
+  };
+
+  // node_modules/@supabase/realtime-js/dist/module/RealtimeChannel.js
+  var REALTIME_POSTGRES_CHANGES_LISTEN_EVENT;
+  (function(REALTIME_POSTGRES_CHANGES_LISTEN_EVENT2) {
+    REALTIME_POSTGRES_CHANGES_LISTEN_EVENT2["ALL"] = "*";
+    REALTIME_POSTGRES_CHANGES_LISTEN_EVENT2["INSERT"] = "INSERT";
+    REALTIME_POSTGRES_CHANGES_LISTEN_EVENT2["UPDATE"] = "UPDATE";
+    REALTIME_POSTGRES_CHANGES_LISTEN_EVENT2["DELETE"] = "DELETE";
+  })(REALTIME_POSTGRES_CHANGES_LISTEN_EVENT || (REALTIME_POSTGRES_CHANGES_LISTEN_EVENT = {}));
+  var REALTIME_LISTEN_TYPES;
+  (function(REALTIME_LISTEN_TYPES2) {
+    REALTIME_LISTEN_TYPES2["BROADCAST"] = "broadcast";
+    REALTIME_LISTEN_TYPES2["PRESENCE"] = "presence";
+    REALTIME_LISTEN_TYPES2["POSTGRES_CHANGES"] = "postgres_changes";
+  })(REALTIME_LISTEN_TYPES || (REALTIME_LISTEN_TYPES = {}));
+  var REALTIME_SUBSCRIBE_STATES;
+  (function(REALTIME_SUBSCRIBE_STATES2) {
+    REALTIME_SUBSCRIBE_STATES2["SUBSCRIBED"] = "SUBSCRIBED";
+    REALTIME_SUBSCRIBE_STATES2["TIMED_OUT"] = "TIMED_OUT";
+    REALTIME_SUBSCRIBE_STATES2["CLOSED"] = "CLOSED";
+    REALTIME_SUBSCRIBE_STATES2["CHANNEL_ERROR"] = "CHANNEL_ERROR";
+  })(REALTIME_SUBSCRIBE_STATES || (REALTIME_SUBSCRIBE_STATES = {}));
+  var RealtimeChannel = class _RealtimeChannel {
+    constructor(topic, params = { config: {} }, socket) {
+      this.topic = topic;
+      this.params = params;
+      this.socket = socket;
+      this.bindings = {};
+      this.state = CHANNEL_STATES.closed;
+      this.joinedOnce = false;
+      this.pushBuffer = [];
+      this.subTopic = topic.replace(/^realtime:/i, "");
+      this.params.config = Object.assign({
+        broadcast: { ack: false, self: false },
+        presence: { key: "" },
+        private: false
+      }, params.config);
+      this.timeout = this.socket.timeout;
+      this.joinPush = new Push(this, CHANNEL_EVENTS.join, this.params, this.timeout);
+      this.rejoinTimer = new Timer(() => this._rejoinUntilConnected(), this.socket.reconnectAfterMs);
+      this.joinPush.receive("ok", () => {
+        this.state = CHANNEL_STATES.joined;
+        this.rejoinTimer.reset();
+        this.pushBuffer.forEach((pushEvent) => pushEvent.send());
+        this.pushBuffer = [];
+      });
+      this._onClose(() => {
+        this.rejoinTimer.reset();
+        this.socket.log("channel", `close ${this.topic} ${this._joinRef()}`);
+        this.state = CHANNEL_STATES.closed;
+        this.socket._remove(this);
+      });
+      this._onError((reason) => {
+        if (this._isLeaving() || this._isClosed()) {
+          return;
+        }
+        this.socket.log("channel", `error ${this.topic}`, reason);
+        this.state = CHANNEL_STATES.errored;
+        this.rejoinTimer.scheduleTimeout();
+      });
+      this.joinPush.receive("timeout", () => {
+        if (!this._isJoining()) {
+          return;
+        }
+        this.socket.log("channel", `timeout ${this.topic}`, this.joinPush.timeout);
+        this.state = CHANNEL_STATES.errored;
+        this.rejoinTimer.scheduleTimeout();
+      });
+      this._on(CHANNEL_EVENTS.reply, {}, (payload, ref) => {
+        this._trigger(this._replyEventName(ref), payload);
+      });
+      this.presence = new RealtimePresence(this);
+      this.broadcastEndpointURL = httpEndpointURL(this.socket.endPoint) + "/api/broadcast";
+    }
+    /** Subscribe registers your client with the server */
+    subscribe(callback, timeout = this.timeout) {
+      var _a, _b;
+      if (!this.socket.isConnected()) {
+        this.socket.connect();
+      }
+      if (this.joinedOnce) {
+        throw `tried to subscribe multiple times. 'subscribe' can only be called a single time per channel instance`;
+      } else {
+        const { config: { broadcast, presence, private: isPrivate } } = this.params;
+        this._onError((e) => callback && callback("CHANNEL_ERROR", e));
+        this._onClose(() => callback && callback("CLOSED"));
+        const accessTokenPayload = {};
+        const config = {
+          broadcast,
+          presence,
+          postgres_changes: (_b = (_a = this.bindings.postgres_changes) === null || _a === void 0 ? void 0 : _a.map((r) => r.filter)) !== null && _b !== void 0 ? _b : [],
+          private: isPrivate
+        };
+        if (this.socket.accessToken) {
+          accessTokenPayload.access_token = this.socket.accessToken;
+        }
+        this.updateJoinPayload(Object.assign({ config }, accessTokenPayload));
+        this.joinedOnce = true;
+        this._rejoin(timeout);
+        this.joinPush.receive("ok", ({ postgres_changes: serverPostgresFilters }) => {
+          var _a2;
+          this.socket.accessToken && this.socket.setAuth(this.socket.accessToken);
+          if (serverPostgresFilters === void 0) {
+            callback && callback("SUBSCRIBED");
+            return;
+          } else {
+            const clientPostgresBindings = this.bindings.postgres_changes;
+            const bindingsLen = (_a2 = clientPostgresBindings === null || clientPostgresBindings === void 0 ? void 0 : clientPostgresBindings.length) !== null && _a2 !== void 0 ? _a2 : 0;
+            const newPostgresBindings = [];
+            for (let i = 0; i < bindingsLen; i++) {
+              const clientPostgresBinding = clientPostgresBindings[i];
+              const { filter: { event, schema, table, filter } } = clientPostgresBinding;
+              const serverPostgresFilter = serverPostgresFilters && serverPostgresFilters[i];
+              if (serverPostgresFilter && serverPostgresFilter.event === event && serverPostgresFilter.schema === schema && serverPostgresFilter.table === table && serverPostgresFilter.filter === filter) {
+                newPostgresBindings.push(Object.assign(Object.assign({}, clientPostgresBinding), { id: serverPostgresFilter.id }));
+              } else {
+                this.unsubscribe();
+                callback && callback("CHANNEL_ERROR", new Error("mismatch between server and client bindings for postgres changes"));
+                return;
+              }
+            }
+            this.bindings.postgres_changes = newPostgresBindings;
+            callback && callback("SUBSCRIBED");
+            return;
+          }
+        }).receive("error", (error) => {
+          callback && callback("CHANNEL_ERROR", new Error(JSON.stringify(Object.values(error).join(", ") || "error")));
+          return;
+        }).receive("timeout", () => {
+          callback && callback("TIMED_OUT");
+          return;
+        });
+      }
+      return this;
+    }
+    presenceState() {
+      return this.presence.state;
+    }
+    async track(payload, opts = {}) {
+      return await this.send({
+        type: "presence",
+        event: "track",
+        payload
+      }, opts.timeout || this.timeout);
+    }
+    async untrack(opts = {}) {
+      return await this.send({
+        type: "presence",
+        event: "untrack"
+      }, opts);
+    }
+    on(type, filter, callback) {
+      return this._on(type, filter, callback);
+    }
+    /**
+     * Sends a message into the channel.
+     *
+     * @param args Arguments to send to channel
+     * @param args.type The type of event to send
+     * @param args.event The name of the event being sent
+     * @param args.payload Payload to be sent
+     * @param opts Options to be used during the send process
+     */
+    async send(args, opts = {}) {
+      var _a, _b;
+      if (!this._canPush() && args.type === "broadcast") {
+        const { event, payload: endpoint_payload } = args;
+        const options = {
+          method: "POST",
+          headers: {
+            Authorization: this.socket.accessToken ? `Bearer ${this.socket.accessToken}` : "",
+            apikey: this.socket.apiKey ? this.socket.apiKey : "",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            messages: [
+              { topic: this.subTopic, event, payload: endpoint_payload }
+            ]
+          })
+        };
+        try {
+          const response = await this._fetchWithTimeout(this.broadcastEndpointURL, options, (_a = opts.timeout) !== null && _a !== void 0 ? _a : this.timeout);
+          await ((_b = response.body) === null || _b === void 0 ? void 0 : _b.cancel());
+          return response.ok ? "ok" : "error";
+        } catch (error) {
+          if (error.name === "AbortError") {
+            return "timed out";
+          } else {
+            return "error";
+          }
+        }
+      } else {
+        return new Promise((resolve) => {
+          var _a2, _b2, _c;
+          const push = this._push(args.type, args, opts.timeout || this.timeout);
+          if (args.type === "broadcast" && !((_c = (_b2 = (_a2 = this.params) === null || _a2 === void 0 ? void 0 : _a2.config) === null || _b2 === void 0 ? void 0 : _b2.broadcast) === null || _c === void 0 ? void 0 : _c.ack)) {
+            resolve("ok");
+          }
+          push.receive("ok", () => resolve("ok"));
+          push.receive("error", () => resolve("error"));
+          push.receive("timeout", () => resolve("timed out"));
+        });
+      }
+    }
+    updateJoinPayload(payload) {
+      this.joinPush.updatePayload(payload);
+    }
+    /**
+     * Leaves the channel.
+     *
+     * Unsubscribes from server events, and instructs channel to terminate on server.
+     * Triggers onClose() hooks.
+     *
+     * To receive leave acknowledgements, use the a `receive` hook to bind to the server ack, ie:
+     * channel.unsubscribe().receive("ok", () => alert("left!") )
+     */
+    unsubscribe(timeout = this.timeout) {
+      this.state = CHANNEL_STATES.leaving;
+      const onClose = () => {
+        this.socket.log("channel", `leave ${this.topic}`);
+        this._trigger(CHANNEL_EVENTS.close, "leave", this._joinRef());
+      };
+      this.rejoinTimer.reset();
+      this.joinPush.destroy();
+      return new Promise((resolve) => {
+        const leavePush = new Push(this, CHANNEL_EVENTS.leave, {}, timeout);
+        leavePush.receive("ok", () => {
+          onClose();
+          resolve("ok");
+        }).receive("timeout", () => {
+          onClose();
+          resolve("timed out");
+        }).receive("error", () => {
+          resolve("error");
+        });
+        leavePush.send();
+        if (!this._canPush()) {
+          leavePush.trigger("ok", {});
+        }
+      });
+    }
+    /** @internal */
+    async _fetchWithTimeout(url, options, timeout) {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeout);
+      const response = await this.socket.fetch(url, Object.assign(Object.assign({}, options), { signal: controller.signal }));
+      clearTimeout(id);
+      return response;
+    }
+    /** @internal */
+    _push(event, payload, timeout = this.timeout) {
+      if (!this.joinedOnce) {
+        throw `tried to push '${event}' to '${this.topic}' before joining. Use channel.subscribe() before pushing events`;
+      }
+      let pushEvent = new Push(this, event, payload, timeout);
+      if (this._canPush()) {
+        pushEvent.send();
+      } else {
+        pushEvent.startTimeout();
+        this.pushBuffer.push(pushEvent);
+      }
+      return pushEvent;
+    }
+    /**
+     * Overridable message hook
+     *
+     * Receives all events for specialized message handling before dispatching to the channel callbacks.
+     * Must return the payload, modified or unmodified.
+     *
+     * @internal
+     */
+    _onMessage(_event, payload, _ref) {
+      return payload;
+    }
+    /** @internal */
+    _isMember(topic) {
+      return this.topic === topic;
+    }
+    /** @internal */
+    _joinRef() {
+      return this.joinPush.ref;
+    }
+    /** @internal */
+    _trigger(type, payload, ref) {
+      var _a, _b;
+      const typeLower = type.toLocaleLowerCase();
+      const { close, error, leave, join } = CHANNEL_EVENTS;
+      const events = [close, error, leave, join];
+      if (ref && events.indexOf(typeLower) >= 0 && ref !== this._joinRef()) {
+        return;
+      }
+      let handledPayload = this._onMessage(typeLower, payload, ref);
+      if (payload && !handledPayload) {
+        throw "channel onMessage callbacks must return the payload, modified or unmodified";
+      }
+      if (["insert", "update", "delete"].includes(typeLower)) {
+        (_a = this.bindings.postgres_changes) === null || _a === void 0 ? void 0 : _a.filter((bind) => {
+          var _a2, _b2, _c;
+          return ((_a2 = bind.filter) === null || _a2 === void 0 ? void 0 : _a2.event) === "*" || ((_c = (_b2 = bind.filter) === null || _b2 === void 0 ? void 0 : _b2.event) === null || _c === void 0 ? void 0 : _c.toLocaleLowerCase()) === typeLower;
+        }).map((bind) => bind.callback(handledPayload, ref));
+      } else {
+        (_b = this.bindings[typeLower]) === null || _b === void 0 ? void 0 : _b.filter((bind) => {
+          var _a2, _b2, _c, _d, _e, _f;
+          if (["broadcast", "presence", "postgres_changes"].includes(typeLower)) {
+            if ("id" in bind) {
+              const bindId = bind.id;
+              const bindEvent = (_a2 = bind.filter) === null || _a2 === void 0 ? void 0 : _a2.event;
+              return bindId && ((_b2 = payload.ids) === null || _b2 === void 0 ? void 0 : _b2.includes(bindId)) && (bindEvent === "*" || (bindEvent === null || bindEvent === void 0 ? void 0 : bindEvent.toLocaleLowerCase()) === ((_c = payload.data) === null || _c === void 0 ? void 0 : _c.type.toLocaleLowerCase()));
+            } else {
+              const bindEvent = (_e = (_d = bind === null || bind === void 0 ? void 0 : bind.filter) === null || _d === void 0 ? void 0 : _d.event) === null || _e === void 0 ? void 0 : _e.toLocaleLowerCase();
+              return bindEvent === "*" || bindEvent === ((_f = payload === null || payload === void 0 ? void 0 : payload.event) === null || _f === void 0 ? void 0 : _f.toLocaleLowerCase());
+            }
+          } else {
+            return bind.type.toLocaleLowerCase() === typeLower;
+          }
+        }).map((bind) => {
+          if (typeof handledPayload === "object" && "ids" in handledPayload) {
+            const postgresChanges = handledPayload.data;
+            const { schema, table, commit_timestamp, type: type2, errors } = postgresChanges;
+            const enrichedPayload = {
+              schema,
+              table,
+              commit_timestamp,
+              eventType: type2,
+              new: {},
+              old: {},
+              errors
+            };
+            handledPayload = Object.assign(Object.assign({}, enrichedPayload), this._getPayloadRecords(postgresChanges));
+          }
+          bind.callback(handledPayload, ref);
+        });
+      }
+    }
+    /** @internal */
+    _isClosed() {
+      return this.state === CHANNEL_STATES.closed;
+    }
+    /** @internal */
+    _isJoined() {
+      return this.state === CHANNEL_STATES.joined;
+    }
+    /** @internal */
+    _isJoining() {
+      return this.state === CHANNEL_STATES.joining;
+    }
+    /** @internal */
+    _isLeaving() {
+      return this.state === CHANNEL_STATES.leaving;
+    }
+    /** @internal */
+    _replyEventName(ref) {
+      return `chan_reply_${ref}`;
+    }
+    /** @internal */
+    _on(type, filter, callback) {
+      const typeLower = type.toLocaleLowerCase();
+      const binding = {
+        type: typeLower,
+        filter,
+        callback
+      };
+      if (this.bindings[typeLower]) {
+        this.bindings[typeLower].push(binding);
+      } else {
+        this.bindings[typeLower] = [binding];
+      }
+      return this;
+    }
+    /** @internal */
+    _off(type, filter) {
+      const typeLower = type.toLocaleLowerCase();
+      this.bindings[typeLower] = this.bindings[typeLower].filter((bind) => {
+        var _a;
+        return !(((_a = bind.type) === null || _a === void 0 ? void 0 : _a.toLocaleLowerCase()) === typeLower && _RealtimeChannel.isEqual(bind.filter, filter));
+      });
+      return this;
+    }
+    /** @internal */
+    static isEqual(obj1, obj2) {
+      if (Object.keys(obj1).length !== Object.keys(obj2).length) {
+        return false;
+      }
+      for (const k in obj1) {
+        if (obj1[k] !== obj2[k]) {
+          return false;
+        }
+      }
+      return true;
+    }
+    /** @internal */
+    _rejoinUntilConnected() {
+      this.rejoinTimer.scheduleTimeout();
+      if (this.socket.isConnected()) {
+        this._rejoin();
+      }
+    }
+    /**
+     * Registers a callback that will be executed when the channel closes.
+     *
+     * @internal
+     */
+    _onClose(callback) {
+      this._on(CHANNEL_EVENTS.close, {}, callback);
+    }
+    /**
+     * Registers a callback that will be executed when the channel encounteres an error.
+     *
+     * @internal
+     */
+    _onError(callback) {
+      this._on(CHANNEL_EVENTS.error, {}, (reason) => callback(reason));
+    }
+    /**
+     * Returns `true` if the socket is connected and the channel has been joined.
+     *
+     * @internal
+     */
+    _canPush() {
+      return this.socket.isConnected() && this._isJoined();
+    }
+    /** @internal */
+    _rejoin(timeout = this.timeout) {
+      if (this._isLeaving()) {
+        return;
+      }
+      this.socket._leaveOpenTopic(this.topic);
+      this.state = CHANNEL_STATES.joining;
+      this.joinPush.resend(timeout);
+    }
+    /** @internal */
+    _getPayloadRecords(payload) {
+      const records = {
+        new: {},
+        old: {}
+      };
+      if (payload.type === "INSERT" || payload.type === "UPDATE") {
+        records.new = convertChangeData(payload.columns, payload.record);
+      }
+      if (payload.type === "UPDATE" || payload.type === "DELETE") {
+        records.old = convertChangeData(payload.columns, payload.old_record);
+      }
+      return records;
+    }
+  };
+
+  // node_modules/@supabase/realtime-js/dist/module/RealtimeClient.js
+  var noop2 = () => {
+  };
+  var NATIVE_WEBSOCKET_AVAILABLE = typeof WebSocket !== "undefined";
+  var RealtimeClient = class {
+    /**
+     * Initializes the Socket.
+     *
+     * @param endPoint The string WebSocket endpoint, ie, "ws://example.com/socket", "wss://example.com", "/socket" (inherited host & protocol)
+     * @param httpEndpoint The string HTTP endpoint, ie, "https://example.com", "/" (inherited host & protocol)
+     * @param options.transport The Websocket Transport, for example WebSocket.
+     * @param options.timeout The default timeout in milliseconds to trigger push timeouts.
+     * @param options.params The optional params to pass when connecting.
+     * @param options.headers The optional headers to pass when connecting.
+     * @param options.heartbeatIntervalMs The millisec interval to send a heartbeat message.
+     * @param options.logger The optional function for specialized logging, ie: logger: (kind, msg, data) => { console.log(`${kind}: ${msg}`, data) }
+     * @param options.encode The function to encode outgoing messages. Defaults to JSON: (payload, callback) => callback(JSON.stringify(payload))
+     * @param options.decode The function to decode incoming messages. Defaults to Serializer's decode.
+     * @param options.reconnectAfterMs he optional function that returns the millsec reconnect interval. Defaults to stepped backoff off.
+     */
+    constructor(endPoint, options) {
+      var _a;
+      this.accessToken = null;
+      this.apiKey = null;
+      this.channels = [];
+      this.endPoint = "";
+      this.httpEndpoint = "";
+      this.headers = DEFAULT_HEADERS;
+      this.params = {};
+      this.timeout = DEFAULT_TIMEOUT;
+      this.heartbeatIntervalMs = 3e4;
+      this.heartbeatTimer = void 0;
+      this.pendingHeartbeatRef = null;
+      this.ref = 0;
+      this.logger = noop2;
+      this.conn = null;
+      this.sendBuffer = [];
+      this.serializer = new Serializer();
+      this.stateChangeCallbacks = {
+        open: [],
+        close: [],
+        error: [],
+        message: []
+      };
+      this._resolveFetch = (customFetch) => {
+        let _fetch;
+        if (customFetch) {
+          _fetch = customFetch;
+        } else if (typeof fetch === "undefined") {
+          _fetch = (...args) => Promise.resolve().then(() => (init_browser(), browser_exports)).then(({ default: fetch3 }) => fetch3(...args));
+        } else {
+          _fetch = fetch;
+        }
+        return (...args) => _fetch(...args);
+      };
+      this.endPoint = `${endPoint}/${TRANSPORTS.websocket}`;
+      this.httpEndpoint = httpEndpointURL(endPoint);
+      if (options === null || options === void 0 ? void 0 : options.transport) {
+        this.transport = options.transport;
+      } else {
+        this.transport = null;
+      }
+      if (options === null || options === void 0 ? void 0 : options.params)
+        this.params = options.params;
+      if (options === null || options === void 0 ? void 0 : options.headers)
+        this.headers = Object.assign(Object.assign({}, this.headers), options.headers);
+      if (options === null || options === void 0 ? void 0 : options.timeout)
+        this.timeout = options.timeout;
+      if (options === null || options === void 0 ? void 0 : options.logger)
+        this.logger = options.logger;
+      if (options === null || options === void 0 ? void 0 : options.heartbeatIntervalMs)
+        this.heartbeatIntervalMs = options.heartbeatIntervalMs;
+      const accessToken = (_a = options === null || options === void 0 ? void 0 : options.params) === null || _a === void 0 ? void 0 : _a.apikey;
+      if (accessToken) {
+        this.accessToken = accessToken;
+        this.apiKey = accessToken;
+      }
+      this.reconnectAfterMs = (options === null || options === void 0 ? void 0 : options.reconnectAfterMs) ? options.reconnectAfterMs : (tries) => {
+        return [1e3, 2e3, 5e3, 1e4][tries - 1] || 1e4;
+      };
+      this.encode = (options === null || options === void 0 ? void 0 : options.encode) ? options.encode : (payload, callback) => {
+        return callback(JSON.stringify(payload));
+      };
+      this.decode = (options === null || options === void 0 ? void 0 : options.decode) ? options.decode : this.serializer.decode.bind(this.serializer);
+      this.reconnectTimer = new Timer(async () => {
+        this.disconnect();
+        this.connect();
+      }, this.reconnectAfterMs);
+      this.fetch = this._resolveFetch(options === null || options === void 0 ? void 0 : options.fetch);
+    }
+    /**
+     * Connects the socket, unless already connected.
+     */
+    connect() {
+      if (this.conn) {
+        return;
+      }
+      if (this.transport) {
+        this.conn = new this.transport(this._endPointURL(), void 0, {
+          headers: this.headers
+        });
+        return;
+      }
+      if (NATIVE_WEBSOCKET_AVAILABLE) {
+        this.conn = new WebSocket(this._endPointURL());
+        this.setupConnection();
+        return;
+      }
+      this.conn = new WSWebSocketDummy(this._endPointURL(), void 0, {
+        close: () => {
+          this.conn = null;
+        }
+      });
+      Promise.resolve().then(() => __toESM(require_browser())).then(({ default: WS }) => {
+        this.conn = new WS(this._endPointURL(), void 0, {
+          headers: this.headers
+        });
+        this.setupConnection();
+      });
+    }
+    /**
+     * Disconnects the socket.
+     *
+     * @param code A numeric status code to send on disconnect.
+     * @param reason A custom reason for the disconnect.
+     */
+    disconnect(code, reason) {
+      if (this.conn) {
+        this.conn.onclose = function() {
+        };
+        if (code) {
+          this.conn.close(code, reason !== null && reason !== void 0 ? reason : "");
+        } else {
+          this.conn.close();
+        }
+        this.conn = null;
+        this.heartbeatTimer && clearInterval(this.heartbeatTimer);
+        this.reconnectTimer.reset();
+      }
+    }
+    /**
+     * Returns all created channels
+     */
+    getChannels() {
+      return this.channels;
+    }
+    /**
+     * Unsubscribes and removes a single channel
+     * @param channel A RealtimeChannel instance
+     */
+    async removeChannel(channel) {
+      const status = await channel.unsubscribe();
+      if (this.channels.length === 0) {
+        this.disconnect();
+      }
+      return status;
+    }
+    /**
+     * Unsubscribes and removes all channels
+     */
+    async removeAllChannels() {
+      const values_1 = await Promise.all(this.channels.map((channel) => channel.unsubscribe()));
+      this.disconnect();
+      return values_1;
+    }
+    /**
+     * Logs the message.
+     *
+     * For customized logging, `this.logger` can be overridden.
+     */
+    log(kind, msg, data) {
+      this.logger(kind, msg, data);
+    }
+    /**
+     * Returns the current state of the socket.
+     */
+    connectionState() {
+      switch (this.conn && this.conn.readyState) {
+        case SOCKET_STATES.connecting:
+          return CONNECTION_STATE.Connecting;
+        case SOCKET_STATES.open:
+          return CONNECTION_STATE.Open;
+        case SOCKET_STATES.closing:
+          return CONNECTION_STATE.Closing;
+        default:
+          return CONNECTION_STATE.Closed;
+      }
+    }
+    /**
+     * Returns `true` is the connection is open.
+     */
+    isConnected() {
+      return this.connectionState() === CONNECTION_STATE.Open;
+    }
+    channel(topic, params = { config: {} }) {
+      const chan = new RealtimeChannel(`realtime:${topic}`, params, this);
+      this.channels.push(chan);
+      return chan;
+    }
+    /**
+     * Push out a message if the socket is connected.
+     *
+     * If the socket is not connected, the message gets enqueued within a local buffer, and sent out when a connection is next established.
+     */
+    push(data) {
+      const { topic, event, payload, ref } = data;
+      const callback = () => {
+        this.encode(data, (result) => {
+          var _a;
+          (_a = this.conn) === null || _a === void 0 ? void 0 : _a.send(result);
+        });
+      };
+      this.log("push", `${topic} ${event} (${ref})`, payload);
+      if (this.isConnected()) {
+        callback();
+      } else {
+        this.sendBuffer.push(callback);
+      }
+    }
+    /**
+     * Sets the JWT access token used for channel subscription authorization and Realtime RLS.
+     *
+     * @param token A JWT string.
+     */
+    setAuth(token) {
+      this.accessToken = token;
+      this.channels.forEach((channel) => {
+        token && channel.updateJoinPayload({ access_token: token });
+        if (channel.joinedOnce && channel._isJoined()) {
+          channel._push(CHANNEL_EVENTS.access_token, { access_token: token });
+        }
+      });
+    }
+    /**
+     * Return the next message ref, accounting for overflows
+     *
+     * @internal
+     */
+    _makeRef() {
+      let newRef = this.ref + 1;
+      if (newRef === this.ref) {
+        this.ref = 0;
+      } else {
+        this.ref = newRef;
+      }
+      return this.ref.toString();
+    }
+    /**
+     * Unsubscribe from channels with the specified topic.
+     *
+     * @internal
+     */
+    _leaveOpenTopic(topic) {
+      let dupChannel = this.channels.find((c) => c.topic === topic && (c._isJoined() || c._isJoining()));
+      if (dupChannel) {
+        this.log("transport", `leaving duplicate topic "${topic}"`);
+        dupChannel.unsubscribe();
+      }
+    }
+    /**
+     * Removes a subscription from the socket.
+     *
+     * @param channel An open subscription.
+     *
+     * @internal
+     */
+    _remove(channel) {
+      this.channels = this.channels.filter((c) => c._joinRef() !== channel._joinRef());
+    }
+    /**
+     * Sets up connection handlers.
+     *
+     * @internal
+     */
+    setupConnection() {
+      if (this.conn) {
+        this.conn.binaryType = "arraybuffer";
+        this.conn.onopen = () => this._onConnOpen();
+        this.conn.onerror = (error) => this._onConnError(error);
+        this.conn.onmessage = (event) => this._onConnMessage(event);
+        this.conn.onclose = (event) => this._onConnClose(event);
+      }
+    }
+    /**
+     * Returns the URL of the websocket.
+     *
+     * @internal
+     */
+    _endPointURL() {
+      return this._appendParams(this.endPoint, Object.assign({}, this.params, { vsn: VSN }));
+    }
+    /** @internal */
+    _onConnMessage(rawMessage) {
+      this.decode(rawMessage.data, (msg) => {
+        let { topic, event, payload, ref } = msg;
+        if (ref && ref === this.pendingHeartbeatRef || event === (payload === null || payload === void 0 ? void 0 : payload.type)) {
+          this.pendingHeartbeatRef = null;
+        }
+        this.log("receive", `${payload.status || ""} ${topic} ${event} ${ref && "(" + ref + ")" || ""}`, payload);
+        this.channels.filter((channel) => channel._isMember(topic)).forEach((channel) => channel._trigger(event, payload, ref));
+        this.stateChangeCallbacks.message.forEach((callback) => callback(msg));
+      });
+    }
+    /** @internal */
+    _onConnOpen() {
+      this.log("transport", `connected to ${this._endPointURL()}`);
+      this._flushSendBuffer();
+      this.reconnectTimer.reset();
+      this.heartbeatTimer && clearInterval(this.heartbeatTimer);
+      this.heartbeatTimer = setInterval(() => this._sendHeartbeat(), this.heartbeatIntervalMs);
+      this.stateChangeCallbacks.open.forEach((callback) => callback());
+    }
+    /** @internal */
+    _onConnClose(event) {
+      this.log("transport", "close", event);
+      this._triggerChanError();
+      this.heartbeatTimer && clearInterval(this.heartbeatTimer);
+      this.reconnectTimer.scheduleTimeout();
+      this.stateChangeCallbacks.close.forEach((callback) => callback(event));
+    }
+    /** @internal */
+    _onConnError(error) {
+      this.log("transport", error.message);
+      this._triggerChanError();
+      this.stateChangeCallbacks.error.forEach((callback) => callback(error));
+    }
+    /** @internal */
+    _triggerChanError() {
+      this.channels.forEach((channel) => channel._trigger(CHANNEL_EVENTS.error));
+    }
+    /** @internal */
+    _appendParams(url, params) {
+      if (Object.keys(params).length === 0) {
+        return url;
+      }
+      const prefix = url.match(/\?/) ? "&" : "?";
+      const query = new URLSearchParams(params);
+      return `${url}${prefix}${query}`;
+    }
+    /** @internal */
+    _flushSendBuffer() {
+      if (this.isConnected() && this.sendBuffer.length > 0) {
+        this.sendBuffer.forEach((callback) => callback());
+        this.sendBuffer = [];
+      }
+    }
+    /** @internal */
+    _sendHeartbeat() {
+      var _a;
+      if (!this.isConnected()) {
+        return;
+      }
+      if (this.pendingHeartbeatRef) {
+        this.pendingHeartbeatRef = null;
+        this.log("transport", "heartbeat timeout. Attempting to re-establish connection");
+        (_a = this.conn) === null || _a === void 0 ? void 0 : _a.close(WS_CLOSE_NORMAL, "hearbeat timeout");
+        return;
+      }
+      this.pendingHeartbeatRef = this._makeRef();
+      this.push({
+        topic: "phoenix",
+        event: "heartbeat",
+        payload: {},
+        ref: this.pendingHeartbeatRef
+      });
+      this.setAuth(this.accessToken);
+    }
+  };
+  var WSWebSocketDummy = class {
+    constructor(address, _protocols, options) {
+      this.binaryType = "arraybuffer";
+      this.onclose = () => {
+      };
+      this.onerror = () => {
+      };
+      this.onmessage = () => {
+      };
+      this.onopen = () => {
+      };
+      this.readyState = SOCKET_STATES.connecting;
+      this.send = () => {
+      };
+      this.url = null;
+      this.url = address;
+      this.close = options.close;
+    }
+  };
+
+  // node_modules/@supabase/storage-js/dist/module/lib/errors.js
+  var StorageError = class extends Error {
+    constructor(message) {
+      super(message);
+      this.__isStorageError = true;
+      this.name = "StorageError";
+    }
+  };
+  function isStorageError(error) {
+    return typeof error === "object" && error !== null && "__isStorageError" in error;
+  }
+  var StorageApiError = class extends StorageError {
+    constructor(message, status) {
+      super(message);
+      this.name = "StorageApiError";
+      this.status = status;
+    }
+    toJSON() {
+      return {
+        name: this.name,
+        message: this.message,
+        status: this.status
+      };
+    }
+  };
+  var StorageUnknownError = class extends StorageError {
+    constructor(message, originalError) {
+      super(message);
+      this.name = "StorageUnknownError";
+      this.originalError = originalError;
+    }
+  };
+
+  // node_modules/@supabase/storage-js/dist/module/lib/helpers.js
+  var __awaiter2 = function(thisArg, _arguments, P, generator) {
+    function adopt(value) {
+      return value instanceof P ? value : new P(function(resolve) {
+        resolve(value);
+      });
+    }
+    return new (P || (P = Promise))(function(resolve, reject) {
+      function fulfilled(value) {
+        try {
+          step(generator.next(value));
+        } catch (e) {
+          reject(e);
+        }
+      }
+      function rejected(value) {
+        try {
+          step(generator["throw"](value));
+        } catch (e) {
+          reject(e);
+        }
+      }
+      function step(result) {
+        result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+      }
+      step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+  };
+  var resolveFetch2 = (customFetch) => {
+    let _fetch;
+    if (customFetch) {
+      _fetch = customFetch;
+    } else if (typeof fetch === "undefined") {
+      _fetch = (...args) => Promise.resolve().then(() => (init_browser(), browser_exports)).then(({ default: fetch3 }) => fetch3(...args));
+    } else {
+      _fetch = fetch;
+    }
+    return (...args) => _fetch(...args);
+  };
+  var resolveResponse = () => __awaiter2(void 0, void 0, void 0, function* () {
+    if (typeof Response === "undefined") {
+      return (yield Promise.resolve().then(() => (init_browser(), browser_exports))).Response;
+    }
+    return Response;
+  });
+  var recursiveToCamel = (item) => {
+    if (Array.isArray(item)) {
+      return item.map((el) => recursiveToCamel(el));
+    } else if (typeof item === "function" || item !== Object(item)) {
+      return item;
+    }
+    const result = {};
+    Object.entries(item).forEach(([key, value]) => {
+      const newKey = key.replace(/([-_][a-z])/gi, (c) => c.toUpperCase().replace(/[-_]/g, ""));
+      result[newKey] = recursiveToCamel(value);
+    });
+    return result;
+  };
+
+  // node_modules/@supabase/storage-js/dist/module/lib/fetch.js
+  var __awaiter3 = function(thisArg, _arguments, P, generator) {
+    function adopt(value) {
+      return value instanceof P ? value : new P(function(resolve) {
+        resolve(value);
+      });
+    }
+    return new (P || (P = Promise))(function(resolve, reject) {
+      function fulfilled(value) {
+        try {
+          step(generator.next(value));
+        } catch (e) {
+          reject(e);
+        }
+      }
+      function rejected(value) {
+        try {
+          step(generator["throw"](value));
+        } catch (e) {
+          reject(e);
+        }
+      }
+      function step(result) {
+        result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+      }
+      step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+  };
+  var _getErrorMessage = (err) => err.msg || err.message || err.error_description || err.error || JSON.stringify(err);
+  var handleError = (error, reject, options) => __awaiter3(void 0, void 0, void 0, function* () {
+    const Res = yield resolveResponse();
+    if (error instanceof Res && !(options === null || options === void 0 ? void 0 : options.noResolveJson)) {
+      error.json().then((err) => {
+        reject(new StorageApiError(_getErrorMessage(err), error.status || 500));
+      }).catch((err) => {
+        reject(new StorageUnknownError(_getErrorMessage(err), err));
+      });
+    } else {
+      reject(new StorageUnknownError(_getErrorMessage(error), error));
+    }
+  });
+  var _getRequestParams = (method, options, parameters, body) => {
+    const params = { method, headers: (options === null || options === void 0 ? void 0 : options.headers) || {} };
+    if (method === "GET") {
+      return params;
+    }
+    params.headers = Object.assign({ "Content-Type": "application/json" }, options === null || options === void 0 ? void 0 : options.headers);
+    if (body) {
+      params.body = JSON.stringify(body);
+    }
+    return Object.assign(Object.assign({}, params), parameters);
+  };
+  function _handleRequest(fetcher, method, url, options, parameters, body) {
+    return __awaiter3(this, void 0, void 0, function* () {
+      return new Promise((resolve, reject) => {
+        fetcher(url, _getRequestParams(method, options, parameters, body)).then((result) => {
+          if (!result.ok)
+            throw result;
+          if (options === null || options === void 0 ? void 0 : options.noResolveJson)
+            return result;
+          return result.json();
+        }).then((data) => resolve(data)).catch((error) => handleError(error, reject, options));
+      });
+    });
+  }
+  function get(fetcher, url, options, parameters) {
+    return __awaiter3(this, void 0, void 0, function* () {
+      return _handleRequest(fetcher, "GET", url, options, parameters);
+    });
+  }
+  function post(fetcher, url, body, options, parameters) {
+    return __awaiter3(this, void 0, void 0, function* () {
+      return _handleRequest(fetcher, "POST", url, options, parameters, body);
+    });
+  }
+  function put(fetcher, url, body, options, parameters) {
+    return __awaiter3(this, void 0, void 0, function* () {
+      return _handleRequest(fetcher, "PUT", url, options, parameters, body);
+    });
+  }
+  function head(fetcher, url, options, parameters) {
+    return __awaiter3(this, void 0, void 0, function* () {
+      return _handleRequest(fetcher, "HEAD", url, Object.assign(Object.assign({}, options), { noResolveJson: true }), parameters);
+    });
+  }
+  function remove(fetcher, url, body, options, parameters) {
+    return __awaiter3(this, void 0, void 0, function* () {
+      return _handleRequest(fetcher, "DELETE", url, options, parameters, body);
+    });
+  }
+
+  // node_modules/@supabase/storage-js/dist/module/packages/StorageFileApi.js
+  var __awaiter4 = function(thisArg, _arguments, P, generator) {
+    function adopt(value) {
+      return value instanceof P ? value : new P(function(resolve) {
+        resolve(value);
+      });
+    }
+    return new (P || (P = Promise))(function(resolve, reject) {
+      function fulfilled(value) {
+        try {
+          step(generator.next(value));
+        } catch (e) {
+          reject(e);
+        }
+      }
+      function rejected(value) {
+        try {
+          step(generator["throw"](value));
+        } catch (e) {
+          reject(e);
+        }
+      }
+      function step(result) {
+        result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+      }
+      step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+  };
+  var DEFAULT_SEARCH_OPTIONS = {
+    limit: 100,
+    offset: 0,
+    sortBy: {
+      column: "name",
+      order: "asc"
+    }
+  };
+  var DEFAULT_FILE_OPTIONS = {
+    cacheControl: "3600",
+    contentType: "text/plain;charset=UTF-8",
+    upsert: false
+  };
+  var StorageFileApi = class {
+    constructor(url, headers = {}, bucketId, fetch3) {
+      this.url = url;
+      this.headers = headers;
+      this.bucketId = bucketId;
+      this.fetch = resolveFetch2(fetch3);
+    }
+    /**
+     * Uploads a file to an existing bucket or replaces an existing file at the specified path with a new one.
+     *
+     * @param method HTTP method.
+     * @param path The relative file path. Should be of the format `folder/subfolder/filename.png`. The bucket must already exist before attempting to upload.
+     * @param fileBody The body of the file to be stored in the bucket.
+     */
+    uploadOrUpdate(method, path, fileBody, fileOptions) {
+      return __awaiter4(this, void 0, void 0, function* () {
+        try {
+          let body;
+          const options = Object.assign(Object.assign({}, DEFAULT_FILE_OPTIONS), fileOptions);
+          let headers = Object.assign(Object.assign({}, this.headers), method === "POST" && { "x-upsert": String(options.upsert) });
+          const metadata = options.metadata;
+          if (typeof Blob !== "undefined" && fileBody instanceof Blob) {
+            body = new FormData();
+            body.append("cacheControl", options.cacheControl);
+            body.append("", fileBody);
+            if (metadata) {
+              body.append("metadata", this.encodeMetadata(metadata));
+            }
+          } else if (typeof FormData !== "undefined" && fileBody instanceof FormData) {
+            body = fileBody;
+            body.append("cacheControl", options.cacheControl);
+            if (metadata) {
+              body.append("metadata", this.encodeMetadata(metadata));
+            }
+          } else {
+            body = fileBody;
+            headers["cache-control"] = `max-age=${options.cacheControl}`;
+            headers["content-type"] = options.contentType;
+            if (metadata) {
+              headers["x-metadata"] = this.toBase64(this.encodeMetadata(metadata));
+            }
+          }
+          if (fileOptions === null || fileOptions === void 0 ? void 0 : fileOptions.headers) {
+            headers = Object.assign(Object.assign({}, headers), fileOptions.headers);
+          }
+          const cleanPath = this._removeEmptyFolders(path);
+          const _path = this._getFinalPath(cleanPath);
+          const res = yield this.fetch(`${this.url}/object/${_path}`, Object.assign({ method, body, headers }, (options === null || options === void 0 ? void 0 : options.duplex) ? { duplex: options.duplex } : {}));
+          const data = yield res.json();
+          if (res.ok) {
+            return {
+              data: { path: cleanPath, id: data.Id, fullPath: data.Key },
+              error: null
+            };
+          } else {
+            const error = data;
+            return { data: null, error };
+          }
+        } catch (error) {
+          if (isStorageError(error)) {
+            return { data: null, error };
+          }
+          throw error;
+        }
+      });
+    }
+    /**
+     * Uploads a file to an existing bucket.
+     *
+     * @param path The file path, including the file name. Should be of the format `folder/subfolder/filename.png`. The bucket must already exist before attempting to upload.
+     * @param fileBody The body of the file to be stored in the bucket.
+     */
+    upload(path, fileBody, fileOptions) {
+      return __awaiter4(this, void 0, void 0, function* () {
+        return this.uploadOrUpdate("POST", path, fileBody, fileOptions);
+      });
+    }
+    /**
+     * Upload a file with a token generated from `createSignedUploadUrl`.
+     * @param path The file path, including the file name. Should be of the format `folder/subfolder/filename.png`. The bucket must already exist before attempting to upload.
+     * @param token The token generated from `createSignedUploadUrl`
+     * @param fileBody The body of the file to be stored in the bucket.
+     */
+    uploadToSignedUrl(path, token, fileBody, fileOptions) {
+      return __awaiter4(this, void 0, void 0, function* () {
+        const cleanPath = this._removeEmptyFolders(path);
+        const _path = this._getFinalPath(cleanPath);
+        const url = new URL(this.url + `/object/upload/sign/${_path}`);
+        url.searchParams.set("token", token);
+        try {
+          let body;
+          const options = Object.assign({ upsert: DEFAULT_FILE_OPTIONS.upsert }, fileOptions);
+          const headers = Object.assign(Object.assign({}, this.headers), { "x-upsert": String(options.upsert) });
+          if (typeof Blob !== "undefined" && fileBody instanceof Blob) {
+            body = new FormData();
+            body.append("cacheControl", options.cacheControl);
+            body.append("", fileBody);
+          } else if (typeof FormData !== "undefined" && fileBody instanceof FormData) {
+            body = fileBody;
+            body.append("cacheControl", options.cacheControl);
+          } else {
+            body = fileBody;
+            headers["cache-control"] = `max-age=${options.cacheControl}`;
+            headers["content-type"] = options.contentType;
+          }
+          const res = yield this.fetch(url.toString(), {
+            method: "PUT",
+            body,
+            headers
+          });
+          const data = yield res.json();
+          if (res.ok) {
+            return {
+              data: { path: cleanPath, fullPath: data.Key },
+              error: null
+            };
+          } else {
+            const error = data;
+            return { data: null, error };
+          }
+        } catch (error) {
+          if (isStorageError(error)) {
+            return { data: null, error };
+          }
+          throw error;
+        }
+      });
+    }
+    /**
+     * Creates a signed upload URL.
+     * Signed upload URLs can be used to upload files to the bucket without further authentication.
+     * They are valid for 2 hours.
+     * @param path The file path, including the current file name. For example `folder/image.png`.
+     * @param options.upsert If set to true, allows the file to be overwritten if it already exists.
+     */
+    createSignedUploadUrl(path, options) {
+      return __awaiter4(this, void 0, void 0, function* () {
+        try {
+          let _path = this._getFinalPath(path);
+          const headers = Object.assign({}, this.headers);
+          if (options === null || options === void 0 ? void 0 : options.upsert) {
+            headers["x-upsert"] = "true";
+          }
+          const data = yield post(this.fetch, `${this.url}/object/upload/sign/${_path}`, {}, { headers });
+          const url = new URL(this.url + data.url);
+          const token = url.searchParams.get("token");
+          if (!token) {
+            throw new StorageError("No token returned by API");
+          }
+          return { data: { signedUrl: url.toString(), path, token }, error: null };
+        } catch (error) {
+          if (isStorageError(error)) {
+            return { data: null, error };
+          }
+          throw error;
+        }
+      });
+    }
+    /**
+     * Replaces an existing file at the specified path with a new one.
+     *
+     * @param path The relative file path. Should be of the format `folder/subfolder/filename.png`. The bucket must already exist before attempting to update.
+     * @param fileBody The body of the file to be stored in the bucket.
+     */
+    update(path, fileBody, fileOptions) {
+      return __awaiter4(this, void 0, void 0, function* () {
+        return this.uploadOrUpdate("PUT", path, fileBody, fileOptions);
+      });
+    }
+    /**
+     * Moves an existing file to a new path in the same bucket.
+     *
+     * @param fromPath The original file path, including the current file name. For example `folder/image.png`.
+     * @param toPath The new file path, including the new file name. For example `folder/image-new.png`.
+     * @param options The destination options.
+     */
+    move(fromPath, toPath, options) {
+      return __awaiter4(this, void 0, void 0, function* () {
+        try {
+          const data = yield post(this.fetch, `${this.url}/object/move`, {
+            bucketId: this.bucketId,
+            sourceKey: fromPath,
+            destinationKey: toPath,
+            destinationBucket: options === null || options === void 0 ? void 0 : options.destinationBucket
+          }, { headers: this.headers });
+          return { data, error: null };
+        } catch (error) {
+          if (isStorageError(error)) {
+            return { data: null, error };
+          }
+          throw error;
+        }
+      });
+    }
+    /**
+     * Copies an existing file to a new path in the same bucket.
+     *
+     * @param fromPath The original file path, including the current file name. For example `folder/image.png`.
+     * @param toPath The new file path, including the new file name. For example `folder/image-copy.png`.
+     * @param options The destination options.
+     */
+    copy(fromPath, toPath, options) {
+      return __awaiter4(this, void 0, void 0, function* () {
+        try {
+          const data = yield post(this.fetch, `${this.url}/object/copy`, {
+            bucketId: this.bucketId,
+            sourceKey: fromPath,
+            destinationKey: toPath,
+            destinationBucket: options === null || options === void 0 ? void 0 : options.destinationBucket
+          }, { headers: this.headers });
+          return { data: { path: data.Key }, error: null };
+        } catch (error) {
+          if (isStorageError(error)) {
+            return { data: null, error };
+          }
+          throw error;
+        }
+      });
+    }
+    /**
+     * Creates a signed URL. Use a signed URL to share a file for a fixed amount of time.
+     *
+     * @param path The file path, including the current file name. For example `folder/image.png`.
+     * @param expiresIn The number of seconds until the signed URL expires. For example, `60` for a URL which is valid for one minute.
+     * @param options.download triggers the file as a download if set to true. Set this parameter as the name of the file if you want to trigger the download with a different filename.
+     * @param options.transform Transform the asset before serving it to the client.
+     */
+    createSignedUrl(path, expiresIn, options) {
+      return __awaiter4(this, void 0, void 0, function* () {
+        try {
+          let _path = this._getFinalPath(path);
+          let data = yield post(this.fetch, `${this.url}/object/sign/${_path}`, Object.assign({ expiresIn }, (options === null || options === void 0 ? void 0 : options.transform) ? { transform: options.transform } : {}), { headers: this.headers });
+          const downloadQueryParam = (options === null || options === void 0 ? void 0 : options.download) ? `&download=${options.download === true ? "" : options.download}` : "";
+          const signedUrl = encodeURI(`${this.url}${data.signedURL}${downloadQueryParam}`);
+          data = { signedUrl };
+          return { data, error: null };
+        } catch (error) {
+          if (isStorageError(error)) {
+            return { data: null, error };
+          }
+          throw error;
+        }
+      });
+    }
+    /**
+     * Creates multiple signed URLs. Use a signed URL to share a file for a fixed amount of time.
+     *
+     * @param paths The file paths to be downloaded, including the current file names. For example `['folder/image.png', 'folder2/image2.png']`.
+     * @param expiresIn The number of seconds until the signed URLs expire. For example, `60` for URLs which are valid for one minute.
+     * @param options.download triggers the file as a download if set to true. Set this parameter as the name of the file if you want to trigger the download with a different filename.
+     */
+    createSignedUrls(paths, expiresIn, options) {
+      return __awaiter4(this, void 0, void 0, function* () {
+        try {
+          const data = yield post(this.fetch, `${this.url}/object/sign/${this.bucketId}`, { expiresIn, paths }, { headers: this.headers });
+          const downloadQueryParam = (options === null || options === void 0 ? void 0 : options.download) ? `&download=${options.download === true ? "" : options.download}` : "";
+          return {
+            data: data.map((datum) => Object.assign(Object.assign({}, datum), { signedUrl: datum.signedURL ? encodeURI(`${this.url}${datum.signedURL}${downloadQueryParam}`) : null })),
+            error: null
+          };
+        } catch (error) {
+          if (isStorageError(error)) {
+            return { data: null, error };
+          }
+          throw error;
+        }
+      });
+    }
+    /**
+     * Downloads a file from a private bucket. For public buckets, make a request to the URL returned from `getPublicUrl` instead.
+     *
+     * @param path The full path and file name of the file to be downloaded. For example `folder/image.png`.
+     * @param options.transform Transform the asset before serving it to the client.
+     */
+    download(path, options) {
+      return __awaiter4(this, void 0, void 0, function* () {
+        const wantsTransformation = typeof (options === null || options === void 0 ? void 0 : options.transform) !== "undefined";
+        const renderPath = wantsTransformation ? "render/image/authenticated" : "object";
+        const transformationQuery = this.transformOptsToQueryString((options === null || options === void 0 ? void 0 : options.transform) || {});
+        const queryString = transformationQuery ? `?${transformationQuery}` : "";
+        try {
+          const _path = this._getFinalPath(path);
+          const res = yield get(this.fetch, `${this.url}/${renderPath}/${_path}${queryString}`, {
+            headers: this.headers,
+            noResolveJson: true
+          });
+          const data = yield res.blob();
+          return { data, error: null };
+        } catch (error) {
+          if (isStorageError(error)) {
+            return { data: null, error };
+          }
+          throw error;
+        }
+      });
+    }
+    /**
+     * Retrieves the details of an existing file.
+     * @param path
+     */
+    info(path) {
+      return __awaiter4(this, void 0, void 0, function* () {
+        const _path = this._getFinalPath(path);
+        try {
+          const data = yield get(this.fetch, `${this.url}/object/info/${_path}`, {
+            headers: this.headers
+          });
+          return { data: recursiveToCamel(data), error: null };
+        } catch (error) {
+          if (isStorageError(error)) {
+            return { data: null, error };
+          }
+          throw error;
+        }
+      });
+    }
+    /**
+     * Checks the existence of a file.
+     * @param path
+     */
+    exists(path) {
+      return __awaiter4(this, void 0, void 0, function* () {
+        const _path = this._getFinalPath(path);
+        try {
+          yield head(this.fetch, `${this.url}/object/${_path}`, {
+            headers: this.headers
+          });
+          return { data: true, error: null };
+        } catch (error) {
+          if (isStorageError(error) && error instanceof StorageUnknownError) {
+            const originalError = error.originalError;
+            if ([400, 404].includes(originalError === null || originalError === void 0 ? void 0 : originalError.status)) {
+              return { data: false, error };
+            }
+          }
+          throw error;
+        }
+      });
+    }
+    /**
+     * A simple convenience function to get the URL for an asset in a public bucket. If you do not want to use this function, you can construct the public URL by concatenating the bucket URL with the path to the asset.
+     * This function does not verify if the bucket is public. If a public URL is created for a bucket which is not public, you will not be able to download the asset.
+     *
+     * @param path The path and name of the file to generate the public URL for. For example `folder/image.png`.
+     * @param options.download Triggers the file as a download if set to true. Set this parameter as the name of the file if you want to trigger the download with a different filename.
+     * @param options.transform Transform the asset before serving it to the client.
+     */
+    getPublicUrl(path, options) {
+      const _path = this._getFinalPath(path);
+      const _queryString = [];
+      const downloadQueryParam = (options === null || options === void 0 ? void 0 : options.download) ? `download=${options.download === true ? "" : options.download}` : "";
+      if (downloadQueryParam !== "") {
+        _queryString.push(downloadQueryParam);
+      }
+      const wantsTransformation = typeof (options === null || options === void 0 ? void 0 : options.transform) !== "undefined";
+      const renderPath = wantsTransformation ? "render/image" : "object";
+      const transformationQuery = this.transformOptsToQueryString((options === null || options === void 0 ? void 0 : options.transform) || {});
+      if (transformationQuery !== "") {
+        _queryString.push(transformationQuery);
+      }
+      let queryString = _queryString.join("&");
+      if (queryString !== "") {
+        queryString = `?${queryString}`;
+      }
+      return {
+        data: { publicUrl: encodeURI(`${this.url}/${renderPath}/public/${_path}${queryString}`) }
+      };
+    }
+    /**
+     * Deletes files within the same bucket
+     *
+     * @param paths An array of files to delete, including the path and file name. For example [`'folder/image.png'`].
+     */
+    remove(paths) {
+      return __awaiter4(this, void 0, void 0, function* () {
+        try {
+          const data = yield remove(this.fetch, `${this.url}/object/${this.bucketId}`, { prefixes: paths }, { headers: this.headers });
+          return { data, error: null };
+        } catch (error) {
+          if (isStorageError(error)) {
+            return { data: null, error };
+          }
+          throw error;
+        }
+      });
+    }
+    /**
+     * Get file metadata
+     * @param id the file id to retrieve metadata
+     */
+    // async getMetadata(
+    //   id: string
+    // ): Promise<
+    //   | {
+    //       data: Metadata
+    //       error: null
+    //     }
+    //   | {
+    //       data: null
+    //       error: StorageError
+    //     }
+    // > {
+    //   try {
+    //     const data = await get(this.fetch, `${this.url}/metadata/${id}`, { headers: this.headers })
+    //     return { data, error: null }
+    //   } catch (error) {
+    //     if (isStorageError(error)) {
+    //       return { data: null, error }
+    //     }
+    //     throw error
+    //   }
+    // }
+    /**
+     * Update file metadata
+     * @param id the file id to update metadata
+     * @param meta the new file metadata
+     */
+    // async updateMetadata(
+    //   id: string,
+    //   meta: Metadata
+    // ): Promise<
+    //   | {
+    //       data: Metadata
+    //       error: null
+    //     }
+    //   | {
+    //       data: null
+    //       error: StorageError
+    //     }
+    // > {
+    //   try {
+    //     const data = await post(
+    //       this.fetch,
+    //       `${this.url}/metadata/${id}`,
+    //       { ...meta },
+    //       { headers: this.headers }
+    //     )
+    //     return { data, error: null }
+    //   } catch (error) {
+    //     if (isStorageError(error)) {
+    //       return { data: null, error }
+    //     }
+    //     throw error
+    //   }
+    // }
+    /**
+     * Lists all the files within a bucket.
+     * @param path The folder path.
+     */
+    list(path, options, parameters) {
+      return __awaiter4(this, void 0, void 0, function* () {
+        try {
+          const body = Object.assign(Object.assign(Object.assign({}, DEFAULT_SEARCH_OPTIONS), options), { prefix: path || "" });
+          const data = yield post(this.fetch, `${this.url}/object/list/${this.bucketId}`, body, { headers: this.headers }, parameters);
+          return { data, error: null };
+        } catch (error) {
+          if (isStorageError(error)) {
+            return { data: null, error };
+          }
+          throw error;
+        }
+      });
+    }
+    encodeMetadata(metadata) {
+      return JSON.stringify(metadata);
+    }
+    toBase64(data) {
+      if (typeof Buffer !== "undefined") {
+        return Buffer.from(data).toString("base64");
+      }
+      return btoa(data);
+    }
+    _getFinalPath(path) {
+      return `${this.bucketId}/${path}`;
+    }
+    _removeEmptyFolders(path) {
+      return path.replace(/^\/|\/$/g, "").replace(/\/+/g, "/");
+    }
+    transformOptsToQueryString(transform) {
+      const params = [];
+      if (transform.width) {
+        params.push(`width=${transform.width}`);
+      }
+      if (transform.height) {
+        params.push(`height=${transform.height}`);
+      }
+      if (transform.resize) {
+        params.push(`resize=${transform.resize}`);
+      }
+      if (transform.format) {
+        params.push(`format=${transform.format}`);
+      }
+      if (transform.quality) {
+        params.push(`quality=${transform.quality}`);
+      }
+      return params.join("&");
+    }
+  };
+
+  // node_modules/@supabase/storage-js/dist/module/lib/version.js
+  var version2 = "2.7.0";
+
+  // node_modules/@supabase/storage-js/dist/module/lib/constants.js
+  var DEFAULT_HEADERS2 = { "X-Client-Info": `storage-js/${version2}` };
+
+  // node_modules/@supabase/storage-js/dist/module/packages/StorageBucketApi.js
+  var __awaiter5 = function(thisArg, _arguments, P, generator) {
+    function adopt(value) {
+      return value instanceof P ? value : new P(function(resolve) {
+        resolve(value);
+      });
+    }
+    return new (P || (P = Promise))(function(resolve, reject) {
+      function fulfilled(value) {
+        try {
+          step(generator.next(value));
+        } catch (e) {
+          reject(e);
+        }
+      }
+      function rejected(value) {
+        try {
+          step(generator["throw"](value));
+        } catch (e) {
+          reject(e);
+        }
+      }
+      function step(result) {
+        result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+      }
+      step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+  };
+  var StorageBucketApi = class {
+    constructor(url, headers = {}, fetch3) {
+      this.url = url;
+      this.headers = Object.assign(Object.assign({}, DEFAULT_HEADERS2), headers);
+      this.fetch = resolveFetch2(fetch3);
+    }
+    /**
+     * Retrieves the details of all Storage buckets within an existing project.
+     */
+    listBuckets() {
+      return __awaiter5(this, void 0, void 0, function* () {
+        try {
+          const data = yield get(this.fetch, `${this.url}/bucket`, { headers: this.headers });
+          return { data, error: null };
+        } catch (error) {
+          if (isStorageError(error)) {
+            return { data: null, error };
+          }
+          throw error;
+        }
+      });
+    }
+    /**
+     * Retrieves the details of an existing Storage bucket.
+     *
+     * @param id The unique identifier of the bucket you would like to retrieve.
+     */
+    getBucket(id) {
+      return __awaiter5(this, void 0, void 0, function* () {
+        try {
+          const data = yield get(this.fetch, `${this.url}/bucket/${id}`, { headers: this.headers });
+          return { data, error: null };
+        } catch (error) {
+          if (isStorageError(error)) {
+            return { data: null, error };
+          }
+          throw error;
+        }
+      });
+    }
+    /**
+     * Creates a new Storage bucket
+     *
+     * @param id A unique identifier for the bucket you are creating.
+     * @param options.public The visibility of the bucket. Public buckets don't require an authorization token to download objects, but still require a valid token for all other operations. By default, buckets are private.
+     * @param options.fileSizeLimit specifies the max file size in bytes that can be uploaded to this bucket.
+     * The global file size limit takes precedence over this value.
+     * The default value is null, which doesn't set a per bucket file size limit.
+     * @param options.allowedMimeTypes specifies the allowed mime types that this bucket can accept during upload.
+     * The default value is null, which allows files with all mime types to be uploaded.
+     * Each mime type specified can be a wildcard, e.g. image/*, or a specific mime type, e.g. image/png.
+     * @returns newly created bucket id
+     */
+    createBucket(id, options = {
+      public: false
+    }) {
+      return __awaiter5(this, void 0, void 0, function* () {
+        try {
+          const data = yield post(this.fetch, `${this.url}/bucket`, {
+            id,
+            name: id,
+            public: options.public,
+            file_size_limit: options.fileSizeLimit,
+            allowed_mime_types: options.allowedMimeTypes
+          }, { headers: this.headers });
+          return { data, error: null };
+        } catch (error) {
+          if (isStorageError(error)) {
+            return { data: null, error };
+          }
+          throw error;
+        }
+      });
+    }
+    /**
+     * Updates a Storage bucket
+     *
+     * @param id A unique identifier for the bucket you are updating.
+     * @param options.public The visibility of the bucket. Public buckets don't require an authorization token to download objects, but still require a valid token for all other operations.
+     * @param options.fileSizeLimit specifies the max file size in bytes that can be uploaded to this bucket.
+     * The global file size limit takes precedence over this value.
+     * The default value is null, which doesn't set a per bucket file size limit.
+     * @param options.allowedMimeTypes specifies the allowed mime types that this bucket can accept during upload.
+     * The default value is null, which allows files with all mime types to be uploaded.
+     * Each mime type specified can be a wildcard, e.g. image/*, or a specific mime type, e.g. image/png.
+     */
+    updateBucket(id, options) {
+      return __awaiter5(this, void 0, void 0, function* () {
+        try {
+          const data = yield put(this.fetch, `${this.url}/bucket/${id}`, {
+            id,
+            name: id,
+            public: options.public,
+            file_size_limit: options.fileSizeLimit,
+            allowed_mime_types: options.allowedMimeTypes
+          }, { headers: this.headers });
+          return { data, error: null };
+        } catch (error) {
+          if (isStorageError(error)) {
+            return { data: null, error };
+          }
+          throw error;
+        }
+      });
+    }
+    /**
+     * Removes all objects inside a single bucket.
+     *
+     * @param id The unique identifier of the bucket you would like to empty.
+     */
+    emptyBucket(id) {
+      return __awaiter5(this, void 0, void 0, function* () {
+        try {
+          const data = yield post(this.fetch, `${this.url}/bucket/${id}/empty`, {}, { headers: this.headers });
+          return { data, error: null };
+        } catch (error) {
+          if (isStorageError(error)) {
+            return { data: null, error };
+          }
+          throw error;
+        }
+      });
+    }
+    /**
+     * Deletes an existing bucket. A bucket can't be deleted with existing objects inside it.
+     * You must first `empty()` the bucket.
+     *
+     * @param id The unique identifier of the bucket you would like to delete.
+     */
+    deleteBucket(id) {
+      return __awaiter5(this, void 0, void 0, function* () {
+        try {
+          const data = yield remove(this.fetch, `${this.url}/bucket/${id}`, {}, { headers: this.headers });
+          return { data, error: null };
+        } catch (error) {
+          if (isStorageError(error)) {
+            return { data: null, error };
+          }
+          throw error;
+        }
+      });
+    }
+  };
+
+  // node_modules/@supabase/storage-js/dist/module/StorageClient.js
+  var StorageClient = class extends StorageBucketApi {
+    constructor(url, headers = {}, fetch3) {
+      super(url, headers, fetch3);
+    }
+    /**
+     * Perform file operation in a bucket.
+     *
+     * @param id The bucket id to operate on.
+     */
+    from(id) {
+      return new StorageFileApi(this.url, this.headers, id, this.fetch);
+    }
+  };
+
+  // node_modules/@supabase/supabase-js/dist/module/lib/version.js
+  var version3 = "2.45.4";
+
+  // node_modules/@supabase/supabase-js/dist/module/lib/constants.js
+  var JS_ENV = "";
+  if (typeof Deno !== "undefined") {
+    JS_ENV = "deno";
+  } else if (typeof document !== "undefined") {
+    JS_ENV = "web";
+  } else if (typeof navigator !== "undefined" && navigator.product === "ReactNative") {
+    JS_ENV = "react-native";
+  } else {
+    JS_ENV = "node";
+  }
+  var DEFAULT_HEADERS3 = { "X-Client-Info": `supabase-js-${JS_ENV}/${version3}` };
+  var DEFAULT_GLOBAL_OPTIONS = {
+    headers: DEFAULT_HEADERS3
+  };
+  var DEFAULT_DB_OPTIONS = {
+    schema: "public"
+  };
+  var DEFAULT_AUTH_OPTIONS = {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true,
+    flowType: "implicit"
+  };
+  var DEFAULT_REALTIME_OPTIONS = {};
+
+  // node_modules/@supabase/supabase-js/dist/module/lib/fetch.js
+  init_browser();
+  var __awaiter6 = function(thisArg, _arguments, P, generator) {
+    function adopt(value) {
+      return value instanceof P ? value : new P(function(resolve) {
+        resolve(value);
+      });
+    }
+    return new (P || (P = Promise))(function(resolve, reject) {
+      function fulfilled(value) {
+        try {
+          step(generator.next(value));
+        } catch (e) {
+          reject(e);
+        }
+      }
+      function rejected(value) {
+        try {
+          step(generator["throw"](value));
+        } catch (e) {
+          reject(e);
+        }
+      }
+      function step(result) {
+        result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+      }
+      step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+  };
+  var resolveFetch3 = (customFetch) => {
+    let _fetch;
+    if (customFetch) {
+      _fetch = customFetch;
+    } else if (typeof fetch === "undefined") {
+      _fetch = browser_default;
+    } else {
+      _fetch = fetch;
+    }
+    return (...args) => _fetch(...args);
+  };
+  var resolveHeadersConstructor = () => {
+    if (typeof Headers === "undefined") {
+      return Headers2;
+    }
+    return Headers;
+  };
+  var fetchWithAuth = (supabaseKey, getAccessToken, customFetch) => {
+    const fetch3 = resolveFetch3(customFetch);
+    const HeadersConstructor = resolveHeadersConstructor();
+    return (input, init) => __awaiter6(void 0, void 0, void 0, function* () {
+      var _a;
+      const accessToken = (_a = yield getAccessToken()) !== null && _a !== void 0 ? _a : supabaseKey;
+      let headers = new HeadersConstructor(init === null || init === void 0 ? void 0 : init.headers);
+      if (!headers.has("apikey")) {
+        headers.set("apikey", supabaseKey);
+      }
+      if (!headers.has("Authorization")) {
+        headers.set("Authorization", `Bearer ${accessToken}`);
+      }
+      return fetch3(input, Object.assign(Object.assign({}, init), { headers }));
+    });
+  };
+
+  // node_modules/@supabase/supabase-js/dist/module/lib/helpers.js
+  var __awaiter7 = function(thisArg, _arguments, P, generator) {
+    function adopt(value) {
+      return value instanceof P ? value : new P(function(resolve) {
+        resolve(value);
+      });
+    }
+    return new (P || (P = Promise))(function(resolve, reject) {
+      function fulfilled(value) {
+        try {
+          step(generator.next(value));
+        } catch (e) {
+          reject(e);
+        }
+      }
+      function rejected(value) {
+        try {
+          step(generator["throw"](value));
+        } catch (e) {
+          reject(e);
+        }
+      }
+      function step(result) {
+        result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+      }
+      step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+  };
+  function stripTrailingSlash(url) {
+    return url.replace(/\/$/, "");
+  }
+  function applySettingDefaults(options, defaults) {
+    const { db: dbOptions, auth: authOptions, realtime: realtimeOptions, global: globalOptions } = options;
+    const { db: DEFAULT_DB_OPTIONS2, auth: DEFAULT_AUTH_OPTIONS2, realtime: DEFAULT_REALTIME_OPTIONS2, global: DEFAULT_GLOBAL_OPTIONS2 } = defaults;
+    const result = {
+      db: Object.assign(Object.assign({}, DEFAULT_DB_OPTIONS2), dbOptions),
+      auth: Object.assign(Object.assign({}, DEFAULT_AUTH_OPTIONS2), authOptions),
+      realtime: Object.assign(Object.assign({}, DEFAULT_REALTIME_OPTIONS2), realtimeOptions),
+      global: Object.assign(Object.assign({}, DEFAULT_GLOBAL_OPTIONS2), globalOptions),
+      accessToken: () => __awaiter7(this, void 0, void 0, function* () {
+        return "";
+      })
+    };
+    if (options.accessToken) {
+      result.accessToken = options.accessToken;
+    } else {
+      delete result.accessToken;
+    }
+    return result;
+  }
+
+  // node_modules/@supabase/auth-js/dist/module/lib/version.js
+  var version4 = "2.65.0";
+
+  // node_modules/@supabase/auth-js/dist/module/lib/constants.js
+  var GOTRUE_URL = "http://localhost:9999";
+  var STORAGE_KEY = "supabase.auth.token";
+  var DEFAULT_HEADERS4 = { "X-Client-Info": `gotrue-js/${version4}` };
+  var EXPIRY_MARGIN = 10;
+  var API_VERSION_HEADER_NAME = "X-Supabase-Api-Version";
+  var API_VERSIONS = {
+    "2024-01-01": {
+      timestamp: Date.parse("2024-01-01T00:00:00.0Z"),
+      name: "2024-01-01"
+    }
+  };
+
+  // node_modules/@supabase/auth-js/dist/module/lib/helpers.js
+  function expiresAt(expiresIn) {
+    const timeNow = Math.round(Date.now() / 1e3);
+    return timeNow + expiresIn;
+  }
+  function uuid() {
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0, v = c == "x" ? r : r & 3 | 8;
+      return v.toString(16);
+    });
+  }
+  var isBrowser = () => typeof document !== "undefined";
+  var localStorageWriteTests = {
+    tested: false,
+    writable: false
+  };
+  var supportsLocalStorage = () => {
+    if (!isBrowser()) {
+      return false;
+    }
+    try {
+      if (typeof globalThis.localStorage !== "object") {
+        return false;
+      }
+    } catch (e) {
+      return false;
+    }
+    if (localStorageWriteTests.tested) {
+      return localStorageWriteTests.writable;
+    }
+    const randomKey = `lswt-${Math.random()}${Math.random()}`;
+    try {
+      globalThis.localStorage.setItem(randomKey, randomKey);
+      globalThis.localStorage.removeItem(randomKey);
+      localStorageWriteTests.tested = true;
+      localStorageWriteTests.writable = true;
+    } catch (e) {
+      localStorageWriteTests.tested = true;
+      localStorageWriteTests.writable = false;
+    }
+    return localStorageWriteTests.writable;
+  };
+  function parseParametersFromURL(href) {
+    const result = {};
+    const url = new URL(href);
+    if (url.hash && url.hash[0] === "#") {
+      try {
+        const hashSearchParams = new URLSearchParams(url.hash.substring(1));
+        hashSearchParams.forEach((value, key) => {
+          result[key] = value;
+        });
+      } catch (e) {
+      }
+    }
+    url.searchParams.forEach((value, key) => {
+      result[key] = value;
+    });
+    return result;
+  }
+  var resolveFetch4 = (customFetch) => {
+    let _fetch;
+    if (customFetch) {
+      _fetch = customFetch;
+    } else if (typeof fetch === "undefined") {
+      _fetch = (...args) => Promise.resolve().then(() => (init_browser(), browser_exports)).then(({ default: fetch3 }) => fetch3(...args));
+    } else {
+      _fetch = fetch;
+    }
+    return (...args) => _fetch(...args);
+  };
+  var looksLikeFetchResponse = (maybeResponse) => {
+    return typeof maybeResponse === "object" && maybeResponse !== null && "status" in maybeResponse && "ok" in maybeResponse && "json" in maybeResponse && typeof maybeResponse.json === "function";
+  };
+  var setItemAsync = async (storage, key, data) => {
+    await storage.setItem(key, JSON.stringify(data));
+  };
+  var getItemAsync = async (storage, key) => {
+    const value = await storage.getItem(key);
+    if (!value) {
+      return null;
+    }
+    try {
+      return JSON.parse(value);
+    } catch (_a) {
+      return value;
+    }
+  };
+  var removeItemAsync = async (storage, key) => {
+    await storage.removeItem(key);
+  };
+  function decodeBase64URL(value) {
+    const key = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+    let base64 = "";
+    let chr1, chr2, chr3;
+    let enc1, enc2, enc3, enc4;
+    let i = 0;
+    value = value.replace("-", "+").replace("_", "/");
+    while (i < value.length) {
+      enc1 = key.indexOf(value.charAt(i++));
+      enc2 = key.indexOf(value.charAt(i++));
+      enc3 = key.indexOf(value.charAt(i++));
+      enc4 = key.indexOf(value.charAt(i++));
+      chr1 = enc1 << 2 | enc2 >> 4;
+      chr2 = (enc2 & 15) << 4 | enc3 >> 2;
+      chr3 = (enc3 & 3) << 6 | enc4;
+      base64 = base64 + String.fromCharCode(chr1);
+      if (enc3 != 64 && chr2 != 0) {
+        base64 = base64 + String.fromCharCode(chr2);
+      }
+      if (enc4 != 64 && chr3 != 0) {
+        base64 = base64 + String.fromCharCode(chr3);
+      }
+    }
+    return base64;
+  }
+  var Deferred = class _Deferred {
+    constructor() {
+      ;
+      this.promise = new _Deferred.promiseConstructor((res, rej) => {
+        ;
+        this.resolve = res;
+        this.reject = rej;
+      });
+    }
+  };
+  Deferred.promiseConstructor = Promise;
+  function decodeJWTPayload(token) {
+    const base64UrlRegex = /^([a-z0-9_-]{4})*($|[a-z0-9_-]{3}=?$|[a-z0-9_-]{2}(==)?$)$/i;
+    const parts = token.split(".");
+    if (parts.length !== 3) {
+      throw new Error("JWT is not valid: not a JWT structure");
+    }
+    if (!base64UrlRegex.test(parts[1])) {
+      throw new Error("JWT is not valid: payload is not in base64url format");
+    }
+    const base64Url = parts[1];
+    return JSON.parse(decodeBase64URL(base64Url));
+  }
+  async function sleep(time) {
+    return await new Promise((accept) => {
+      setTimeout(() => accept(null), time);
+    });
+  }
+  function retryable(fn, isRetryable) {
+    const promise = new Promise((accept, reject) => {
+      ;
+      (async () => {
+        for (let attempt = 0; attempt < Infinity; attempt++) {
+          try {
+            const result = await fn(attempt);
+            if (!isRetryable(attempt, null, result)) {
+              accept(result);
+              return;
+            }
+          } catch (e) {
+            if (!isRetryable(attempt, e)) {
+              reject(e);
+              return;
+            }
+          }
+        }
+      })();
+    });
+    return promise;
+  }
+  function dec2hex(dec) {
+    return ("0" + dec.toString(16)).substr(-2);
+  }
+  function generatePKCEVerifier() {
+    const verifierLength = 56;
+    const array = new Uint32Array(verifierLength);
+    if (typeof crypto === "undefined") {
+      const charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
+      const charSetLen = charSet.length;
+      let verifier = "";
+      for (let i = 0; i < verifierLength; i++) {
+        verifier += charSet.charAt(Math.floor(Math.random() * charSetLen));
+      }
+      return verifier;
+    }
+    crypto.getRandomValues(array);
+    return Array.from(array, dec2hex).join("");
+  }
+  async function sha256(randomString) {
+    const encoder = new TextEncoder();
+    const encodedData = encoder.encode(randomString);
+    const hash = await crypto.subtle.digest("SHA-256", encodedData);
+    const bytes = new Uint8Array(hash);
+    return Array.from(bytes).map((c) => String.fromCharCode(c)).join("");
+  }
+  function base64urlencode(str) {
+    return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  }
+  async function generatePKCEChallenge(verifier) {
+    const hasCryptoSupport = typeof crypto !== "undefined" && typeof crypto.subtle !== "undefined" && typeof TextEncoder !== "undefined";
+    if (!hasCryptoSupport) {
+      console.warn("WebCrypto API is not supported. Code challenge method will default to use plain instead of sha256.");
+      return verifier;
+    }
+    const hashed = await sha256(verifier);
+    return base64urlencode(hashed);
+  }
+  async function getCodeChallengeAndMethod(storage, storageKey, isPasswordRecovery = false) {
+    const codeVerifier = generatePKCEVerifier();
+    let storedCodeVerifier = codeVerifier;
+    if (isPasswordRecovery) {
+      storedCodeVerifier += "/PASSWORD_RECOVERY";
+    }
+    await setItemAsync(storage, `${storageKey}-code-verifier`, storedCodeVerifier);
+    const codeChallenge = await generatePKCEChallenge(codeVerifier);
+    const codeChallengeMethod = codeVerifier === codeChallenge ? "plain" : "s256";
+    return [codeChallenge, codeChallengeMethod];
+  }
+  var API_VERSION_REGEX = /^2[0-9]{3}-(0[1-9]|1[0-2])-(0[1-9]|1[0-9]|2[0-9]|3[0-1])$/i;
+  function parseResponseAPIVersion(response) {
+    const apiVersion = response.headers.get(API_VERSION_HEADER_NAME);
+    if (!apiVersion) {
+      return null;
+    }
+    if (!apiVersion.match(API_VERSION_REGEX)) {
+      return null;
+    }
+    try {
+      const date = /* @__PURE__ */ new Date(`${apiVersion}T00:00:00.0Z`);
+      return date;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // node_modules/@supabase/auth-js/dist/module/lib/errors.js
+  var AuthError = class extends Error {
+    constructor(message, status, code) {
+      super(message);
+      this.__isAuthError = true;
+      this.name = "AuthError";
+      this.status = status;
+      this.code = code;
+    }
+  };
+  function isAuthError(error) {
+    return typeof error === "object" && error !== null && "__isAuthError" in error;
+  }
+  var AuthApiError = class extends AuthError {
+    constructor(message, status, code) {
+      super(message, status, code);
+      this.name = "AuthApiError";
+      this.status = status;
+      this.code = code;
+    }
+  };
+  function isAuthApiError(error) {
+    return isAuthError(error) && error.name === "AuthApiError";
+  }
+  var AuthUnknownError = class extends AuthError {
+    constructor(message, originalError) {
+      super(message);
+      this.name = "AuthUnknownError";
+      this.originalError = originalError;
+    }
+  };
+  var CustomAuthError = class extends AuthError {
+    constructor(message, name, status, code) {
+      super(message, status, code);
+      this.name = name;
+      this.status = status;
+    }
+  };
+  var AuthSessionMissingError = class extends CustomAuthError {
+    constructor() {
+      super("Auth session missing!", "AuthSessionMissingError", 400, void 0);
+    }
+  };
+  function isAuthSessionMissingError(error) {
+    return isAuthError(error) && error.name === "AuthSessionMissingError";
+  }
+  var AuthInvalidTokenResponseError = class extends CustomAuthError {
+    constructor() {
+      super("Auth session or user missing", "AuthInvalidTokenResponseError", 500, void 0);
+    }
+  };
+  var AuthInvalidCredentialsError = class extends CustomAuthError {
+    constructor(message) {
+      super(message, "AuthInvalidCredentialsError", 400, void 0);
+    }
+  };
+  var AuthImplicitGrantRedirectError = class extends CustomAuthError {
+    constructor(message, details = null) {
+      super(message, "AuthImplicitGrantRedirectError", 500, void 0);
+      this.details = null;
+      this.details = details;
+    }
+    toJSON() {
+      return {
+        name: this.name,
+        message: this.message,
+        status: this.status,
+        details: this.details
+      };
+    }
+  };
+  var AuthPKCEGrantCodeExchangeError = class extends CustomAuthError {
+    constructor(message, details = null) {
+      super(message, "AuthPKCEGrantCodeExchangeError", 500, void 0);
+      this.details = null;
+      this.details = details;
+    }
+    toJSON() {
+      return {
+        name: this.name,
+        message: this.message,
+        status: this.status,
+        details: this.details
+      };
+    }
+  };
+  var AuthRetryableFetchError = class extends CustomAuthError {
+    constructor(message, status) {
+      super(message, "AuthRetryableFetchError", status, void 0);
+    }
+  };
+  function isAuthRetryableFetchError(error) {
+    return isAuthError(error) && error.name === "AuthRetryableFetchError";
+  }
+  var AuthWeakPasswordError = class extends CustomAuthError {
+    constructor(message, status, reasons) {
+      super(message, "AuthWeakPasswordError", status, "weak_password");
+      this.reasons = reasons;
+    }
+  };
+
+  // node_modules/@supabase/auth-js/dist/module/lib/fetch.js
+  var __rest = function(s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+      t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+      for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+        if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+          t[p[i]] = s[p[i]];
+      }
+    return t;
+  };
+  var _getErrorMessage2 = (err) => err.msg || err.message || err.error_description || err.error || JSON.stringify(err);
+  var NETWORK_ERROR_CODES = [502, 503, 504];
+  async function handleError2(error) {
+    var _a;
+    if (!looksLikeFetchResponse(error)) {
+      throw new AuthRetryableFetchError(_getErrorMessage2(error), 0);
+    }
+    if (NETWORK_ERROR_CODES.includes(error.status)) {
+      throw new AuthRetryableFetchError(_getErrorMessage2(error), error.status);
+    }
+    let data;
+    try {
+      data = await error.json();
+    } catch (e) {
+      throw new AuthUnknownError(_getErrorMessage2(e), e);
+    }
+    let errorCode = void 0;
+    const responseAPIVersion = parseResponseAPIVersion(error);
+    if (responseAPIVersion && responseAPIVersion.getTime() >= API_VERSIONS["2024-01-01"].timestamp && typeof data === "object" && data && typeof data.code === "string") {
+      errorCode = data.code;
+    } else if (typeof data === "object" && data && typeof data.error_code === "string") {
+      errorCode = data.error_code;
+    }
+    if (!errorCode) {
+      if (typeof data === "object" && data && typeof data.weak_password === "object" && data.weak_password && Array.isArray(data.weak_password.reasons) && data.weak_password.reasons.length && data.weak_password.reasons.reduce((a, i) => a && typeof i === "string", true)) {
+        throw new AuthWeakPasswordError(_getErrorMessage2(data), error.status, data.weak_password.reasons);
+      }
+    } else if (errorCode === "weak_password") {
+      throw new AuthWeakPasswordError(_getErrorMessage2(data), error.status, ((_a = data.weak_password) === null || _a === void 0 ? void 0 : _a.reasons) || []);
+    } else if (errorCode === "session_not_found") {
+      throw new AuthSessionMissingError();
+    }
+    throw new AuthApiError(_getErrorMessage2(data), error.status || 500, errorCode);
+  }
+  var _getRequestParams2 = (method, options, parameters, body) => {
+    const params = { method, headers: (options === null || options === void 0 ? void 0 : options.headers) || {} };
+    if (method === "GET") {
+      return params;
+    }
+    params.headers = Object.assign({ "Content-Type": "application/json;charset=UTF-8" }, options === null || options === void 0 ? void 0 : options.headers);
+    params.body = JSON.stringify(body);
+    return Object.assign(Object.assign({}, params), parameters);
+  };
+  async function _request(fetcher, method, url, options) {
+    var _a;
+    const headers = Object.assign({}, options === null || options === void 0 ? void 0 : options.headers);
+    if (!headers[API_VERSION_HEADER_NAME]) {
+      headers[API_VERSION_HEADER_NAME] = API_VERSIONS["2024-01-01"].name;
+    }
+    if (options === null || options === void 0 ? void 0 : options.jwt) {
+      headers["Authorization"] = `Bearer ${options.jwt}`;
+    }
+    const qs = (_a = options === null || options === void 0 ? void 0 : options.query) !== null && _a !== void 0 ? _a : {};
+    if (options === null || options === void 0 ? void 0 : options.redirectTo) {
+      qs["redirect_to"] = options.redirectTo;
+    }
+    const queryString = Object.keys(qs).length ? "?" + new URLSearchParams(qs).toString() : "";
+    const data = await _handleRequest2(fetcher, method, url + queryString, {
+      headers,
+      noResolveJson: options === null || options === void 0 ? void 0 : options.noResolveJson
+    }, {}, options === null || options === void 0 ? void 0 : options.body);
+    return (options === null || options === void 0 ? void 0 : options.xform) ? options === null || options === void 0 ? void 0 : options.xform(data) : { data: Object.assign({}, data), error: null };
+  }
+  async function _handleRequest2(fetcher, method, url, options, parameters, body) {
+    const requestParams = _getRequestParams2(method, options, parameters, body);
+    let result;
+    try {
+      result = await fetcher(url, Object.assign({}, requestParams));
+    } catch (e) {
+      console.error(e);
+      throw new AuthRetryableFetchError(_getErrorMessage2(e), 0);
+    }
+    if (!result.ok) {
+      await handleError2(result);
+    }
+    if (options === null || options === void 0 ? void 0 : options.noResolveJson) {
+      return result;
+    }
+    try {
+      return await result.json();
+    } catch (e) {
+      await handleError2(e);
+    }
+  }
+  function _sessionResponse(data) {
+    var _a;
+    let session = null;
+    if (hasSession(data)) {
+      session = Object.assign({}, data);
+      if (!data.expires_at) {
+        session.expires_at = expiresAt(data.expires_in);
+      }
+    }
+    const user = (_a = data.user) !== null && _a !== void 0 ? _a : data;
+    return { data: { session, user }, error: null };
+  }
+  function _sessionResponsePassword(data) {
+    const response = _sessionResponse(data);
+    if (!response.error && data.weak_password && typeof data.weak_password === "object" && Array.isArray(data.weak_password.reasons) && data.weak_password.reasons.length && data.weak_password.message && typeof data.weak_password.message === "string" && data.weak_password.reasons.reduce((a, i) => a && typeof i === "string", true)) {
+      response.data.weak_password = data.weak_password;
+    }
+    return response;
+  }
+  function _userResponse(data) {
+    var _a;
+    const user = (_a = data.user) !== null && _a !== void 0 ? _a : data;
+    return { data: { user }, error: null };
+  }
+  function _ssoResponse(data) {
+    return { data, error: null };
+  }
+  function _generateLinkResponse(data) {
+    const { action_link, email_otp, hashed_token, redirect_to, verification_type } = data, rest = __rest(data, ["action_link", "email_otp", "hashed_token", "redirect_to", "verification_type"]);
+    const properties = {
+      action_link,
+      email_otp,
+      hashed_token,
+      redirect_to,
+      verification_type
+    };
+    const user = Object.assign({}, rest);
+    return {
+      data: {
+        properties,
+        user
+      },
+      error: null
+    };
+  }
+  function _noResolveJsonResponse(data) {
+    return data;
+  }
+  function hasSession(data) {
+    return data.access_token && data.refresh_token && data.expires_in;
+  }
+
+  // node_modules/@supabase/auth-js/dist/module/GoTrueAdminApi.js
+  var __rest2 = function(s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+      t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+      for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+        if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+          t[p[i]] = s[p[i]];
+      }
+    return t;
+  };
+  var GoTrueAdminApi = class {
+    constructor({ url = "", headers = {}, fetch: fetch3 }) {
+      this.url = url;
+      this.headers = headers;
+      this.fetch = resolveFetch4(fetch3);
+      this.mfa = {
+        listFactors: this._listFactors.bind(this),
+        deleteFactor: this._deleteFactor.bind(this)
+      };
+    }
+    /**
+     * Removes a logged-in session.
+     * @param jwt A valid, logged-in JWT.
+     * @param scope The logout sope.
+     */
+    async signOut(jwt, scope = "global") {
+      try {
+        await _request(this.fetch, "POST", `${this.url}/logout?scope=${scope}`, {
+          headers: this.headers,
+          jwt,
+          noResolveJson: true
+        });
+        return { data: null, error: null };
+      } catch (error) {
+        if (isAuthError(error)) {
+          return { data: null, error };
+        }
+        throw error;
+      }
+    }
+    /**
+     * Sends an invite link to an email address.
+     * @param email The email address of the user.
+     * @param options Additional options to be included when inviting.
+     */
+    async inviteUserByEmail(email, options = {}) {
+      try {
+        return await _request(this.fetch, "POST", `${this.url}/invite`, {
+          body: { email, data: options.data },
+          headers: this.headers,
+          redirectTo: options.redirectTo,
+          xform: _userResponse
+        });
+      } catch (error) {
+        if (isAuthError(error)) {
+          return { data: { user: null }, error };
+        }
+        throw error;
+      }
+    }
+    /**
+     * Generates email links and OTPs to be sent via a custom email provider.
+     * @param email The user's email.
+     * @param options.password User password. For signup only.
+     * @param options.data Optional user metadata. For signup only.
+     * @param options.redirectTo The redirect url which should be appended to the generated link
+     */
+    async generateLink(params) {
+      try {
+        const { options } = params, rest = __rest2(params, ["options"]);
+        const body = Object.assign(Object.assign({}, rest), options);
+        if ("newEmail" in rest) {
+          body.new_email = rest === null || rest === void 0 ? void 0 : rest.newEmail;
+          delete body["newEmail"];
+        }
+        return await _request(this.fetch, "POST", `${this.url}/admin/generate_link`, {
+          body,
+          headers: this.headers,
+          xform: _generateLinkResponse,
+          redirectTo: options === null || options === void 0 ? void 0 : options.redirectTo
+        });
+      } catch (error) {
+        if (isAuthError(error)) {
+          return {
+            data: {
+              properties: null,
+              user: null
+            },
+            error
+          };
+        }
+        throw error;
+      }
+    }
+    // User Admin API
+    /**
+     * Creates a new user.
+     * This function should only be called on a server. Never expose your `service_role` key in the browser.
+     */
+    async createUser(attributes) {
+      try {
+        return await _request(this.fetch, "POST", `${this.url}/admin/users`, {
+          body: attributes,
+          headers: this.headers,
+          xform: _userResponse
+        });
+      } catch (error) {
+        if (isAuthError(error)) {
+          return { data: { user: null }, error };
+        }
+        throw error;
+      }
+    }
+    /**
+     * Get a list of users.
+     *
+     * This function should only be called on a server. Never expose your `service_role` key in the browser.
+     * @param params An object which supports `page` and `perPage` as numbers, to alter the paginated results.
+     */
+    async listUsers(params) {
+      var _a, _b, _c, _d, _e, _f, _g;
+      try {
+        const pagination = { nextPage: null, lastPage: 0, total: 0 };
+        const response = await _request(this.fetch, "GET", `${this.url}/admin/users`, {
+          headers: this.headers,
+          noResolveJson: true,
+          query: {
+            page: (_b = (_a = params === null || params === void 0 ? void 0 : params.page) === null || _a === void 0 ? void 0 : _a.toString()) !== null && _b !== void 0 ? _b : "",
+            per_page: (_d = (_c = params === null || params === void 0 ? void 0 : params.perPage) === null || _c === void 0 ? void 0 : _c.toString()) !== null && _d !== void 0 ? _d : ""
+          },
+          xform: _noResolveJsonResponse
+        });
+        if (response.error)
+          throw response.error;
+        const users = await response.json();
+        const total = (_e = response.headers.get("x-total-count")) !== null && _e !== void 0 ? _e : 0;
+        const links = (_g = (_f = response.headers.get("link")) === null || _f === void 0 ? void 0 : _f.split(",")) !== null && _g !== void 0 ? _g : [];
+        if (links.length > 0) {
+          links.forEach((link) => {
+            const page = parseInt(link.split(";")[0].split("=")[1].substring(0, 1));
+            const rel = JSON.parse(link.split(";")[1].split("=")[1]);
+            pagination[`${rel}Page`] = page;
+          });
+          pagination.total = parseInt(total);
+        }
+        return { data: Object.assign(Object.assign({}, users), pagination), error: null };
+      } catch (error) {
+        if (isAuthError(error)) {
+          return { data: { users: [] }, error };
+        }
+        throw error;
+      }
+    }
+    /**
+     * Get user by id.
+     *
+     * @param uid The user's unique identifier
+     *
+     * This function should only be called on a server. Never expose your `service_role` key in the browser.
+     */
+    async getUserById(uid) {
+      try {
+        return await _request(this.fetch, "GET", `${this.url}/admin/users/${uid}`, {
+          headers: this.headers,
+          xform: _userResponse
+        });
+      } catch (error) {
+        if (isAuthError(error)) {
+          return { data: { user: null }, error };
+        }
+        throw error;
+      }
+    }
+    /**
+     * Updates the user data.
+     *
+     * @param attributes The data you want to update.
+     *
+     * This function should only be called on a server. Never expose your `service_role` key in the browser.
+     */
+    async updateUserById(uid, attributes) {
+      try {
+        return await _request(this.fetch, "PUT", `${this.url}/admin/users/${uid}`, {
+          body: attributes,
+          headers: this.headers,
+          xform: _userResponse
+        });
+      } catch (error) {
+        if (isAuthError(error)) {
+          return { data: { user: null }, error };
+        }
+        throw error;
+      }
+    }
+    /**
+     * Delete a user. Requires a `service_role` key.
+     *
+     * @param id The user id you want to remove.
+     * @param shouldSoftDelete If true, then the user will be soft-deleted (setting `deleted_at` to the current timestamp and disabling their account while preserving their data) from the auth schema.
+     * Defaults to false for backward compatibility.
+     *
+     * This function should only be called on a server. Never expose your `service_role` key in the browser.
+     */
+    async deleteUser(id, shouldSoftDelete = false) {
+      try {
+        return await _request(this.fetch, "DELETE", `${this.url}/admin/users/${id}`, {
+          headers: this.headers,
+          body: {
+            should_soft_delete: shouldSoftDelete
+          },
+          xform: _userResponse
+        });
+      } catch (error) {
+        if (isAuthError(error)) {
+          return { data: { user: null }, error };
+        }
+        throw error;
+      }
+    }
+    async _listFactors(params) {
+      try {
+        const { data, error } = await _request(this.fetch, "GET", `${this.url}/admin/users/${params.userId}/factors`, {
+          headers: this.headers,
+          xform: (factors) => {
+            return { data: { factors }, error: null };
+          }
+        });
+        return { data, error };
+      } catch (error) {
+        if (isAuthError(error)) {
+          return { data: null, error };
+        }
+        throw error;
+      }
+    }
+    async _deleteFactor(params) {
+      try {
+        const data = await _request(this.fetch, "DELETE", `${this.url}/admin/users/${params.userId}/factors/${params.id}`, {
+          headers: this.headers
+        });
+        return { data, error: null };
+      } catch (error) {
+        if (isAuthError(error)) {
+          return { data: null, error };
+        }
+        throw error;
+      }
+    }
+  };
+
+  // node_modules/@supabase/auth-js/dist/module/lib/local-storage.js
+  var localStorageAdapter = {
+    getItem: (key) => {
+      if (!supportsLocalStorage()) {
+        return null;
+      }
+      return globalThis.localStorage.getItem(key);
+    },
+    setItem: (key, value) => {
+      if (!supportsLocalStorage()) {
+        return;
+      }
+      globalThis.localStorage.setItem(key, value);
+    },
+    removeItem: (key) => {
+      if (!supportsLocalStorage()) {
+        return;
+      }
+      globalThis.localStorage.removeItem(key);
+    }
+  };
+  function memoryLocalStorageAdapter(store = {}) {
+    return {
+      getItem: (key) => {
+        return store[key] || null;
+      },
+      setItem: (key, value) => {
+        store[key] = value;
+      },
+      removeItem: (key) => {
+        delete store[key];
+      }
+    };
+  }
+
+  // node_modules/@supabase/auth-js/dist/module/lib/polyfills.js
+  function polyfillGlobalThis() {
+    if (typeof globalThis === "object")
+      return;
+    try {
+      Object.defineProperty(Object.prototype, "__magic__", {
+        get: function() {
+          return this;
+        },
+        configurable: true
+      });
+      __magic__.globalThis = __magic__;
+      delete Object.prototype.__magic__;
+    } catch (e) {
+      if (typeof self !== "undefined") {
+        self.globalThis = self;
+      }
+    }
+  }
+
+  // node_modules/@supabase/auth-js/dist/module/lib/locks.js
+  var internals = {
+    /**
+     * @experimental
+     */
+    debug: !!(globalThis && supportsLocalStorage() && globalThis.localStorage && globalThis.localStorage.getItem("supabase.gotrue-js.locks.debug") === "true")
+  };
+  var LockAcquireTimeoutError = class extends Error {
+    constructor(message) {
+      super(message);
+      this.isAcquireTimeout = true;
+    }
+  };
+  var NavigatorLockAcquireTimeoutError = class extends LockAcquireTimeoutError {
+  };
+  async function navigatorLock(name, acquireTimeout, fn) {
+    if (internals.debug) {
+      console.log("@supabase/gotrue-js: navigatorLock: acquire lock", name, acquireTimeout);
+    }
+    const abortController = new globalThis.AbortController();
+    if (acquireTimeout > 0) {
+      setTimeout(() => {
+        abortController.abort();
+        if (internals.debug) {
+          console.log("@supabase/gotrue-js: navigatorLock acquire timed out", name);
+        }
+      }, acquireTimeout);
+    }
+    return await globalThis.navigator.locks.request(name, acquireTimeout === 0 ? {
+      mode: "exclusive",
+      ifAvailable: true
+    } : {
+      mode: "exclusive",
+      signal: abortController.signal
+    }, async (lock) => {
+      if (lock) {
+        if (internals.debug) {
+          console.log("@supabase/gotrue-js: navigatorLock: acquired", name, lock.name);
+        }
+        try {
+          return await fn();
+        } finally {
+          if (internals.debug) {
+            console.log("@supabase/gotrue-js: navigatorLock: released", name, lock.name);
+          }
+        }
+      } else {
+        if (acquireTimeout === 0) {
+          if (internals.debug) {
+            console.log("@supabase/gotrue-js: navigatorLock: not immediately available", name);
+          }
+          throw new NavigatorLockAcquireTimeoutError(`Acquiring an exclusive Navigator LockManager lock "${name}" immediately failed`);
+        } else {
+          if (internals.debug) {
+            try {
+              const result = await globalThis.navigator.locks.query();
+              console.log("@supabase/gotrue-js: Navigator LockManager state", JSON.stringify(result, null, "  "));
+            } catch (e) {
+              console.warn("@supabase/gotrue-js: Error when querying Navigator LockManager state", e);
+            }
+          }
+          console.warn("@supabase/gotrue-js: Navigator LockManager returned a null lock when using #request without ifAvailable set to true, it appears this browser is not following the LockManager spec https://developer.mozilla.org/en-US/docs/Web/API/LockManager/request");
+          return await fn();
+        }
+      }
+    });
+  }
+
+  // node_modules/@supabase/auth-js/dist/module/GoTrueClient.js
+  polyfillGlobalThis();
+  var DEFAULT_OPTIONS = {
+    url: GOTRUE_URL,
+    storageKey: STORAGE_KEY,
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true,
+    headers: DEFAULT_HEADERS4,
+    flowType: "implicit",
+    debug: false,
+    hasCustomAuthorizationHeader: false
+  };
+  var AUTO_REFRESH_TICK_DURATION = 30 * 1e3;
+  var AUTO_REFRESH_TICK_THRESHOLD = 3;
+  async function lockNoOp(name, acquireTimeout, fn) {
+    return await fn();
+  }
+  var GoTrueClient = class _GoTrueClient {
+    /**
+     * Create a new client for use in the browser.
+     */
+    constructor(options) {
+      var _a, _b;
+      this.memoryStorage = null;
+      this.stateChangeEmitters = /* @__PURE__ */ new Map();
+      this.autoRefreshTicker = null;
+      this.visibilityChangedCallback = null;
+      this.refreshingDeferred = null;
+      this.initializePromise = null;
+      this.detectSessionInUrl = true;
+      this.hasCustomAuthorizationHeader = false;
+      this.suppressGetSessionWarning = false;
+      this.lockAcquired = false;
+      this.pendingInLock = [];
+      this.broadcastChannel = null;
+      this.logger = console.log;
+      this.instanceID = _GoTrueClient.nextInstanceID;
+      _GoTrueClient.nextInstanceID += 1;
+      if (this.instanceID > 0 && isBrowser()) {
+        console.warn("Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.");
+      }
+      const settings = Object.assign(Object.assign({}, DEFAULT_OPTIONS), options);
+      this.logDebugMessages = !!settings.debug;
+      if (typeof settings.debug === "function") {
+        this.logger = settings.debug;
+      }
+      this.persistSession = settings.persistSession;
+      this.storageKey = settings.storageKey;
+      this.autoRefreshToken = settings.autoRefreshToken;
+      this.admin = new GoTrueAdminApi({
+        url: settings.url,
+        headers: settings.headers,
+        fetch: settings.fetch
+      });
+      this.url = settings.url;
+      this.headers = settings.headers;
+      this.fetch = resolveFetch4(settings.fetch);
+      this.lock = settings.lock || lockNoOp;
+      this.detectSessionInUrl = settings.detectSessionInUrl;
+      this.flowType = settings.flowType;
+      this.hasCustomAuthorizationHeader = settings.hasCustomAuthorizationHeader;
+      if (settings.lock) {
+        this.lock = settings.lock;
+      } else if (isBrowser() && ((_a = globalThis === null || globalThis === void 0 ? void 0 : globalThis.navigator) === null || _a === void 0 ? void 0 : _a.locks)) {
+        this.lock = navigatorLock;
+      } else {
+        this.lock = lockNoOp;
+      }
+      this.mfa = {
+        verify: this._verify.bind(this),
+        enroll: this._enroll.bind(this),
+        unenroll: this._unenroll.bind(this),
+        challenge: this._challenge.bind(this),
+        listFactors: this._listFactors.bind(this),
+        challengeAndVerify: this._challengeAndVerify.bind(this),
+        getAuthenticatorAssuranceLevel: this._getAuthenticatorAssuranceLevel.bind(this)
+      };
+      if (this.persistSession) {
+        if (settings.storage) {
+          this.storage = settings.storage;
+        } else {
+          if (supportsLocalStorage()) {
+            this.storage = localStorageAdapter;
+          } else {
+            this.memoryStorage = {};
+            this.storage = memoryLocalStorageAdapter(this.memoryStorage);
+          }
+        }
+      } else {
+        this.memoryStorage = {};
+        this.storage = memoryLocalStorageAdapter(this.memoryStorage);
+      }
+      if (isBrowser() && globalThis.BroadcastChannel && this.persistSession && this.storageKey) {
+        try {
+          this.broadcastChannel = new globalThis.BroadcastChannel(this.storageKey);
+        } catch (e) {
+          console.error("Failed to create a new BroadcastChannel, multi-tab state changes will not be available", e);
+        }
+        (_b = this.broadcastChannel) === null || _b === void 0 ? void 0 : _b.addEventListener("message", async (event) => {
+          this._debug("received broadcast notification from other tab or client", event);
+          await this._notifyAllSubscribers(event.data.event, event.data.session, false);
+        });
+      }
+      this.initialize();
+    }
+    _debug(...args) {
+      if (this.logDebugMessages) {
+        this.logger(`GoTrueClient@${this.instanceID} (${version4}) ${(/* @__PURE__ */ new Date()).toISOString()}`, ...args);
+      }
+      return this;
+    }
+    /**
+     * Initializes the client session either from the url or from storage.
+     * This method is automatically called when instantiating the client, but should also be called
+     * manually when checking for an error from an auth redirect (oauth, magiclink, password recovery, etc).
+     */
+    async initialize() {
+      if (this.initializePromise) {
+        return await this.initializePromise;
+      }
+      this.initializePromise = (async () => {
+        return await this._acquireLock(-1, async () => {
+          return await this._initialize();
+        });
+      })();
+      return await this.initializePromise;
+    }
+    /**
+     * IMPORTANT:
+     * 1. Never throw in this method, as it is called from the constructor
+     * 2. Never return a session from this method as it would be cached over
+     *    the whole lifetime of the client
+     */
+    async _initialize() {
+      try {
+        const isPKCEFlow = isBrowser() ? await this._isPKCEFlow() : false;
+        this._debug("#_initialize()", "begin", "is PKCE flow", isPKCEFlow);
+        if (isPKCEFlow || this.detectSessionInUrl && this._isImplicitGrantFlow()) {
+          const { data, error } = await this._getSessionFromURL(isPKCEFlow);
+          if (error) {
+            this._debug("#_initialize()", "error detecting session from URL", error);
+            if ((error === null || error === void 0 ? void 0 : error.message) === "Identity is already linked" || (error === null || error === void 0 ? void 0 : error.message) === "Identity is already linked to another user") {
+              return { error };
+            }
+            await this._removeSession();
+            return { error };
+          }
+          const { session, redirectType } = data;
+          this._debug("#_initialize()", "detected session in URL", session, "redirect type", redirectType);
+          await this._saveSession(session);
+          setTimeout(async () => {
+            if (redirectType === "recovery") {
+              await this._notifyAllSubscribers("PASSWORD_RECOVERY", session);
+            } else {
+              await this._notifyAllSubscribers("SIGNED_IN", session);
+            }
+          }, 0);
+          return { error: null };
+        }
+        await this._recoverAndRefresh();
+        return { error: null };
+      } catch (error) {
+        if (isAuthError(error)) {
+          return { error };
+        }
+        return {
+          error: new AuthUnknownError("Unexpected error during initialization", error)
+        };
+      } finally {
+        await this._handleVisibilityChange();
+        this._debug("#_initialize()", "end");
+      }
+    }
+    /**
+     * Creates a new anonymous user.
+     *
+     * @returns A session where the is_anonymous claim in the access token JWT set to true
+     */
+    async signInAnonymously(credentials) {
+      var _a, _b, _c;
+      try {
+        const res = await _request(this.fetch, "POST", `${this.url}/signup`, {
+          headers: this.headers,
+          body: {
+            data: (_b = (_a = credentials === null || credentials === void 0 ? void 0 : credentials.options) === null || _a === void 0 ? void 0 : _a.data) !== null && _b !== void 0 ? _b : {},
+            gotrue_meta_security: { captcha_token: (_c = credentials === null || credentials === void 0 ? void 0 : credentials.options) === null || _c === void 0 ? void 0 : _c.captchaToken }
+          },
+          xform: _sessionResponse
+        });
+        const { data, error } = res;
+        if (error || !data) {
+          return { data: { user: null, session: null }, error };
+        }
+        const session = data.session;
+        const user = data.user;
+        if (data.session) {
+          await this._saveSession(data.session);
+          await this._notifyAllSubscribers("SIGNED_IN", session);
+        }
+        return { data: { user, session }, error: null };
+      } catch (error) {
+        if (isAuthError(error)) {
+          return { data: { user: null, session: null }, error };
+        }
+        throw error;
+      }
+    }
+    /**
+     * Creates a new user.
+     *
+     * Be aware that if a user account exists in the system you may get back an
+     * error message that attempts to hide this information from the user.
+     * This method has support for PKCE via email signups. The PKCE flow cannot be used when autoconfirm is enabled.
+     *
+     * @returns A logged-in session if the server has "autoconfirm" ON
+     * @returns A user if the server has "autoconfirm" OFF
+     */
+    async signUp(credentials) {
+      var _a, _b, _c;
+      try {
+        let res;
+        if ("email" in credentials) {
+          const { email, password, options } = credentials;
+          let codeChallenge = null;
+          let codeChallengeMethod = null;
+          if (this.flowType === "pkce") {
+            ;
+            [codeChallenge, codeChallengeMethod] = await getCodeChallengeAndMethod(this.storage, this.storageKey);
+          }
+          res = await _request(this.fetch, "POST", `${this.url}/signup`, {
+            headers: this.headers,
+            redirectTo: options === null || options === void 0 ? void 0 : options.emailRedirectTo,
+            body: {
+              email,
+              password,
+              data: (_a = options === null || options === void 0 ? void 0 : options.data) !== null && _a !== void 0 ? _a : {},
+              gotrue_meta_security: { captcha_token: options === null || options === void 0 ? void 0 : options.captchaToken },
+              code_challenge: codeChallenge,
+              code_challenge_method: codeChallengeMethod
+            },
+            xform: _sessionResponse
+          });
+        } else if ("phone" in credentials) {
+          const { phone, password, options } = credentials;
+          res = await _request(this.fetch, "POST", `${this.url}/signup`, {
+            headers: this.headers,
+            body: {
+              phone,
+              password,
+              data: (_b = options === null || options === void 0 ? void 0 : options.data) !== null && _b !== void 0 ? _b : {},
+              channel: (_c = options === null || options === void 0 ? void 0 : options.channel) !== null && _c !== void 0 ? _c : "sms",
+              gotrue_meta_security: { captcha_token: options === null || options === void 0 ? void 0 : options.captchaToken }
+            },
+            xform: _sessionResponse
+          });
+        } else {
+          throw new AuthInvalidCredentialsError("You must provide either an email or phone number and a password");
+        }
+        const { data, error } = res;
+        if (error || !data) {
+          return { data: { user: null, session: null }, error };
+        }
+        const session = data.session;
+        const user = data.user;
+        if (data.session) {
+          await this._saveSession(data.session);
+          await this._notifyAllSubscribers("SIGNED_IN", session);
+        }
+        return { data: { user, session }, error: null };
+      } catch (error) {
+        if (isAuthError(error)) {
+          return { data: { user: null, session: null }, error };
+        }
+        throw error;
+      }
+    }
+    /**
+     * Log in an existing user with an email and password or phone and password.
+     *
+     * Be aware that you may get back an error message that will not distinguish
+     * between the cases where the account does not exist or that the
+     * email/phone and password combination is wrong or that the account can only
+     * be accessed via social login.
+     */
+    async signInWithPassword(credentials) {
+      try {
+        let res;
+        if ("email" in credentials) {
+          const { email, password, options } = credentials;
+          res = await _request(this.fetch, "POST", `${this.url}/token?grant_type=password`, {
+            headers: this.headers,
+            body: {
+              email,
+              password,
+              gotrue_meta_security: { captcha_token: options === null || options === void 0 ? void 0 : options.captchaToken }
+            },
+            xform: _sessionResponsePassword
+          });
+        } else if ("phone" in credentials) {
+          const { phone, password, options } = credentials;
+          res = await _request(this.fetch, "POST", `${this.url}/token?grant_type=password`, {
+            headers: this.headers,
+            body: {
+              phone,
+              password,
+              gotrue_meta_security: { captcha_token: options === null || options === void 0 ? void 0 : options.captchaToken }
+            },
+            xform: _sessionResponsePassword
+          });
+        } else {
+          throw new AuthInvalidCredentialsError("You must provide either an email or phone number and a password");
+        }
+        const { data, error } = res;
+        if (error) {
+          return { data: { user: null, session: null }, error };
+        } else if (!data || !data.session || !data.user) {
+          return { data: { user: null, session: null }, error: new AuthInvalidTokenResponseError() };
+        }
+        if (data.session) {
+          await this._saveSession(data.session);
+          await this._notifyAllSubscribers("SIGNED_IN", data.session);
+        }
+        return {
+          data: Object.assign({ user: data.user, session: data.session }, data.weak_password ? { weakPassword: data.weak_password } : null),
+          error
+        };
+      } catch (error) {
+        if (isAuthError(error)) {
+          return { data: { user: null, session: null }, error };
+        }
+        throw error;
+      }
+    }
+    /**
+     * Log in an existing user via a third-party provider.
+     * This method supports the PKCE flow.
+     */
+    async signInWithOAuth(credentials) {
+      var _a, _b, _c, _d;
+      return await this._handleProviderSignIn(credentials.provider, {
+        redirectTo: (_a = credentials.options) === null || _a === void 0 ? void 0 : _a.redirectTo,
+        scopes: (_b = credentials.options) === null || _b === void 0 ? void 0 : _b.scopes,
+        queryParams: (_c = credentials.options) === null || _c === void 0 ? void 0 : _c.queryParams,
+        skipBrowserRedirect: (_d = credentials.options) === null || _d === void 0 ? void 0 : _d.skipBrowserRedirect
+      });
+    }
+    /**
+     * Log in an existing user by exchanging an Auth Code issued during the PKCE flow.
+     */
+    async exchangeCodeForSession(authCode) {
+      await this.initializePromise;
+      return this._acquireLock(-1, async () => {
+        return this._exchangeCodeForSession(authCode);
+      });
+    }
+    async _exchangeCodeForSession(authCode) {
+      const storageItem = await getItemAsync(this.storage, `${this.storageKey}-code-verifier`);
+      const [codeVerifier, redirectType] = (storageItem !== null && storageItem !== void 0 ? storageItem : "").split("/");
+      try {
+        const { data, error } = await _request(this.fetch, "POST", `${this.url}/token?grant_type=pkce`, {
+          headers: this.headers,
+          body: {
+            auth_code: authCode,
+            code_verifier: codeVerifier
+          },
+          xform: _sessionResponse
+        });
+        await removeItemAsync(this.storage, `${this.storageKey}-code-verifier`);
+        if (error) {
+          throw error;
+        }
+        if (!data || !data.session || !data.user) {
+          return {
+            data: { user: null, session: null, redirectType: null },
+            error: new AuthInvalidTokenResponseError()
+          };
+        }
+        if (data.session) {
+          await this._saveSession(data.session);
+          await this._notifyAllSubscribers("SIGNED_IN", data.session);
+        }
+        return { data: Object.assign(Object.assign({}, data), { redirectType: redirectType !== null && redirectType !== void 0 ? redirectType : null }), error };
+      } catch (error) {
+        if (isAuthError(error)) {
+          return { data: { user: null, session: null, redirectType: null }, error };
+        }
+        throw error;
+      }
+    }
+    /**
+     * Allows signing in with an OIDC ID token. The authentication provider used
+     * should be enabled and configured.
+     */
+    async signInWithIdToken(credentials) {
+      try {
+        const { options, provider, token, access_token, nonce } = credentials;
+        const res = await _request(this.fetch, "POST", `${this.url}/token?grant_type=id_token`, {
+          headers: this.headers,
+          body: {
+            provider,
+            id_token: token,
+            access_token,
+            nonce,
+            gotrue_meta_security: { captcha_token: options === null || options === void 0 ? void 0 : options.captchaToken }
+          },
+          xform: _sessionResponse
+        });
+        const { data, error } = res;
+        if (error) {
+          return { data: { user: null, session: null }, error };
+        } else if (!data || !data.session || !data.user) {
+          return {
+            data: { user: null, session: null },
+            error: new AuthInvalidTokenResponseError()
+          };
+        }
+        if (data.session) {
+          await this._saveSession(data.session);
+          await this._notifyAllSubscribers("SIGNED_IN", data.session);
+        }
+        return { data, error };
+      } catch (error) {
+        if (isAuthError(error)) {
+          return { data: { user: null, session: null }, error };
+        }
+        throw error;
+      }
+    }
+    /**
+     * Log in a user using magiclink or a one-time password (OTP).
+     *
+     * If the `{{ .ConfirmationURL }}` variable is specified in the email template, a magiclink will be sent.
+     * If the `{{ .Token }}` variable is specified in the email template, an OTP will be sent.
+     * If you're using phone sign-ins, only an OTP will be sent. You won't be able to send a magiclink for phone sign-ins.
+     *
+     * Be aware that you may get back an error message that will not distinguish
+     * between the cases where the account does not exist or, that the account
+     * can only be accessed via social login.
+     *
+     * Do note that you will need to configure a Whatsapp sender on Twilio
+     * if you are using phone sign in with the 'whatsapp' channel. The whatsapp
+     * channel is not supported on other providers
+     * at this time.
+     * This method supports PKCE when an email is passed.
+     */
+    async signInWithOtp(credentials) {
+      var _a, _b, _c, _d, _e;
+      try {
+        if ("email" in credentials) {
+          const { email, options } = credentials;
+          let codeChallenge = null;
+          let codeChallengeMethod = null;
+          if (this.flowType === "pkce") {
+            ;
+            [codeChallenge, codeChallengeMethod] = await getCodeChallengeAndMethod(this.storage, this.storageKey);
+          }
+          const { error } = await _request(this.fetch, "POST", `${this.url}/otp`, {
+            headers: this.headers,
+            body: {
+              email,
+              data: (_a = options === null || options === void 0 ? void 0 : options.data) !== null && _a !== void 0 ? _a : {},
+              create_user: (_b = options === null || options === void 0 ? void 0 : options.shouldCreateUser) !== null && _b !== void 0 ? _b : true,
+              gotrue_meta_security: { captcha_token: options === null || options === void 0 ? void 0 : options.captchaToken },
+              code_challenge: codeChallenge,
+              code_challenge_method: codeChallengeMethod
+            },
+            redirectTo: options === null || options === void 0 ? void 0 : options.emailRedirectTo
+          });
+          return { data: { user: null, session: null }, error };
+        }
+        if ("phone" in credentials) {
+          const { phone, options } = credentials;
+          const { data, error } = await _request(this.fetch, "POST", `${this.url}/otp`, {
+            headers: this.headers,
+            body: {
+              phone,
+              data: (_c = options === null || options === void 0 ? void 0 : options.data) !== null && _c !== void 0 ? _c : {},
+              create_user: (_d = options === null || options === void 0 ? void 0 : options.shouldCreateUser) !== null && _d !== void 0 ? _d : true,
+              gotrue_meta_security: { captcha_token: options === null || options === void 0 ? void 0 : options.captchaToken },
+              channel: (_e = options === null || options === void 0 ? void 0 : options.channel) !== null && _e !== void 0 ? _e : "sms"
+            }
+          });
+          return { data: { user: null, session: null, messageId: data === null || data === void 0 ? void 0 : data.message_id }, error };
+        }
+        throw new AuthInvalidCredentialsError("You must provide either an email or phone number.");
+      } catch (error) {
+        if (isAuthError(error)) {
+          return { data: { user: null, session: null }, error };
+        }
+        throw error;
+      }
+    }
+    /**
+     * Log in a user given a User supplied OTP or TokenHash received through mobile or email.
+     */
+    async verifyOtp(params) {
+      var _a, _b;
+      try {
+        let redirectTo = void 0;
+        let captchaToken = void 0;
+        if ("options" in params) {
+          redirectTo = (_a = params.options) === null || _a === void 0 ? void 0 : _a.redirectTo;
+          captchaToken = (_b = params.options) === null || _b === void 0 ? void 0 : _b.captchaToken;
+        }
+        const { data, error } = await _request(this.fetch, "POST", `${this.url}/verify`, {
+          headers: this.headers,
+          body: Object.assign(Object.assign({}, params), { gotrue_meta_security: { captcha_token: captchaToken } }),
+          redirectTo,
+          xform: _sessionResponse
+        });
+        if (error) {
+          throw error;
+        }
+        if (!data) {
+          throw new Error("An error occurred on token verification.");
+        }
+        const session = data.session;
+        const user = data.user;
+        if (session === null || session === void 0 ? void 0 : session.access_token) {
+          await this._saveSession(session);
+          await this._notifyAllSubscribers(params.type == "recovery" ? "PASSWORD_RECOVERY" : "SIGNED_IN", session);
+        }
+        return { data: { user, session }, error: null };
+      } catch (error) {
+        if (isAuthError(error)) {
+          return { data: { user: null, session: null }, error };
+        }
+        throw error;
+      }
+    }
+    /**
+     * Attempts a single-sign on using an enterprise Identity Provider. A
+     * successful SSO attempt will redirect the current page to the identity
+     * provider authorization page. The redirect URL is implementation and SSO
+     * protocol specific.
+     *
+     * You can use it by providing a SSO domain. Typically you can extract this
+     * domain by asking users for their email address. If this domain is
+     * registered on the Auth instance the redirect will use that organization's
+     * currently active SSO Identity Provider for the login.
+     *
+     * If you have built an organization-specific login page, you can use the
+     * organization's SSO Identity Provider UUID directly instead.
+     */
+    async signInWithSSO(params) {
+      var _a, _b, _c;
+      try {
+        let codeChallenge = null;
+        let codeChallengeMethod = null;
+        if (this.flowType === "pkce") {
+          ;
+          [codeChallenge, codeChallengeMethod] = await getCodeChallengeAndMethod(this.storage, this.storageKey);
+        }
+        return await _request(this.fetch, "POST", `${this.url}/sso`, {
+          body: Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({}, "providerId" in params ? { provider_id: params.providerId } : null), "domain" in params ? { domain: params.domain } : null), { redirect_to: (_b = (_a = params.options) === null || _a === void 0 ? void 0 : _a.redirectTo) !== null && _b !== void 0 ? _b : void 0 }), ((_c = params === null || params === void 0 ? void 0 : params.options) === null || _c === void 0 ? void 0 : _c.captchaToken) ? { gotrue_meta_security: { captcha_token: params.options.captchaToken } } : null), { skip_http_redirect: true, code_challenge: codeChallenge, code_challenge_method: codeChallengeMethod }),
+          headers: this.headers,
+          xform: _ssoResponse
+        });
+      } catch (error) {
+        if (isAuthError(error)) {
+          return { data: null, error };
+        }
+        throw error;
+      }
+    }
+    /**
+     * Sends a reauthentication OTP to the user's email or phone number.
+     * Requires the user to be signed-in.
+     */
+    async reauthenticate() {
+      await this.initializePromise;
+      return await this._acquireLock(-1, async () => {
+        return await this._reauthenticate();
+      });
+    }
+    async _reauthenticate() {
+      try {
+        return await this._useSession(async (result) => {
+          const { data: { session }, error: sessionError } = result;
+          if (sessionError)
+            throw sessionError;
+          if (!session)
+            throw new AuthSessionMissingError();
+          const { error } = await _request(this.fetch, "GET", `${this.url}/reauthenticate`, {
+            headers: this.headers,
+            jwt: session.access_token
+          });
+          return { data: { user: null, session: null }, error };
+        });
+      } catch (error) {
+        if (isAuthError(error)) {
+          return { data: { user: null, session: null }, error };
+        }
+        throw error;
+      }
+    }
+    /**
+     * Resends an existing signup confirmation email, email change email, SMS OTP or phone change OTP.
+     */
+    async resend(credentials) {
+      try {
+        const endpoint = `${this.url}/resend`;
+        if ("email" in credentials) {
+          const { email, type, options } = credentials;
+          const { error } = await _request(this.fetch, "POST", endpoint, {
+            headers: this.headers,
+            body: {
+              email,
+              type,
+              gotrue_meta_security: { captcha_token: options === null || options === void 0 ? void 0 : options.captchaToken }
+            },
+            redirectTo: options === null || options === void 0 ? void 0 : options.emailRedirectTo
+          });
+          return { data: { user: null, session: null }, error };
+        } else if ("phone" in credentials) {
+          const { phone, type, options } = credentials;
+          const { data, error } = await _request(this.fetch, "POST", endpoint, {
+            headers: this.headers,
+            body: {
+              phone,
+              type,
+              gotrue_meta_security: { captcha_token: options === null || options === void 0 ? void 0 : options.captchaToken }
+            }
+          });
+          return { data: { user: null, session: null, messageId: data === null || data === void 0 ? void 0 : data.message_id }, error };
+        }
+        throw new AuthInvalidCredentialsError("You must provide either an email or phone number and a type");
+      } catch (error) {
+        if (isAuthError(error)) {
+          return { data: { user: null, session: null }, error };
+        }
+        throw error;
+      }
+    }
+    /**
+     * Returns the session, refreshing it if necessary.
+     *
+     * The session returned can be null if the session is not detected which can happen in the event a user is not signed-in or has logged out.
+     *
+     * **IMPORTANT:** This method loads values directly from the storage attached
+     * to the client. If that storage is based on request cookies for example,
+     * the values in it may not be authentic and therefore it's strongly advised
+     * against using this method and its results in such circumstances. A warning
+     * will be emitted if this is detected. Use {@link #getUser()} instead.
+     */
+    async getSession() {
+      await this.initializePromise;
+      const result = await this._acquireLock(-1, async () => {
+        return this._useSession(async (result2) => {
+          return result2;
+        });
+      });
+      return result;
+    }
+    /**
+     * Acquires a global lock based on the storage key.
+     */
+    async _acquireLock(acquireTimeout, fn) {
+      this._debug("#_acquireLock", "begin", acquireTimeout);
+      try {
+        if (this.lockAcquired) {
+          const last = this.pendingInLock.length ? this.pendingInLock[this.pendingInLock.length - 1] : Promise.resolve();
+          const result = (async () => {
+            await last;
+            return await fn();
+          })();
+          this.pendingInLock.push((async () => {
+            try {
+              await result;
+            } catch (e) {
+            }
+          })());
+          return result;
+        }
+        return await this.lock(`lock:${this.storageKey}`, acquireTimeout, async () => {
+          this._debug("#_acquireLock", "lock acquired for storage key", this.storageKey);
+          try {
+            this.lockAcquired = true;
+            const result = fn();
+            this.pendingInLock.push((async () => {
+              try {
+                await result;
+              } catch (e) {
+              }
+            })());
+            await result;
+            while (this.pendingInLock.length) {
+              const waitOn = [...this.pendingInLock];
+              await Promise.all(waitOn);
+              this.pendingInLock.splice(0, waitOn.length);
+            }
+            return await result;
+          } finally {
+            this._debug("#_acquireLock", "lock released for storage key", this.storageKey);
+            this.lockAcquired = false;
+          }
+        });
+      } finally {
+        this._debug("#_acquireLock", "end");
+      }
+    }
+    /**
+     * Use instead of {@link #getSession} inside the library. It is
+     * semantically usually what you want, as getting a session involves some
+     * processing afterwards that requires only one client operating on the
+     * session at once across multiple tabs or processes.
+     */
+    async _useSession(fn) {
+      this._debug("#_useSession", "begin");
+      try {
+        const result = await this.__loadSession();
+        return await fn(result);
+      } finally {
+        this._debug("#_useSession", "end");
+      }
+    }
+    /**
+     * NEVER USE DIRECTLY!
+     *
+     * Always use {@link #_useSession}.
+     */
+    async __loadSession() {
+      this._debug("#__loadSession()", "begin");
+      if (!this.lockAcquired) {
+        this._debug("#__loadSession()", "used outside of an acquired lock!", new Error().stack);
+      }
+      try {
+        let currentSession = null;
+        const maybeSession = await getItemAsync(this.storage, this.storageKey);
+        this._debug("#getSession()", "session from storage", maybeSession);
+        if (maybeSession !== null) {
+          if (this._isValidSession(maybeSession)) {
+            currentSession = maybeSession;
+          } else {
+            this._debug("#getSession()", "session from storage is not valid");
+            await this._removeSession();
+          }
+        }
+        if (!currentSession) {
+          return { data: { session: null }, error: null };
+        }
+        const hasExpired = currentSession.expires_at ? currentSession.expires_at <= Date.now() / 1e3 : false;
+        this._debug("#__loadSession()", `session has${hasExpired ? "" : " not"} expired`, "expires_at", currentSession.expires_at);
+        if (!hasExpired) {
+          if (this.storage.isServer) {
+            let suppressWarning = this.suppressGetSessionWarning;
+            const proxySession = new Proxy(currentSession, {
+              get: (target, prop, receiver) => {
+                if (!suppressWarning && prop === "user") {
+                  console.warn("Using the user object as returned from supabase.auth.getSession() or from some supabase.auth.onAuthStateChange() events could be insecure! This value comes directly from the storage medium (usually cookies on the server) and many not be authentic. Use supabase.auth.getUser() instead which authenticates the data by contacting the Supabase Auth server.");
+                  suppressWarning = true;
+                  this.suppressGetSessionWarning = true;
+                }
+                return Reflect.get(target, prop, receiver);
+              }
+            });
+            currentSession = proxySession;
+          }
+          return { data: { session: currentSession }, error: null };
+        }
+        const { session, error } = await this._callRefreshToken(currentSession.refresh_token);
+        if (error) {
+          return { data: { session: null }, error };
+        }
+        return { data: { session }, error: null };
+      } finally {
+        this._debug("#__loadSession()", "end");
+      }
+    }
+    /**
+     * Gets the current user details if there is an existing session. This method
+     * performs a network request to the Supabase Auth server, so the returned
+     * value is authentic and can be used to base authorization rules on.
+     *
+     * @param jwt Takes in an optional access token JWT. If no JWT is provided, the JWT from the current session is used.
+     */
+    async getUser(jwt) {
+      if (jwt) {
+        return await this._getUser(jwt);
+      }
+      await this.initializePromise;
+      const result = await this._acquireLock(-1, async () => {
+        return await this._getUser();
+      });
+      return result;
+    }
+    async _getUser(jwt) {
+      try {
+        if (jwt) {
+          return await _request(this.fetch, "GET", `${this.url}/user`, {
+            headers: this.headers,
+            jwt,
+            xform: _userResponse
+          });
+        }
+        return await this._useSession(async (result) => {
+          var _a, _b, _c;
+          const { data, error } = result;
+          if (error) {
+            throw error;
+          }
+          if (!((_a = data.session) === null || _a === void 0 ? void 0 : _a.access_token) && !this.hasCustomAuthorizationHeader) {
+            return { data: { user: null }, error: new AuthSessionMissingError() };
+          }
+          return await _request(this.fetch, "GET", `${this.url}/user`, {
+            headers: this.headers,
+            jwt: (_c = (_b = data.session) === null || _b === void 0 ? void 0 : _b.access_token) !== null && _c !== void 0 ? _c : void 0,
+            xform: _userResponse
+          });
+        });
+      } catch (error) {
+        if (isAuthError(error)) {
+          if (isAuthSessionMissingError(error)) {
+            await this._removeSession();
+            await removeItemAsync(this.storage, `${this.storageKey}-code-verifier`);
+            await this._notifyAllSubscribers("SIGNED_OUT", null);
+          }
+          return { data: { user: null }, error };
+        }
+        throw error;
+      }
+    }
+    /**
+     * Updates user data for a logged in user.
+     */
+    async updateUser(attributes, options = {}) {
+      await this.initializePromise;
+      return await this._acquireLock(-1, async () => {
+        return await this._updateUser(attributes, options);
+      });
+    }
+    async _updateUser(attributes, options = {}) {
+      try {
+        return await this._useSession(async (result) => {
+          const { data: sessionData, error: sessionError } = result;
+          if (sessionError) {
+            throw sessionError;
+          }
+          if (!sessionData.session) {
+            throw new AuthSessionMissingError();
+          }
+          const session = sessionData.session;
+          let codeChallenge = null;
+          let codeChallengeMethod = null;
+          if (this.flowType === "pkce" && attributes.email != null) {
+            ;
+            [codeChallenge, codeChallengeMethod] = await getCodeChallengeAndMethod(this.storage, this.storageKey);
+          }
+          const { data, error: userError } = await _request(this.fetch, "PUT", `${this.url}/user`, {
+            headers: this.headers,
+            redirectTo: options === null || options === void 0 ? void 0 : options.emailRedirectTo,
+            body: Object.assign(Object.assign({}, attributes), { code_challenge: codeChallenge, code_challenge_method: codeChallengeMethod }),
+            jwt: session.access_token,
+            xform: _userResponse
+          });
+          if (userError)
+            throw userError;
+          session.user = data.user;
+          await this._saveSession(session);
+          await this._notifyAllSubscribers("USER_UPDATED", session);
+          return { data: { user: session.user }, error: null };
+        });
+      } catch (error) {
+        if (isAuthError(error)) {
+          return { data: { user: null }, error };
+        }
+        throw error;
+      }
+    }
+    /**
+     * Decodes a JWT (without performing any validation).
+     */
+    _decodeJWT(jwt) {
+      return decodeJWTPayload(jwt);
+    }
+    /**
+     * Sets the session data from the current session. If the current session is expired, setSession will take care of refreshing it to obtain a new session.
+     * If the refresh token or access token in the current session is invalid, an error will be thrown.
+     * @param currentSession The current session that minimally contains an access token and refresh token.
+     */
+    async setSession(currentSession) {
+      await this.initializePromise;
+      return await this._acquireLock(-1, async () => {
+        return await this._setSession(currentSession);
+      });
+    }
+    async _setSession(currentSession) {
+      try {
+        if (!currentSession.access_token || !currentSession.refresh_token) {
+          throw new AuthSessionMissingError();
+        }
+        const timeNow = Date.now() / 1e3;
+        let expiresAt2 = timeNow;
+        let hasExpired = true;
+        let session = null;
+        const payload = decodeJWTPayload(currentSession.access_token);
+        if (payload.exp) {
+          expiresAt2 = payload.exp;
+          hasExpired = expiresAt2 <= timeNow;
+        }
+        if (hasExpired) {
+          const { session: refreshedSession, error } = await this._callRefreshToken(currentSession.refresh_token);
+          if (error) {
+            return { data: { user: null, session: null }, error };
+          }
+          if (!refreshedSession) {
+            return { data: { user: null, session: null }, error: null };
+          }
+          session = refreshedSession;
+        } else {
+          const { data, error } = await this._getUser(currentSession.access_token);
+          if (error) {
+            throw error;
+          }
+          session = {
+            access_token: currentSession.access_token,
+            refresh_token: currentSession.refresh_token,
+            user: data.user,
+            token_type: "bearer",
+            expires_in: expiresAt2 - timeNow,
+            expires_at: expiresAt2
+          };
+          await this._saveSession(session);
+          await this._notifyAllSubscribers("SIGNED_IN", session);
+        }
+        return { data: { user: session.user, session }, error: null };
+      } catch (error) {
+        if (isAuthError(error)) {
+          return { data: { session: null, user: null }, error };
+        }
+        throw error;
+      }
+    }
+    /**
+     * Returns a new session, regardless of expiry status.
+     * Takes in an optional current session. If not passed in, then refreshSession() will attempt to retrieve it from getSession().
+     * If the current session's refresh token is invalid, an error will be thrown.
+     * @param currentSession The current session. If passed in, it must contain a refresh token.
+     */
+    async refreshSession(currentSession) {
+      await this.initializePromise;
+      return await this._acquireLock(-1, async () => {
+        return await this._refreshSession(currentSession);
+      });
+    }
+    async _refreshSession(currentSession) {
+      try {
+        return await this._useSession(async (result) => {
+          var _a;
+          if (!currentSession) {
+            const { data, error: error2 } = result;
+            if (error2) {
+              throw error2;
+            }
+            currentSession = (_a = data.session) !== null && _a !== void 0 ? _a : void 0;
+          }
+          if (!(currentSession === null || currentSession === void 0 ? void 0 : currentSession.refresh_token)) {
+            throw new AuthSessionMissingError();
+          }
+          const { session, error } = await this._callRefreshToken(currentSession.refresh_token);
+          if (error) {
+            return { data: { user: null, session: null }, error };
+          }
+          if (!session) {
+            return { data: { user: null, session: null }, error: null };
+          }
+          return { data: { user: session.user, session }, error: null };
+        });
+      } catch (error) {
+        if (isAuthError(error)) {
+          return { data: { user: null, session: null }, error };
+        }
+        throw error;
+      }
+    }
+    /**
+     * Gets the session data from a URL string
+     */
+    async _getSessionFromURL(isPKCEFlow) {
+      try {
+        if (!isBrowser())
+          throw new AuthImplicitGrantRedirectError("No browser detected.");
+        if (this.flowType === "implicit" && !this._isImplicitGrantFlow()) {
+          throw new AuthImplicitGrantRedirectError("Not a valid implicit grant flow url.");
+        } else if (this.flowType == "pkce" && !isPKCEFlow) {
+          throw new AuthPKCEGrantCodeExchangeError("Not a valid PKCE flow url.");
+        }
+        const params = parseParametersFromURL(window.location.href);
+        if (isPKCEFlow) {
+          if (!params.code)
+            throw new AuthPKCEGrantCodeExchangeError("No code detected.");
+          const { data: data2, error: error2 } = await this._exchangeCodeForSession(params.code);
+          if (error2)
+            throw error2;
+          const url = new URL(window.location.href);
+          url.searchParams.delete("code");
+          window.history.replaceState(window.history.state, "", url.toString());
+          return { data: { session: data2.session, redirectType: null }, error: null };
+        }
+        if (params.error || params.error_description || params.error_code) {
+          throw new AuthImplicitGrantRedirectError(params.error_description || "Error in URL with unspecified error_description", {
+            error: params.error || "unspecified_error",
+            code: params.error_code || "unspecified_code"
+          });
+        }
+        const { provider_token, provider_refresh_token, access_token, refresh_token, expires_in, expires_at, token_type } = params;
+        if (!access_token || !expires_in || !refresh_token || !token_type) {
+          throw new AuthImplicitGrantRedirectError("No session defined in URL");
+        }
+        const timeNow = Math.round(Date.now() / 1e3);
+        const expiresIn = parseInt(expires_in);
+        let expiresAt2 = timeNow + expiresIn;
+        if (expires_at) {
+          expiresAt2 = parseInt(expires_at);
+        }
+        const actuallyExpiresIn = expiresAt2 - timeNow;
+        if (actuallyExpiresIn * 1e3 <= AUTO_REFRESH_TICK_DURATION) {
+          console.warn(`@supabase/gotrue-js: Session as retrieved from URL expires in ${actuallyExpiresIn}s, should have been closer to ${expiresIn}s`);
+        }
+        const issuedAt = expiresAt2 - expiresIn;
+        if (timeNow - issuedAt >= 120) {
+          console.warn("@supabase/gotrue-js: Session as retrieved from URL was issued over 120s ago, URL could be stale", issuedAt, expiresAt2, timeNow);
+        } else if (timeNow - issuedAt < 0) {
+          console.warn("@supabase/gotrue-js: Session as retrieved from URL was issued in the future? Check the device clock for skew", issuedAt, expiresAt2, timeNow);
+        }
+        const { data, error } = await this._getUser(access_token);
+        if (error)
+          throw error;
+        const session = {
+          provider_token,
+          provider_refresh_token,
+          access_token,
+          expires_in: expiresIn,
+          expires_at: expiresAt2,
+          refresh_token,
+          token_type,
+          user: data.user
+        };
+        window.location.hash = "";
+        this._debug("#_getSessionFromURL()", "clearing window.location.hash");
+        return { data: { session, redirectType: params.type }, error: null };
+      } catch (error) {
+        if (isAuthError(error)) {
+          return { data: { session: null, redirectType: null }, error };
+        }
+        throw error;
+      }
+    }
+    /**
+     * Checks if the current URL contains parameters given by an implicit oauth grant flow (https://www.rfc-editor.org/rfc/rfc6749.html#section-4.2)
+     */
+    _isImplicitGrantFlow() {
+      const params = parseParametersFromURL(window.location.href);
+      return !!(isBrowser() && (params.access_token || params.error_description));
+    }
+    /**
+     * Checks if the current URL and backing storage contain parameters given by a PKCE flow
+     */
+    async _isPKCEFlow() {
+      const params = parseParametersFromURL(window.location.href);
+      const currentStorageContent = await getItemAsync(this.storage, `${this.storageKey}-code-verifier`);
+      return !!(params.code && currentStorageContent);
+    }
+    /**
+     * Inside a browser context, `signOut()` will remove the logged in user from the browser session and log them out - removing all items from localstorage and then trigger a `"SIGNED_OUT"` event.
+     *
+     * For server-side management, you can revoke all refresh tokens for a user by passing a user's JWT through to `auth.api.signOut(JWT: string)`.
+     * There is no way to revoke a user's access token jwt until it expires. It is recommended to set a shorter expiry on the jwt for this reason.
+     *
+     * If using `others` scope, no `SIGNED_OUT` event is fired!
+     */
+    async signOut(options = { scope: "global" }) {
+      await this.initializePromise;
+      return await this._acquireLock(-1, async () => {
+        return await this._signOut(options);
+      });
+    }
+    async _signOut({ scope } = { scope: "global" }) {
+      return await this._useSession(async (result) => {
+        var _a;
+        const { data, error: sessionError } = result;
+        if (sessionError) {
+          return { error: sessionError };
+        }
+        const accessToken = (_a = data.session) === null || _a === void 0 ? void 0 : _a.access_token;
+        if (accessToken) {
+          const { error } = await this.admin.signOut(accessToken, scope);
+          if (error) {
+            if (!(isAuthApiError(error) && (error.status === 404 || error.status === 401 || error.status === 403))) {
+              return { error };
+            }
+          }
+        }
+        if (scope !== "others") {
+          await this._removeSession();
+          await removeItemAsync(this.storage, `${this.storageKey}-code-verifier`);
+          await this._notifyAllSubscribers("SIGNED_OUT", null);
+        }
+        return { error: null };
+      });
+    }
+    /**
+     * Receive a notification every time an auth event happens.
+     * @param callback A callback function to be invoked when an auth event happens.
+     */
+    onAuthStateChange(callback) {
+      const id = uuid();
+      const subscription = {
+        id,
+        callback,
+        unsubscribe: () => {
+          this._debug("#unsubscribe()", "state change callback with id removed", id);
+          this.stateChangeEmitters.delete(id);
+        }
+      };
+      this._debug("#onAuthStateChange()", "registered callback with id", id);
+      this.stateChangeEmitters.set(id, subscription);
+      (async () => {
+        await this.initializePromise;
+        await this._acquireLock(-1, async () => {
+          this._emitInitialSession(id);
+        });
+      })();
+      return { data: { subscription } };
+    }
+    async _emitInitialSession(id) {
+      return await this._useSession(async (result) => {
+        var _a, _b;
+        try {
+          const { data: { session }, error } = result;
+          if (error)
+            throw error;
+          await ((_a = this.stateChangeEmitters.get(id)) === null || _a === void 0 ? void 0 : _a.callback("INITIAL_SESSION", session));
+          this._debug("INITIAL_SESSION", "callback id", id, "session", session);
+        } catch (err) {
+          await ((_b = this.stateChangeEmitters.get(id)) === null || _b === void 0 ? void 0 : _b.callback("INITIAL_SESSION", null));
+          this._debug("INITIAL_SESSION", "callback id", id, "error", err);
+          console.error(err);
+        }
+      });
+    }
+    /**
+     * Sends a password reset request to an email address. This method supports the PKCE flow.
+     *
+     * @param email The email address of the user.
+     * @param options.redirectTo The URL to send the user to after they click the password reset link.
+     * @param options.captchaToken Verification token received when the user completes the captcha on the site.
+     */
+    async resetPasswordForEmail(email, options = {}) {
+      let codeChallenge = null;
+      let codeChallengeMethod = null;
+      if (this.flowType === "pkce") {
+        ;
+        [codeChallenge, codeChallengeMethod] = await getCodeChallengeAndMethod(
+          this.storage,
+          this.storageKey,
+          true
+          // isPasswordRecovery
+        );
+      }
+      try {
+        return await _request(this.fetch, "POST", `${this.url}/recover`, {
+          body: {
+            email,
+            code_challenge: codeChallenge,
+            code_challenge_method: codeChallengeMethod,
+            gotrue_meta_security: { captcha_token: options.captchaToken }
+          },
+          headers: this.headers,
+          redirectTo: options.redirectTo
+        });
+      } catch (error) {
+        if (isAuthError(error)) {
+          return { data: null, error };
+        }
+        throw error;
+      }
+    }
+    /**
+     * Gets all the identities linked to a user.
+     */
+    async getUserIdentities() {
+      var _a;
+      try {
+        const { data, error } = await this.getUser();
+        if (error)
+          throw error;
+        return { data: { identities: (_a = data.user.identities) !== null && _a !== void 0 ? _a : [] }, error: null };
+      } catch (error) {
+        if (isAuthError(error)) {
+          return { data: null, error };
+        }
+        throw error;
+      }
+    }
+    /**
+     * Links an oauth identity to an existing user.
+     * This method supports the PKCE flow.
+     */
+    async linkIdentity(credentials) {
+      var _a;
+      try {
+        const { data, error } = await this._useSession(async (result) => {
+          var _a2, _b, _c, _d, _e;
+          const { data: data2, error: error2 } = result;
+          if (error2)
+            throw error2;
+          const url = await this._getUrlForProvider(`${this.url}/user/identities/authorize`, credentials.provider, {
+            redirectTo: (_a2 = credentials.options) === null || _a2 === void 0 ? void 0 : _a2.redirectTo,
+            scopes: (_b = credentials.options) === null || _b === void 0 ? void 0 : _b.scopes,
+            queryParams: (_c = credentials.options) === null || _c === void 0 ? void 0 : _c.queryParams,
+            skipBrowserRedirect: true
+          });
+          return await _request(this.fetch, "GET", url, {
+            headers: this.headers,
+            jwt: (_e = (_d = data2.session) === null || _d === void 0 ? void 0 : _d.access_token) !== null && _e !== void 0 ? _e : void 0
+          });
+        });
+        if (error)
+          throw error;
+        if (isBrowser() && !((_a = credentials.options) === null || _a === void 0 ? void 0 : _a.skipBrowserRedirect)) {
+          window.location.assign(data === null || data === void 0 ? void 0 : data.url);
+        }
+        return { data: { provider: credentials.provider, url: data === null || data === void 0 ? void 0 : data.url }, error: null };
+      } catch (error) {
+        if (isAuthError(error)) {
+          return { data: { provider: credentials.provider, url: null }, error };
+        }
+        throw error;
+      }
+    }
+    /**
+     * Unlinks an identity from a user by deleting it. The user will no longer be able to sign in with that identity once it's unlinked.
+     */
+    async unlinkIdentity(identity) {
+      try {
+        return await this._useSession(async (result) => {
+          var _a, _b;
+          const { data, error } = result;
+          if (error) {
+            throw error;
+          }
+          return await _request(this.fetch, "DELETE", `${this.url}/user/identities/${identity.identity_id}`, {
+            headers: this.headers,
+            jwt: (_b = (_a = data.session) === null || _a === void 0 ? void 0 : _a.access_token) !== null && _b !== void 0 ? _b : void 0
+          });
+        });
+      } catch (error) {
+        if (isAuthError(error)) {
+          return { data: null, error };
+        }
+        throw error;
+      }
+    }
+    /**
+     * Generates a new JWT.
+     * @param refreshToken A valid refresh token that was returned on login.
+     */
+    async _refreshAccessToken(refreshToken) {
+      const debugName = `#_refreshAccessToken(${refreshToken.substring(0, 5)}...)`;
+      this._debug(debugName, "begin");
+      try {
+        const startedAt = Date.now();
+        return await retryable(async (attempt) => {
+          if (attempt > 0) {
+            await sleep(200 * Math.pow(2, attempt - 1));
+          }
+          this._debug(debugName, "refreshing attempt", attempt);
+          return await _request(this.fetch, "POST", `${this.url}/token?grant_type=refresh_token`, {
+            body: { refresh_token: refreshToken },
+            headers: this.headers,
+            xform: _sessionResponse
+          });
+        }, (attempt, error) => {
+          const nextBackOffInterval = 200 * Math.pow(2, attempt);
+          return error && isAuthRetryableFetchError(error) && // retryable only if the request can be sent before the backoff overflows the tick duration
+          Date.now() + nextBackOffInterval - startedAt < AUTO_REFRESH_TICK_DURATION;
+        });
+      } catch (error) {
+        this._debug(debugName, "error", error);
+        if (isAuthError(error)) {
+          return { data: { session: null, user: null }, error };
+        }
+        throw error;
+      } finally {
+        this._debug(debugName, "end");
+      }
+    }
+    _isValidSession(maybeSession) {
+      const isValidSession = typeof maybeSession === "object" && maybeSession !== null && "access_token" in maybeSession && "refresh_token" in maybeSession && "expires_at" in maybeSession;
+      return isValidSession;
+    }
+    async _handleProviderSignIn(provider, options) {
+      const url = await this._getUrlForProvider(`${this.url}/authorize`, provider, {
+        redirectTo: options.redirectTo,
+        scopes: options.scopes,
+        queryParams: options.queryParams
+      });
+      this._debug("#_handleProviderSignIn()", "provider", provider, "options", options, "url", url);
+      if (isBrowser() && !options.skipBrowserRedirect) {
+        window.location.assign(url);
+      }
+      return { data: { provider, url }, error: null };
+    }
+    /**
+     * Recovers the session from LocalStorage and refreshes
+     * Note: this method is async to accommodate for AsyncStorage e.g. in React native.
+     */
+    async _recoverAndRefresh() {
+      var _a;
+      const debugName = "#_recoverAndRefresh()";
+      this._debug(debugName, "begin");
+      try {
+        const currentSession = await getItemAsync(this.storage, this.storageKey);
+        this._debug(debugName, "session from storage", currentSession);
+        if (!this._isValidSession(currentSession)) {
+          this._debug(debugName, "session is not valid");
+          if (currentSession !== null) {
+            await this._removeSession();
+          }
+          return;
+        }
+        const timeNow = Math.round(Date.now() / 1e3);
+        const expiresWithMargin = ((_a = currentSession.expires_at) !== null && _a !== void 0 ? _a : Infinity) < timeNow + EXPIRY_MARGIN;
+        this._debug(debugName, `session has${expiresWithMargin ? "" : " not"} expired with margin of ${EXPIRY_MARGIN}s`);
+        if (expiresWithMargin) {
+          if (this.autoRefreshToken && currentSession.refresh_token) {
+            const { error } = await this._callRefreshToken(currentSession.refresh_token);
+            if (error) {
+              console.error(error);
+              if (!isAuthRetryableFetchError(error)) {
+                this._debug(debugName, "refresh failed with a non-retryable error, removing the session", error);
+                await this._removeSession();
+              }
+            }
+          }
+        } else {
+          await this._notifyAllSubscribers("SIGNED_IN", currentSession);
+        }
+      } catch (err) {
+        this._debug(debugName, "error", err);
+        console.error(err);
+        return;
+      } finally {
+        this._debug(debugName, "end");
+      }
+    }
+    async _callRefreshToken(refreshToken) {
+      var _a, _b;
+      if (!refreshToken) {
+        throw new AuthSessionMissingError();
+      }
+      if (this.refreshingDeferred) {
+        return this.refreshingDeferred.promise;
+      }
+      const debugName = `#_callRefreshToken(${refreshToken.substring(0, 5)}...)`;
+      this._debug(debugName, "begin");
+      try {
+        this.refreshingDeferred = new Deferred();
+        const { data, error } = await this._refreshAccessToken(refreshToken);
+        if (error)
+          throw error;
+        if (!data.session)
+          throw new AuthSessionMissingError();
+        await this._saveSession(data.session);
+        await this._notifyAllSubscribers("TOKEN_REFRESHED", data.session);
+        const result = { session: data.session, error: null };
+        this.refreshingDeferred.resolve(result);
+        return result;
+      } catch (error) {
+        this._debug(debugName, "error", error);
+        if (isAuthError(error)) {
+          const result = { session: null, error };
+          if (!isAuthRetryableFetchError(error)) {
+            await this._removeSession();
+            await this._notifyAllSubscribers("SIGNED_OUT", null);
+          }
+          (_a = this.refreshingDeferred) === null || _a === void 0 ? void 0 : _a.resolve(result);
+          return result;
+        }
+        (_b = this.refreshingDeferred) === null || _b === void 0 ? void 0 : _b.reject(error);
+        throw error;
+      } finally {
+        this.refreshingDeferred = null;
+        this._debug(debugName, "end");
+      }
+    }
+    async _notifyAllSubscribers(event, session, broadcast = true) {
+      const debugName = `#_notifyAllSubscribers(${event})`;
+      this._debug(debugName, "begin", session, `broadcast = ${broadcast}`);
+      try {
+        if (this.broadcastChannel && broadcast) {
+          this.broadcastChannel.postMessage({ event, session });
+        }
+        const errors = [];
+        const promises = Array.from(this.stateChangeEmitters.values()).map(async (x) => {
+          try {
+            await x.callback(event, session);
+          } catch (e) {
+            errors.push(e);
+          }
+        });
+        await Promise.all(promises);
+        if (errors.length > 0) {
+          for (let i = 0; i < errors.length; i += 1) {
+            console.error(errors[i]);
+          }
+          throw errors[0];
+        }
+      } finally {
+        this._debug(debugName, "end");
+      }
+    }
+    /**
+     * set currentSession and currentUser
+     * process to _startAutoRefreshToken if possible
+     */
+    async _saveSession(session) {
+      this._debug("#_saveSession()", session);
+      this.suppressGetSessionWarning = true;
+      await setItemAsync(this.storage, this.storageKey, session);
+    }
+    async _removeSession() {
+      this._debug("#_removeSession()");
+      await removeItemAsync(this.storage, this.storageKey);
+    }
+    /**
+     * Removes any registered visibilitychange callback.
+     *
+     * {@see #startAutoRefresh}
+     * {@see #stopAutoRefresh}
+     */
+    _removeVisibilityChangedCallback() {
+      this._debug("#_removeVisibilityChangedCallback()");
+      const callback = this.visibilityChangedCallback;
+      this.visibilityChangedCallback = null;
+      try {
+        if (callback && isBrowser() && (window === null || window === void 0 ? void 0 : window.removeEventListener)) {
+          window.removeEventListener("visibilitychange", callback);
+        }
+      } catch (e) {
+        console.error("removing visibilitychange callback failed", e);
+      }
+    }
+    /**
+     * This is the private implementation of {@link #startAutoRefresh}. Use this
+     * within the library.
+     */
+    async _startAutoRefresh() {
+      await this._stopAutoRefresh();
+      this._debug("#_startAutoRefresh()");
+      const ticker = setInterval(() => this._autoRefreshTokenTick(), AUTO_REFRESH_TICK_DURATION);
+      this.autoRefreshTicker = ticker;
+      if (ticker && typeof ticker === "object" && typeof ticker.unref === "function") {
+        ticker.unref();
+      } else if (typeof Deno !== "undefined" && typeof Deno.unrefTimer === "function") {
+        Deno.unrefTimer(ticker);
+      }
+      setTimeout(async () => {
+        await this.initializePromise;
+        await this._autoRefreshTokenTick();
+      }, 0);
+    }
+    /**
+     * This is the private implementation of {@link #stopAutoRefresh}. Use this
+     * within the library.
+     */
+    async _stopAutoRefresh() {
+      this._debug("#_stopAutoRefresh()");
+      const ticker = this.autoRefreshTicker;
+      this.autoRefreshTicker = null;
+      if (ticker) {
+        clearInterval(ticker);
+      }
+    }
+    /**
+     * Starts an auto-refresh process in the background. The session is checked
+     * every few seconds. Close to the time of expiration a process is started to
+     * refresh the session. If refreshing fails it will be retried for as long as
+     * necessary.
+     *
+     * If you set the {@link GoTrueClientOptions#autoRefreshToken} you don't need
+     * to call this function, it will be called for you.
+     *
+     * On browsers the refresh process works only when the tab/window is in the
+     * foreground to conserve resources as well as prevent race conditions and
+     * flooding auth with requests. If you call this method any managed
+     * visibility change callback will be removed and you must manage visibility
+     * changes on your own.
+     *
+     * On non-browser platforms the refresh process works *continuously* in the
+     * background, which may not be desirable. You should hook into your
+     * platform's foreground indication mechanism and call these methods
+     * appropriately to conserve resources.
+     *
+     * {@see #stopAutoRefresh}
+     */
+    async startAutoRefresh() {
+      this._removeVisibilityChangedCallback();
+      await this._startAutoRefresh();
+    }
+    /**
+     * Stops an active auto refresh process running in the background (if any).
+     *
+     * If you call this method any managed visibility change callback will be
+     * removed and you must manage visibility changes on your own.
+     *
+     * See {@link #startAutoRefresh} for more details.
+     */
+    async stopAutoRefresh() {
+      this._removeVisibilityChangedCallback();
+      await this._stopAutoRefresh();
+    }
+    /**
+     * Runs the auto refresh token tick.
+     */
+    async _autoRefreshTokenTick() {
+      this._debug("#_autoRefreshTokenTick()", "begin");
+      try {
+        await this._acquireLock(0, async () => {
+          try {
+            const now = Date.now();
+            try {
+              return await this._useSession(async (result) => {
+                const { data: { session } } = result;
+                if (!session || !session.refresh_token || !session.expires_at) {
+                  this._debug("#_autoRefreshTokenTick()", "no session");
+                  return;
+                }
+                const expiresInTicks = Math.floor((session.expires_at * 1e3 - now) / AUTO_REFRESH_TICK_DURATION);
+                this._debug("#_autoRefreshTokenTick()", `access token expires in ${expiresInTicks} ticks, a tick lasts ${AUTO_REFRESH_TICK_DURATION}ms, refresh threshold is ${AUTO_REFRESH_TICK_THRESHOLD} ticks`);
+                if (expiresInTicks <= AUTO_REFRESH_TICK_THRESHOLD) {
+                  await this._callRefreshToken(session.refresh_token);
+                }
+              });
+            } catch (e) {
+              console.error("Auto refresh tick failed with error. This is likely a transient error.", e);
+            }
+          } finally {
+            this._debug("#_autoRefreshTokenTick()", "end");
+          }
+        });
+      } catch (e) {
+        if (e.isAcquireTimeout || e instanceof LockAcquireTimeoutError) {
+          this._debug("auto refresh token tick lock not available");
+        } else {
+          throw e;
+        }
+      }
+    }
+    /**
+     * Registers callbacks on the browser / platform, which in-turn run
+     * algorithms when the browser window/tab are in foreground. On non-browser
+     * platforms it assumes always foreground.
+     */
+    async _handleVisibilityChange() {
+      this._debug("#_handleVisibilityChange()");
+      if (!isBrowser() || !(window === null || window === void 0 ? void 0 : window.addEventListener)) {
+        if (this.autoRefreshToken) {
+          this.startAutoRefresh();
+        }
+        return false;
+      }
+      try {
+        this.visibilityChangedCallback = async () => await this._onVisibilityChanged(false);
+        window === null || window === void 0 ? void 0 : window.addEventListener("visibilitychange", this.visibilityChangedCallback);
+        await this._onVisibilityChanged(true);
+      } catch (error) {
+        console.error("_handleVisibilityChange", error);
+      }
+    }
+    /**
+     * Callback registered with `window.addEventListener('visibilitychange')`.
+     */
+    async _onVisibilityChanged(calledFromInitialize) {
+      const methodName = `#_onVisibilityChanged(${calledFromInitialize})`;
+      this._debug(methodName, "visibilityState", document.visibilityState);
+      if (document.visibilityState === "visible") {
+        if (this.autoRefreshToken) {
+          this._startAutoRefresh();
+        }
+        if (!calledFromInitialize) {
+          await this.initializePromise;
+          await this._acquireLock(-1, async () => {
+            if (document.visibilityState !== "visible") {
+              this._debug(methodName, "acquired the lock to recover the session, but the browser visibilityState is no longer visible, aborting");
+              return;
+            }
+            await this._recoverAndRefresh();
+          });
+        }
+      } else if (document.visibilityState === "hidden") {
+        if (this.autoRefreshToken) {
+          this._stopAutoRefresh();
+        }
+      }
+    }
+    /**
+     * Generates the relevant login URL for a third-party provider.
+     * @param options.redirectTo A URL or mobile address to send the user to after they are confirmed.
+     * @param options.scopes A space-separated list of scopes granted to the OAuth application.
+     * @param options.queryParams An object of key-value pairs containing query parameters granted to the OAuth application.
+     */
+    async _getUrlForProvider(url, provider, options) {
+      const urlParams = [`provider=${encodeURIComponent(provider)}`];
+      if (options === null || options === void 0 ? void 0 : options.redirectTo) {
+        urlParams.push(`redirect_to=${encodeURIComponent(options.redirectTo)}`);
+      }
+      if (options === null || options === void 0 ? void 0 : options.scopes) {
+        urlParams.push(`scopes=${encodeURIComponent(options.scopes)}`);
+      }
+      if (this.flowType === "pkce") {
+        const [codeChallenge, codeChallengeMethod] = await getCodeChallengeAndMethod(this.storage, this.storageKey);
+        const flowParams = new URLSearchParams({
+          code_challenge: `${encodeURIComponent(codeChallenge)}`,
+          code_challenge_method: `${encodeURIComponent(codeChallengeMethod)}`
+        });
+        urlParams.push(flowParams.toString());
+      }
+      if (options === null || options === void 0 ? void 0 : options.queryParams) {
+        const query = new URLSearchParams(options.queryParams);
+        urlParams.push(query.toString());
+      }
+      if (options === null || options === void 0 ? void 0 : options.skipBrowserRedirect) {
+        urlParams.push(`skip_http_redirect=${options.skipBrowserRedirect}`);
+      }
+      return `${url}?${urlParams.join("&")}`;
+    }
+    async _unenroll(params) {
+      try {
+        return await this._useSession(async (result) => {
+          var _a;
+          const { data: sessionData, error: sessionError } = result;
+          if (sessionError) {
+            return { data: null, error: sessionError };
+          }
+          return await _request(this.fetch, "DELETE", `${this.url}/factors/${params.factorId}`, {
+            headers: this.headers,
+            jwt: (_a = sessionData === null || sessionData === void 0 ? void 0 : sessionData.session) === null || _a === void 0 ? void 0 : _a.access_token
+          });
+        });
+      } catch (error) {
+        if (isAuthError(error)) {
+          return { data: null, error };
+        }
+        throw error;
+      }
+    }
+    /**
+     * {@see GoTrueMFAApi#enroll}
+     */
+    async _enroll(params) {
+      try {
+        return await this._useSession(async (result) => {
+          var _a, _b;
+          const { data: sessionData, error: sessionError } = result;
+          if (sessionError) {
+            return { data: null, error: sessionError };
+          }
+          const body = Object.assign({ friendly_name: params.friendlyName, factor_type: params.factorType }, params.factorType === "phone" ? { phone: params.phone } : { issuer: params.issuer });
+          const { data, error } = await _request(this.fetch, "POST", `${this.url}/factors`, {
+            body,
+            headers: this.headers,
+            jwt: (_a = sessionData === null || sessionData === void 0 ? void 0 : sessionData.session) === null || _a === void 0 ? void 0 : _a.access_token
+          });
+          if (error) {
+            return { data: null, error };
+          }
+          if (params.factorType === "phone") {
+            delete data.totp;
+          }
+          if (params.factorType === "totp" && ((_b = data === null || data === void 0 ? void 0 : data.totp) === null || _b === void 0 ? void 0 : _b.qr_code)) {
+            data.totp.qr_code = `data:image/svg+xml;utf-8,${data.totp.qr_code}`;
+          }
+          return { data, error: null };
+        });
+      } catch (error) {
+        if (isAuthError(error)) {
+          return { data: null, error };
+        }
+        throw error;
+      }
+    }
+    /**
+     * {@see GoTrueMFAApi#verify}
+     */
+    async _verify(params) {
+      return this._acquireLock(-1, async () => {
+        try {
+          return await this._useSession(async (result) => {
+            var _a;
+            const { data: sessionData, error: sessionError } = result;
+            if (sessionError) {
+              return { data: null, error: sessionError };
+            }
+            const { data, error } = await _request(this.fetch, "POST", `${this.url}/factors/${params.factorId}/verify`, {
+              body: { code: params.code, challenge_id: params.challengeId },
+              headers: this.headers,
+              jwt: (_a = sessionData === null || sessionData === void 0 ? void 0 : sessionData.session) === null || _a === void 0 ? void 0 : _a.access_token
+            });
+            if (error) {
+              return { data: null, error };
+            }
+            await this._saveSession(Object.assign({ expires_at: Math.round(Date.now() / 1e3) + data.expires_in }, data));
+            await this._notifyAllSubscribers("MFA_CHALLENGE_VERIFIED", data);
+            return { data, error };
+          });
+        } catch (error) {
+          if (isAuthError(error)) {
+            return { data: null, error };
+          }
+          throw error;
+        }
+      });
+    }
+    /**
+     * {@see GoTrueMFAApi#challenge}
+     */
+    async _challenge(params) {
+      return this._acquireLock(-1, async () => {
+        try {
+          return await this._useSession(async (result) => {
+            var _a;
+            const { data: sessionData, error: sessionError } = result;
+            if (sessionError) {
+              return { data: null, error: sessionError };
+            }
+            return await _request(this.fetch, "POST", `${this.url}/factors/${params.factorId}/challenge`, {
+              body: { channel: params.channel },
+              headers: this.headers,
+              jwt: (_a = sessionData === null || sessionData === void 0 ? void 0 : sessionData.session) === null || _a === void 0 ? void 0 : _a.access_token
+            });
+          });
+        } catch (error) {
+          if (isAuthError(error)) {
+            return { data: null, error };
+          }
+          throw error;
+        }
+      });
+    }
+    /**
+     * {@see GoTrueMFAApi#challengeAndVerify}
+     */
+    async _challengeAndVerify(params) {
+      const { data: challengeData, error: challengeError } = await this._challenge({
+        factorId: params.factorId
+      });
+      if (challengeError) {
+        return { data: null, error: challengeError };
+      }
+      return await this._verify({
+        factorId: params.factorId,
+        challengeId: challengeData.id,
+        code: params.code
+      });
+    }
+    /**
+     * {@see GoTrueMFAApi#listFactors}
+     */
+    async _listFactors() {
+      const { data: { user }, error: userError } = await this.getUser();
+      if (userError) {
+        return { data: null, error: userError };
+      }
+      const factors = (user === null || user === void 0 ? void 0 : user.factors) || [];
+      const totp = factors.filter((factor) => factor.factor_type === "totp" && factor.status === "verified");
+      const phone = factors.filter((factor) => factor.factor_type === "phone" && factor.status === "verified");
+      return {
+        data: {
+          all: factors,
+          totp,
+          phone
+        },
+        error: null
+      };
+    }
+    /**
+     * {@see GoTrueMFAApi#getAuthenticatorAssuranceLevel}
+     */
+    async _getAuthenticatorAssuranceLevel() {
+      return this._acquireLock(-1, async () => {
+        return await this._useSession(async (result) => {
+          var _a, _b;
+          const { data: { session }, error: sessionError } = result;
+          if (sessionError) {
+            return { data: null, error: sessionError };
+          }
+          if (!session) {
+            return {
+              data: { currentLevel: null, nextLevel: null, currentAuthenticationMethods: [] },
+              error: null
+            };
+          }
+          const payload = this._decodeJWT(session.access_token);
+          let currentLevel = null;
+          if (payload.aal) {
+            currentLevel = payload.aal;
+          }
+          let nextLevel = currentLevel;
+          const verifiedFactors = (_b = (_a = session.user.factors) === null || _a === void 0 ? void 0 : _a.filter((factor) => factor.status === "verified")) !== null && _b !== void 0 ? _b : [];
+          if (verifiedFactors.length > 0) {
+            nextLevel = "aal2";
+          }
+          const currentAuthenticationMethods = payload.amr || [];
+          return { data: { currentLevel, nextLevel, currentAuthenticationMethods }, error: null };
+        });
+      });
+    }
+  };
+  GoTrueClient.nextInstanceID = 0;
+
+  // node_modules/@supabase/auth-js/dist/module/AuthClient.js
+  var AuthClient = GoTrueClient;
+  var AuthClient_default = AuthClient;
+
+  // node_modules/@supabase/supabase-js/dist/module/lib/SupabaseAuthClient.js
+  var SupabaseAuthClient = class extends AuthClient_default {
+    constructor(options) {
+      super(options);
+    }
+  };
+
+  // node_modules/@supabase/supabase-js/dist/module/SupabaseClient.js
+  var __awaiter8 = function(thisArg, _arguments, P, generator) {
+    function adopt(value) {
+      return value instanceof P ? value : new P(function(resolve) {
+        resolve(value);
+      });
+    }
+    return new (P || (P = Promise))(function(resolve, reject) {
+      function fulfilled(value) {
+        try {
+          step(generator.next(value));
+        } catch (e) {
+          reject(e);
+        }
+      }
+      function rejected(value) {
+        try {
+          step(generator["throw"](value));
+        } catch (e) {
+          reject(e);
+        }
+      }
+      function step(result) {
+        result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+      }
+      step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+  };
+  var SupabaseClient = class {
+    /**
+     * Create a new client for use in the browser.
+     * @param supabaseUrl The unique Supabase URL which is supplied when you create a new project in your project dashboard.
+     * @param supabaseKey The unique Supabase Key which is supplied when you create a new project in your project dashboard.
+     * @param options.db.schema You can switch in between schemas. The schema needs to be on the list of exposed schemas inside Supabase.
+     * @param options.auth.autoRefreshToken Set to "true" if you want to automatically refresh the token before expiring.
+     * @param options.auth.persistSession Set to "true" if you want to automatically save the user session into local storage.
+     * @param options.auth.detectSessionInUrl Set to "true" if you want to automatically detects OAuth grants in the URL and signs in the user.
+     * @param options.realtime Options passed along to realtime-js constructor.
+     * @param options.global.fetch A custom fetch implementation.
+     * @param options.global.headers Any additional headers to send with each network request.
+     */
+    constructor(supabaseUrl, supabaseKey, options) {
+      var _a, _b, _c;
+      this.supabaseUrl = supabaseUrl;
+      this.supabaseKey = supabaseKey;
+      if (!supabaseUrl)
+        throw new Error("supabaseUrl is required.");
+      if (!supabaseKey)
+        throw new Error("supabaseKey is required.");
+      const _supabaseUrl = stripTrailingSlash(supabaseUrl);
+      this.realtimeUrl = `${_supabaseUrl}/realtime/v1`.replace(/^http/i, "ws");
+      this.authUrl = `${_supabaseUrl}/auth/v1`;
+      this.storageUrl = `${_supabaseUrl}/storage/v1`;
+      this.functionsUrl = `${_supabaseUrl}/functions/v1`;
+      const defaultStorageKey = `sb-${new URL(this.authUrl).hostname.split(".")[0]}-auth-token`;
+      const DEFAULTS = {
+        db: DEFAULT_DB_OPTIONS,
+        realtime: DEFAULT_REALTIME_OPTIONS,
+        auth: Object.assign(Object.assign({}, DEFAULT_AUTH_OPTIONS), { storageKey: defaultStorageKey }),
+        global: DEFAULT_GLOBAL_OPTIONS
+      };
+      const settings = applySettingDefaults(options !== null && options !== void 0 ? options : {}, DEFAULTS);
+      this.storageKey = (_a = settings.auth.storageKey) !== null && _a !== void 0 ? _a : "";
+      this.headers = (_b = settings.global.headers) !== null && _b !== void 0 ? _b : {};
+      if (!settings.accessToken) {
+        this.auth = this._initSupabaseAuthClient((_c = settings.auth) !== null && _c !== void 0 ? _c : {}, this.headers, settings.global.fetch);
+      } else {
+        this.accessToken = settings.accessToken;
+        this.auth = new Proxy({}, {
+          get: (_, prop) => {
+            throw new Error(`@supabase/supabase-js: Supabase Client is configured with the accessToken option, accessing supabase.auth.${String(prop)} is not possible`);
+          }
+        });
+      }
+      this.fetch = fetchWithAuth(supabaseKey, this._getAccessToken.bind(this), settings.global.fetch);
+      this.realtime = this._initRealtimeClient(Object.assign({ headers: this.headers }, settings.realtime));
+      this.rest = new PostgrestClient(`${_supabaseUrl}/rest/v1`, {
+        headers: this.headers,
+        schema: settings.db.schema,
+        fetch: this.fetch
+      });
+      if (!settings.accessToken) {
+        this._listenForAuthEvents();
+      }
+    }
+    /**
+     * Supabase Functions allows you to deploy and invoke edge functions.
+     */
+    get functions() {
+      return new FunctionsClient(this.functionsUrl, {
+        headers: this.headers,
+        customFetch: this.fetch
+      });
+    }
+    /**
+     * Supabase Storage allows you to manage user-generated content, such as photos or videos.
+     */
+    get storage() {
+      return new StorageClient(this.storageUrl, this.headers, this.fetch);
+    }
+    /**
+     * Perform a query on a table or a view.
+     *
+     * @param relation - The table or view name to query
+     */
+    from(relation) {
+      return this.rest.from(relation);
+    }
+    // NOTE: signatures must be kept in sync with PostgrestClient.schema
+    /**
+     * Select a schema to query or perform an function (rpc) call.
+     *
+     * The schema needs to be on the list of exposed schemas inside Supabase.
+     *
+     * @param schema - The schema to query
+     */
+    schema(schema) {
+      return this.rest.schema(schema);
+    }
+    // NOTE: signatures must be kept in sync with PostgrestClient.rpc
+    /**
+     * Perform a function call.
+     *
+     * @param fn - The function name to call
+     * @param args - The arguments to pass to the function call
+     * @param options - Named parameters
+     * @param options.head - When set to `true`, `data` will not be returned.
+     * Useful if you only need the count.
+     * @param options.get - When set to `true`, the function will be called with
+     * read-only access mode.
+     * @param options.count - Count algorithm to use to count rows returned by the
+     * function. Only applicable for [set-returning
+     * functions](https://www.postgresql.org/docs/current/functions-srf.html).
+     *
+     * `"exact"`: Exact but slow count algorithm. Performs a `COUNT(*)` under the
+     * hood.
+     *
+     * `"planned"`: Approximated but fast count algorithm. Uses the Postgres
+     * statistics under the hood.
+     *
+     * `"estimated"`: Uses exact count for low numbers and planned count for high
+     * numbers.
+     */
+    rpc(fn, args = {}, options = {}) {
+      return this.rest.rpc(fn, args, options);
+    }
+    /**
+     * Creates a Realtime channel with Broadcast, Presence, and Postgres Changes.
+     *
+     * @param {string} name - The name of the Realtime channel.
+     * @param {Object} opts - The options to pass to the Realtime channel.
+     *
+     */
+    channel(name, opts = { config: {} }) {
+      return this.realtime.channel(name, opts);
+    }
+    /**
+     * Returns all Realtime channels.
+     */
+    getChannels() {
+      return this.realtime.getChannels();
+    }
+    /**
+     * Unsubscribes and removes Realtime channel from Realtime client.
+     *
+     * @param {RealtimeChannel} channel - The name of the Realtime channel.
+     *
+     */
+    removeChannel(channel) {
+      return this.realtime.removeChannel(channel);
+    }
+    /**
+     * Unsubscribes and removes all Realtime channels from Realtime client.
+     */
+    removeAllChannels() {
+      return this.realtime.removeAllChannels();
+    }
+    _getAccessToken() {
+      var _a, _b;
+      return __awaiter8(this, void 0, void 0, function* () {
+        if (this.accessToken) {
+          return yield this.accessToken();
+        }
+        const { data } = yield this.auth.getSession();
+        return (_b = (_a = data.session) === null || _a === void 0 ? void 0 : _a.access_token) !== null && _b !== void 0 ? _b : null;
+      });
+    }
+    _initSupabaseAuthClient({ autoRefreshToken, persistSession, detectSessionInUrl, storage, storageKey, flowType, lock, debug }, headers, fetch3) {
+      var _a;
+      const authHeaders = {
+        Authorization: `Bearer ${this.supabaseKey}`,
+        apikey: `${this.supabaseKey}`
+      };
+      return new SupabaseAuthClient({
+        url: this.authUrl,
+        headers: Object.assign(Object.assign({}, authHeaders), headers),
+        storageKey,
+        autoRefreshToken,
+        persistSession,
+        detectSessionInUrl,
+        storage,
+        flowType,
+        lock,
+        debug,
+        fetch: fetch3,
+        // auth checks if there is a custom authorizaiton header using this flag
+        // so it knows whether to return an error when getUser is called with no session
+        hasCustomAuthorizationHeader: (_a = "Authorization" in this.headers) !== null && _a !== void 0 ? _a : false
+      });
+    }
+    _initRealtimeClient(options) {
+      return new RealtimeClient(this.realtimeUrl, Object.assign(Object.assign({}, options), { params: Object.assign({ apikey: this.supabaseKey }, options === null || options === void 0 ? void 0 : options.params) }));
+    }
+    _listenForAuthEvents() {
+      let data = this.auth.onAuthStateChange((event, session) => {
+        this._handleTokenChanged(event, "CLIENT", session === null || session === void 0 ? void 0 : session.access_token);
+      });
+      return data;
+    }
+    _handleTokenChanged(event, source, token) {
+      if ((event === "TOKEN_REFRESHED" || event === "SIGNED_IN") && this.changedAccessToken !== token) {
+        this.realtime.setAuth(token !== null && token !== void 0 ? token : null);
+        this.changedAccessToken = token;
+      } else if (event === "SIGNED_OUT") {
+        this.realtime.setAuth(this.supabaseKey);
+        if (source == "STORAGE")
+          this.auth.signOut();
+        this.changedAccessToken = void 0;
+      }
+    }
+  };
+
+  // node_modules/@supabase/supabase-js/dist/module/index.js
+  var createClient = (supabaseUrl, supabaseKey, options) => {
+    return new SupabaseClient(supabaseUrl, supabaseKey, options);
+  };
+
+  // src/auth.ts
+  var SUPABASE_URL = "https://qzunabrdemvyruvaozer.supabase.co";
+  var PRODUCTION_AUTH_REDIRECT_URL = "https://renewalscope.princesankhala670.workers.dev";
+  function getAuthRedirectUrl() {
+    if (typeof window !== "undefined") {
+      const { hostname, origin } = window.location;
+      if (hostname === "localhost" || hostname === "127.0.0.1") {
+        return origin;
+      }
+    }
+    return PRODUCTION_AUTH_REDIRECT_URL;
+  }
+  var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6dW5hYnJkZW12eXJ1dmFvemVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5NDU3MDgsImV4cCI6MjEwMjUyMTcwOH0.cE3JVKZt0Y0EO5nS1SdEimVljdudfzKhS2mHhoH0wng";
+  var supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true
+    }
+  });
+  async function getCurrentUser() {
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error) {
+        console.error("getCurrentUser error:", error);
+        return null;
+      }
+      return user;
+    } catch (err) {
+      console.error("getCurrentUser exception:", err);
+      return null;
+    }
+  }
+  async function signUp(email, password) {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: getAuthRedirectUrl()
+        }
+      });
+      if (error) {
+        console.error("signUp error:", error);
+        return { user: null, error };
+      }
+      return { user: data.user, error: null };
+    } catch (err) {
+      console.error("signUp exception:", err);
+      const errorMessage = err instanceof Error ? err.message : "Network error: Failed to connect to authentication server";
+      return {
+        user: null,
+        error: {
+          message: errorMessage,
+          name: "NetworkError",
+          status: 0
+        }
+      };
+    }
+  }
+  async function signIn(email, password) {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      if (error) {
+        console.error("signIn error:", error);
+        return { user: null, error };
+      }
+      return { user: data.user, error: null };
+    } catch (err) {
+      console.error("signIn exception:", err);
+      const errorMessage = err instanceof Error ? err.message : "Network error: Failed to connect to authentication server";
+      return {
+        user: null,
+        error: {
+          message: errorMessage,
+          name: "NetworkError",
+          status: 0
+        }
+      };
+    }
+  }
+  async function signOut() {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("signOut error:", error);
+      }
+      return { error };
+    } catch (err) {
+      console.error("signOut exception:", err);
+      return {
+        error: {
+          message: err instanceof Error ? err.message : "Sign out failed",
+          name: "SignOutError",
+          status: 0
+        }
+      };
+    }
+  }
+  async function resetPassword(email) {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: getAuthRedirectUrl()
+      });
+      if (error) {
+        console.error("resetPassword error:", error);
+      }
+      return { error };
+    } catch (err) {
+      console.error("resetPassword exception:", err);
+      return {
+        error: {
+          message: err instanceof Error ? err.message : "Password reset failed",
+          name: "PasswordResetError",
+          status: 0
+        }
+      };
+    }
+  }
+  async function signInWithGoogle() {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: getAuthRedirectUrl()
+        }
+      });
+      if (error) {
+        console.error("signInWithGoogle error:", error);
+        return { error };
+      }
+      return { error: null };
+    } catch (err) {
+      console.error("signInWithGoogle exception:", err);
+      return {
+        error: {
+          message: err instanceof Error ? err.message : "Google sign-in failed",
+          name: "GoogleSignInError",
+          status: 0
+        }
+      };
+    }
+  }
+  function onAuthStateChange(callback) {
+    return supabase.auth.onAuthStateChange(callback);
+  }
+
+  // src/entitlements.ts
+  async function checkEntitlement(userId, userEmail) {
+    return {
+      hasProAccess: true,
+      reason: "Beta access granted"
+    };
+  }
+
+  // src/ui.ts
+  var authState = {
+    user: null,
+    loading: true,
+    authenticated: false
+  };
+  var hasProAccess = false;
+  var PRODUCT_DESCRIPTIONS = {
+    project_management: "RFIs, submittals, scheduling, punch lists, documents",
+    quality_safety: "Inspections, incidents, observations, forms, daily log",
+    project_financials: "Budgets, cost management, financial workflows",
+    invoice_management: "Invoice workflows and billing",
+    analytics: "Reporting, dashboards, unified data",
+    pay: "Subcontractor payments, compliance, lien waivers",
+    resource_tracking: "Labor, productivity, resource tracking",
+    estimating: "Estimating and takeoff workflows",
+    bid_management: "Bid distribution, collection, coverage"
+  };
+  function makeInitialState() {
+    return {
+      step: 1,
+      annual_cost_usd: null,
+      acv_usd: null,
+      contract_term: "annual",
+      selected_products: [],
+      product_inputs: [],
+      discount_status: null,
+      discount_pct: null,
+      discount_usd: null,
+      bundle_structure: null,
+      credits_usd: null,
+      rate_protection_status: null,
+      renewal_increase_pct: null,
+      tier_changed: null,
+      packaging_changed: null,
+      expected_next_year_acv_usd: null,
+      construction_type: null,
+      target_savings_pct: null,
+      before_annual_cost_usd: null,
+      after_annual_cost_usd: null
+    };
+  }
+  var state = makeInitialState();
+  var lastInput = null;
+  var lastOutput = null;
+  var USAGE_LABELS = {
+    CRITICAL: "Used daily",
+    REGULAR: "Used weekly",
+    OCCASIONAL: "Used occasionally",
+    RARELY: "Used rarely",
+    NOT_USED: "Not used",
+    NOT_SURE: "Not sure"
+  };
+  var REQUIREMENT_LABELS = {
+    BUSINESS_CRITICAL: "Business critical",
+    CLIENT_CONTRACT: "Client/contract requirement",
+    INTERNAL_POLICY: "Internal policy",
+    NOT_REQUIRED: "Not required",
+    NOT_SURE: "Not sure"
+  };
+  var DEPENDENCY_LABELS = {
+    YES: "Dependency confirmed",
+    NO: "No known dependency",
+    NOT_SURE: "Dependency unknown"
+  };
+  function $(id) {
+    return document.getElementById(id);
+  }
+  function fmtUSD(n) {
+    return "$" + n.toLocaleString("en-US", { maximumFractionDigits: 0 });
+  }
+  function fmtRate(n) {
+    return "$" + n.toLocaleString("en-US", { maximumFractionDigits: 0 });
+  }
+  function setHidden(id, hidden) {
+    const el = $(id);
+    if (el) el.hidden = hidden;
+  }
+  function showError(containerId, msg) {
+    const el = $(containerId);
+    if (el) el.innerHTML = `<div class="error-msg">${msg}</div>`;
+  }
+  function clearError(containerId) {
+    const el = $(containerId);
+    if (el) el.innerHTML = "";
+  }
+  function updateProgress() {
+    const fill = $("progress-fill");
+    const text = $("progress-text");
+    if (fill) fill.style.width = `${state.step / 5 * 100}%`;
+    if (text) text.textContent = `Step ${state.step} of 5`;
+  }
+  function goToStep(n) {
+    for (let i = 1; i <= 5; i++) setHidden(`step-${i}`, i !== n);
+    state.step = n;
+    updateProgress();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  function validateStep1() {
+    const cost = $("annual_cost_usd")?.value;
+    const acv = $("acv_usd")?.value;
+    if (!cost || parseFloat(cost) <= 0) return "Please enter a valid annual spend greater than 0.";
+    if (!acv || parseFloat(acv) <= 0) return "Please enter a valid ACV greater than 0.";
+    return null;
+  }
+  function saveStep1() {
+    state.annual_cost_usd = parseFloat($("annual_cost_usd").value);
+    state.acv_usd = parseFloat($("acv_usd").value);
+    const term = $("contract_term").value;
+    state.contract_term = term || "annual";
+  }
+  function renderProductCards() {
+    const container = $("product-cards");
+    if (!container) return;
+    const products = PRODUCT_CATALOG.filter((p) => p.mvp_supported === true);
+    container.innerHTML = products.map((p) => {
+      const desc = PRODUCT_DESCRIPTIONS[p.id] ?? "";
+      const sel = state.selected_products.includes(p.id);
+      return `<div class="product-card${sel ? " selected" : ""}" data-product-id="${p.id}" role="checkbox" aria-checked="${sel}" tabindex="0"><div class="pc-label">${p.label}</div><div class="pc-desc">${desc}</div></div>`;
+    }).join("");
+    container.querySelectorAll(".product-card").forEach((card) => {
+      card.addEventListener("click", () => toggleProduct(card));
+      card.addEventListener("keydown", (e) => {
+        if (e.key === " " || e.key === "Enter") {
+          e.preventDefault();
+          toggleProduct(card);
+        }
+      });
+    });
+  }
+  function toggleProduct(card) {
+    const id = card.dataset["productId"] ?? "";
+    if (!id) return;
+    if (state.selected_products.includes(id)) {
+      state.selected_products = state.selected_products.filter((p) => p !== id);
+      card.classList.remove("selected");
+      card.setAttribute("aria-checked", "false");
+    } else {
+      state.selected_products.push(id);
+      card.classList.add("selected");
+      card.setAttribute("aria-checked", "true");
+    }
+  }
+  function validateStep2() {
+    if (state.selected_products.length === 0) return "Please select at least one product.";
+    return null;
+  }
+  function renderProductDetails() {
+    const container = $("product-details");
+    if (!container) return;
+    container.innerHTML = state.selected_products.map((pid) => {
+      const prod = PRODUCT_CATALOG.find((p) => p.id === pid);
+      const label = prod?.label ?? pid;
+      const ex = state.product_inputs.find((pi) => pi.product_id === pid);
+      const u = ex?.usage ?? "";
+      const r = ex?.requirement ?? "";
+      const rep = ex?.replacement ?? "";
+      const d = ex?.dependency ?? "";
+      const price = ex?.annual_price_usd ?? "";
+      const opt = (val, label2, cur) => `<option value="${val}"${cur === val ? " selected" : ""}>${label2}</option>`;
+      return `<div class="product-detail-block" data-product-id="${pid}"><div class="pd-heading">${label}</div><div class="pd-grid"><div class="field"><label>Usage</label><select class="pd-usage"><option value="">Select\u2026</option>` + opt("CRITICAL" /* CRITICAL */, "Used daily", u) + opt("REGULAR" /* REGULAR */, "Used weekly", u) + opt("OCCASIONAL" /* OCCASIONAL */, "Used occasionally", u) + opt("RARELY" /* RARELY */, "Used rarely", u) + opt("NOT_USED" /* NOT_USED */, "Not used", u) + opt("NOT_SURE" /* NOT_SURE */, "Not sure", u) + `</select></div><div class="field"><label>Business Requirement</label><select class="pd-requirement"><option value="">Select\u2026</option>` + opt("BUSINESS_CRITICAL" /* BUSINESS_CRITICAL */, "Business critical", r) + opt("CLIENT_CONTRACT" /* CLIENT_CONTRACT */, "Client contract requirement", r) + opt("INTERNAL_POLICY" /* INTERNAL_POLICY */, "Internal policy requirement", r) + opt("NOT_REQUIRED" /* NOT_REQUIRED */, "Not required", r) + opt("NOT_SURE" /* NOT_SURE */, "Not sure", r) + `</select></div><div class="field"><label>Replacement Option</label><select class="pd-replacement"><option value="">Select\u2026</option>` + opt("ANOTHER_TOOL" /* ANOTHER_TOOL */, "Another tool available", rep) + opt("INTERNAL_PROCESS" /* INTERNAL_PROCESS */, "Internal process", rep) + opt("NOT_NEEDED" /* NOT_NEEDED */, "Not needed if removed", rep) + opt("NO_REPLACEMENT" /* NO_REPLACEMENT */, "No replacement exists", rep) + opt("NOT_SURE" /* NOT_SURE */, "Not sure", rep) + `</select></div><div class="field"><label>Has Dependencies</label><select class="pd-dependency"><option value="">Select\u2026</option>` + opt("YES" /* YES */, "Yes, has dependencies", d) + opt("NO" /* NO */, "No dependencies", d) + opt("NOT_SURE" /* NOT_SURE */, "Not sure", d) + `</select></div></div><div class="field" style="max-width:240px;margin-top:8px;"><label>Line-item annual price (USD)<span class="hint">Optional</span></label><input type="number" class="pd-price" placeholder="24000" min="0" value="${price}" /></div></div>`;
+    }).join("");
+  }
+  function validateStep3() {
+    const blocks = document.querySelectorAll(".product-detail-block");
+    for (const block of blocks) {
+      const pid = block.dataset["productId"] ?? "";
+      const prod = PRODUCT_CATALOG.find((p) => p.id === pid);
+      const label = prod?.label ?? pid;
+      if (!block.querySelector(".pd-usage")?.value) return `Please select usage for ${label}.`;
+      if (!block.querySelector(".pd-requirement")?.value) return `Please select a requirement for ${label}.`;
+      if (!block.querySelector(".pd-replacement")?.value) return `Please select a replacement option for ${label}.`;
+      if (!block.querySelector(".pd-dependency")?.value) return `Please select dependency status for ${label}.`;
+    }
+    return null;
+  }
+  function saveStep3() {
+    const inputs = [];
+    document.querySelectorAll(".product-detail-block").forEach((block) => {
+      const pid = block.dataset["productId"];
+      if (!pid) return;
+      const usage = block.querySelector(".pd-usage").value;
+      const requirement = block.querySelector(".pd-requirement").value;
+      const replacement = block.querySelector(".pd-replacement").value;
+      const dependency = block.querySelector(".pd-dependency").value;
+      const priceVal = block.querySelector(".pd-price")?.value;
+      const input = { product_id: pid, usage, requirement, replacement, dependency };
+      if (priceVal && parseFloat(priceVal) > 0) input.annual_price_usd = parseFloat(priceVal);
+      inputs.push(input);
+    });
+    state.product_inputs = inputs;
+  }
+  function updateDiscountFields() {
+    const ds = $("discount_status")?.value ?? "";
+    const pf = $("discount-pct-field");
+    const uf = $("discount-usd-field");
+    if (pf) pf.hidden = ds !== "PCT_KNOWN" /* PCT_KNOWN */;
+    if (uf) uf.hidden = ds !== "USD_KNOWN" /* USD_KNOWN */;
+  }
+  function saveStep4() {
+    const ds = $("discount_status")?.value ?? "";
+    state.discount_status = ds ? ds : null;
+    const dpct = $("discount_pct")?.value ?? "";
+    state.discount_pct = dpct ? parseFloat(dpct) : null;
+    const dusd = $("discount_usd")?.value ?? "";
+    state.discount_usd = dusd ? parseFloat(dusd) : null;
+    const bs = $("bundle_structure")?.value ?? "";
+    state.bundle_structure = bs ? bs : null;
+    const credits = $("credits_usd")?.value ?? "";
+    state.credits_usd = credits ? parseFloat(credits) : null;
+    const rp = $("rate_protection_status")?.value ?? "";
+    state.rate_protection_status = rp ? rp : null;
+    const ri = $("renewal_increase_pct")?.value ?? "";
+    state.renewal_increase_pct = ri ? parseFloat(ri) : null;
+    const tc = $("tier_changed")?.value ?? "";
+    state.tier_changed = tc ? tc : null;
+    const pc = $("packaging_changed")?.value ?? "";
+    state.packaging_changed = pc ? pc : null;
+    const eny = $("expected_next_year_acv_usd")?.value ?? "";
+    state.expected_next_year_acv_usd = eny ? parseFloat(eny) : null;
+    const ct = $("construction_type")?.value ?? "";
+    state.construction_type = ct ? ct : null;
+    const tsp = $("target_savings_pct")?.value ?? "";
+    state.target_savings_pct = tsp ? parseInt(tsp, 10) : null;
+    const bef = $("before_annual_cost_usd")?.value ?? "";
+    state.before_annual_cost_usd = bef ? parseFloat(bef) : null;
+    const aft = $("after_annual_cost_usd")?.value ?? "";
+    state.after_annual_cost_usd = aft ? parseFloat(aft) : null;
+  }
+  function renderReview() {
+    const container = $("review-summary");
+    if (!container) return;
+    const termLabel = state.contract_term === "annual" ? "Annual" : state.contract_term === "multi_year" ? "Multi-year" : "Other";
+    const productLabels = state.selected_products.map((id) => PRODUCT_CATALOG.find((p) => p.id === id)?.label ?? id).join(", ") || "\u2014";
+    const rows = [
+      ["Annual Spend", state.annual_cost_usd != null ? fmtUSD(state.annual_cost_usd) : "\u2014"],
+      ["ACV", state.acv_usd != null ? fmtUSD(state.acv_usd) : "\u2014"],
+      ["Contract Term", termLabel],
+      ["Products", productLabels]
+    ];
+    if (state.discount_status) rows.push(["Discount Status", state.discount_status.replace(/_/g, " ")]);
+    if (state.discount_pct != null) rows.push(["Discount %", `${state.discount_pct}%`]);
+    if (state.discount_usd != null) rows.push(["Discount USD", fmtUSD(state.discount_usd)]);
+    if (state.bundle_structure) rows.push(["Bundle", state.bundle_structure]);
+    if (state.credits_usd != null) rows.push(["Credits", fmtUSD(state.credits_usd)]);
+    if (state.rate_protection_status) rows.push(["Rate Protection", state.rate_protection_status]);
+    if (state.renewal_increase_pct != null) rows.push(["Renewal Increase", `${state.renewal_increase_pct}%`]);
+    if (state.tier_changed) rows.push(["Tier Changed", state.tier_changed.replace(/_/g, " ")]);
+    if (state.packaging_changed) rows.push(["Packaging Changed", state.packaging_changed.replace(/_/g, " ")]);
+    if (state.expected_next_year_acv_usd != null) rows.push(["Expected Next-Year ACV", fmtUSD(state.expected_next_year_acv_usd)]);
+    if (state.construction_type) rows.push(["Construction Type", state.construction_type.replace(/_/g, " ")]);
+    if (state.target_savings_pct != null) rows.push(["Savings Target", `${state.target_savings_pct}%`]);
+    if (state.before_annual_cost_usd != null) rows.push(["Before Quote", fmtUSD(state.before_annual_cost_usd)]);
+    if (state.after_annual_cost_usd != null) rows.push(["After Quote", fmtUSD(state.after_annual_cost_usd)]);
+    container.innerHTML = `<table class="review-table"><thead><tr><th>Field</th><th>Value</th></tr></thead><tbody>` + rows.map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join("") + `</tbody></table>`;
+  }
+  function runLoadingAnimation() {
+    return new Promise((resolve) => {
+      let i = 0;
+      function tick() {
+        const li = $(`ls-${i}`);
+        if (li) {
+          li.classList.add("done");
+          const check = li.querySelector(".check");
+          if (check) check.textContent = "\u2713";
+        }
+        i++;
+        if (i < 5) {
+          setTimeout(tick, 300);
+        } else {
+          setTimeout(resolve, 200);
+        }
+      }
+      setTimeout(tick, 300);
+    });
+  }
+  function buildEngineInput() {
+    const input = {
+      annual_cost_usd: state.annual_cost_usd,
+      acv_usd: state.acv_usd,
+      contract_term: state.contract_term === "other" ? "annual" : state.contract_term,
+      products: state.selected_products,
+      product_inputs: state.product_inputs
+    };
+    if (state.discount_status) input["discount_status"] = state.discount_status;
+    if (state.discount_pct != null) input["discount_pct"] = state.discount_pct;
+    if (state.discount_usd != null) input["discount_usd"] = state.discount_usd;
+    if (state.bundle_structure) input["bundle_structure"] = state.bundle_structure;
+    if (state.credits_usd != null) input["credits_usd"] = state.credits_usd;
+    if (state.rate_protection_status) input["rate_protection_status"] = state.rate_protection_status;
+    if (state.renewal_increase_pct != null) input["renewal_increase_pct"] = state.renewal_increase_pct;
+    if (state.tier_changed) input["tier_changed"] = state.tier_changed;
+    if (state.packaging_changed) input["packaging_changed"] = state.packaging_changed;
+    if (state.expected_next_year_acv_usd != null) input["expected_next_year_acv_usd"] = state.expected_next_year_acv_usd;
+    if (state.construction_type) input["construction_type"] = state.construction_type;
+    if (state.target_savings_pct != null) input["target_savings_pct"] = state.target_savings_pct;
+    if (state.before_annual_cost_usd != null) input["before_annual_cost_usd"] = state.before_annual_cost_usd;
+    if (state.after_annual_cost_usd != null) input["after_annual_cost_usd"] = state.after_annual_cost_usd;
+    return input;
+  }
+  function verdictLabel(v) {
+    switch (v) {
+      case "VERIFIED_BEFORE_AFTER" /* VERIFIED_BEFORE_AFTER */:
+        return "Verified Savings";
+      case "SAVINGS_IDENTIFIED" /* SAVINGS_IDENTIFIED */:
+        return "Savings Identified";
+      case "OPPORTUNITY_NOT_QUANTIFIABLE" /* OPPORTUNITY_NOT_QUANTIFIABLE */:
+        return "Opportunity Identified";
+      case "NO_DEFENSIBLE_SAVINGS_IDENTIFIED" /* NO_DEFENSIBLE_SAVINGS_IDENTIFIED */:
+        return "No Defensible Savings";
+      default:
+        return String(v).replace(/_/g, " ");
+    }
+  }
+  function renderExecutiveSummary(output) {
+    const container = $("results-executive-summary");
+    if (!container) return;
+    const fr = output.free_result;
+    const isVerified = fr.verdict === "VERIFIED_BEFORE_AFTER" /* VERIFIED_BEFORE_AFTER */;
+    const showSavings = isVerified && fr.savings_amount != null && fr.savings_amount > 0;
+    const candidateCount = output.candidates?.candidates.length ?? 0;
+    const blockedCount = output.candidates?.blocked.length ?? 0;
+    const stat = (label, value, cls = "") => `<div class="exec-stat"><div class="exec-stat-label">${label}</div><div class="exec-stat-value${cls ? " " + cls : ""}">${value}</div></div>`;
+    let statsHtml = stat("Current Annual Spend", fmtUSD(fr.current_spend));
+    if (showSavings) statsHtml += stat("Verified Savings", fmtUSD(fr.savings_amount), "green");
+    statsHtml += stat("Optimization Candidates", String(candidateCount));
+    statsHtml += stat("Blocked Products", String(blockedCount));
+    statsHtml += stat("Verdict", verdictLabel(fr.verdict));
+    let noticesHtml = "";
+    const topWarnings = output.warnings.slice(0, 2);
+    if (topWarnings.length > 0)
+      noticesHtml += `<div class="alert warning" style="margin-top:16px;"><strong>Notices:</strong><br>` + topWarnings.map((w) => `\u2022 ${w}`).join("<br>") + `</div>`;
+    const topAssumptions = output.assumptions.slice(0, 2);
+    if (topAssumptions.length > 0)
+      noticesHtml += `<div class="alert info" style="margin-top:12px;"><strong>Commercial Assumptions:</strong><br>` + topAssumptions.map((a) => `\u2022 ${a}`).join("<br>") + `</div>`;
+    container.innerHTML = `<div class="card"><div class="card-title">Executive Summary</div><div class="exec-summary-grid">${statsHtml}</div>${noticesHtml}</div>`;
+  }
+  function renderProductAudit(output) {
+    const container = $("results-product-audit");
+    if (!container) return;
+    const productInputs = lastInput?.["product_inputs"] ?? [];
+    if (productInputs.length === 0) {
+      container.innerHTML = "";
+      return;
+    }
+    const rows = productInputs.map((pi) => {
+      const prod = PRODUCT_CATALOG.find((p) => p.id === pi.product_id);
+      const candInfo = getCandidateStatus(pi.product_id, output);
+      return {
+        name: prod?.label ?? pi.product_id,
+        usage: USAGE_LABELS[pi.usage] ?? pi.usage,
+        req: REQUIREMENT_LABELS[pi.requirement] ?? pi.requirement,
+        dep: DEPENDENCY_LABELS[pi.dependency] ?? pi.dependency,
+        spend: pi.annual_price_usd != null ? fmtUSD(pi.annual_price_usd) + "/yr" : "\u2014",
+        candStatus: candInfo.status,
+        why: candInfo.why,
+        savStatus: getSavingsStatus(pi.product_id, output)
+      };
+    });
+    const tableRows = rows.map(
+      (r) => `<tr><td><strong>${r.name}</strong></td><td>${r.usage}</td><td>${r.req}</td><td>${r.dep}</td><td>${r.spend}</td><td>${r.candStatus}</td><td>${r.savStatus || "\u2014"}</td><td>${r.why || "\u2014"}</td></tr>`
+    ).join("");
+    const cards = rows.map(
+      (r) => `<div class="audit-card"><div class="audit-card-title">${r.name}</div><div class="audit-card-row"><span class="audit-card-label">Usage</span><span>${r.usage}</span></div><div class="audit-card-row"><span class="audit-card-label">Requirement</span><span>${r.req}</span></div><div class="audit-card-row"><span class="audit-card-label">Dependency</span><span>${r.dep}</span></div><div class="audit-card-row"><span class="audit-card-label">Spend</span><span>${r.spend}</span></div><div class="audit-card-row"><span class="audit-card-label">Status</span><span>${r.candStatus}</span></div>` + (r.savStatus ? `<div class="audit-card-row"><span class="audit-card-label">Savings</span><span>${r.savStatus}</span></div>` : "") + (r.why ? `<div class="audit-card-row"><span class="audit-card-label">Note</span><span>${r.why}</span></div>` : "") + `</div>`
+    ).join("");
+    container.innerHTML = `<div class="card"><div class="card-title">Product Audit</div><div style="overflow-x:auto;"><table class="audit-table"><thead><tr><th>Product</th><th>Usage</th><th>Requirement</th><th>Dependency</th><th>Line-item Spend</th><th>Candidate Status</th><th>Savings Status</th><th>Note</th></tr></thead><tbody>${tableRows}</tbody></table></div><div id="audit-cards-mobile">${cards}</div></div>`;
+  }
+  function renderCounterfactualSection(output) {
+    const container = $("results-counterfactual");
+    if (!container) return;
+    const cfResults = output.counterfactual?.counterfactual_results ?? [];
+    if (cfResults.length === 0) {
+      container.innerHTML = "";
+      return;
+    }
+    const cards = cfResults.map((cf) => {
+      const prod = PRODUCT_CATALOG.find((p) => p.id === cf.candidate.product_id);
+      const name = prod?.label ?? cf.candidate.product_id;
+      const rc = cf.result_class;
+      const isCommOpp = rc === "SAVINGS_IDENTIFIED" /* SAVINGS_IDENTIFIED */ && (cf.dollar_saving == null || cf.dollar_saving === 0);
+      const displayClass = rc;
+      const badgeLabel = isCommOpp ? "COMMERCIAL OPPORTUNITY" : rc === "VERIFIED_BEFORE_AFTER" /* VERIFIED_BEFORE_AFTER */ ? "VERIFIED BEFORE/AFTER" : rc === "OPPORTUNITY_NOT_QUANTIFIABLE" /* OPPORTUNITY_NOT_QUANTIFIABLE */ ? "OPPORTUNITY \u2014 NOT QUANTIFIABLE" : rc.replace(/_/g, " ");
+      const badgeCls = rc === "VERIFIED_BEFORE_AFTER" /* VERIFIED_BEFORE_AFTER */ || rc === "SAVINGS_IDENTIFIED" /* SAVINGS_IDENTIFIED */ && !isCommOpp ? "VERIFIED_BEFORE_AFTER" : rc === "OPPORTUNITY_NOT_QUANTIFIABLE" /* OPPORTUNITY_NOT_QUANTIFIABLE */ ? "OPPORTUNITY_NOT_QUANTIFIABLE" : "NO_DEFENSIBLE_SAVINGS_IDENTIFIED";
+      let extraHtml = "";
+      if (rc === "VERIFIED_BEFORE_AFTER" /* VERIFIED_BEFORE_AFTER */ && cf.dollar_saving != null && cf.dollar_saving > 0)
+        extraHtml = `<div class="cf-saving">Verified quote-to-quote difference: ${fmtUSD(cf.dollar_saving)}/year</div>`;
+      else if (rc === "OPPORTUNITY_NOT_QUANTIFIABLE" /* OPPORTUNITY_NOT_QUANTIFIABLE */)
+        extraHtml = `<div class="cf-opportunity">Savings not yet quantifiable</div>`;
+      return `<div class="cf-result-card ${displayClass}"><div class="cf-card-header"><span class="cf-product-name">${name}</span><span class="result-badge ${badgeCls}">${badgeLabel}</span></div><div class="cf-explanation">${cf.explanation}</div>${extraHtml}</div>`;
+    }).join("");
+    container.innerHTML = `<div class="card"><div class="card-title">Counterfactual Analysis</div>${cards}</div>`;
+  }
+  function evidenceSourceType(id) {
+    if (id.startsWith("REDDIT-")) return "Customer observation (Reddit)";
+    if (id.startsWith("WEB-")) return "Web/secondary source";
+    if (id.startsWith("PQ-")) return "Public procurement quote";
+    return "Public observation";
+  }
+  function renderEvidenceSection(output) {
+    const container = $("results-evidence");
+    if (!container) return;
+    const trailIds = output.paid_report.evidence_trail ?? [];
+    const benchIds = output.benchmark?.comparable_evidence_ids ?? [];
+    const allIds = [.../* @__PURE__ */ new Set([...trailIds, ...benchIds])];
+    if (allIds.length === 0) {
+      container.innerHTML = "";
+      return;
+    }
+    const items = allIds.map(
+      (id) => `<div class="evidence-item"><details><summary>${id} \u2014 ${evidenceSourceType(id)}</summary><div class="ev-meta"><div class="ev-meta-row"><span class="ev-meta-label">Source type:</span> ${evidenceSourceType(id)}</div><div class="ev-meta-row"><span class="ev-meta-label">Supports:</span> Benchmark context and effective rate comparison</div><div class="ev-meta-row"><span class="ev-meta-label">Does not support:</span> Exact post-removal renewal pricing</div></div></details></div>`
+    ).join("");
+    container.innerHTML = `<div class="card"><div class="card-title">Evidence Trail</div><p class="section-note">Evidence IDs referenced in this analysis. Expand each to see source context.</p>${items}</div>`;
+  }
+  function generatePDF(output, input) {
+    const jspdfLib = window.jspdf;
+    if (!jspdfLib) {
+      alert("PDF library not loaded. Please refresh the page and try again.");
+      return;
+    }
+    const doc = new jspdfLib.jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const pageW = 210;
+    const pageH = 297;
+    const margin = 20;
+    const contentW = pageW - margin * 2;
+    let y = margin;
+    const maxY = pageH - 35;
+    const forest = [18, 59, 42];
+    const green = [31, 138, 91];
+    const mint = [234, 247, 240];
+    const charcoal = [27, 31, 30];
+    const muted = [107, 114, 128];
+    const amber = [217, 119, 6];
+    const red = [220, 38, 38];
+    const dateStr = (/* @__PURE__ */ new Date()).toISOString().split("T")[0].replace(/-/g, "");
+    const randomHex = Math.random().toString(16).substring(2, 8).toUpperCase();
+    const reportId = `RS-${dateStr}-${randomHex}`;
+    let pageNum = 0;
+    function addPage() {
+      doc.addPage();
+      pageNum++;
+      addPageHeader();
+      y = 32;
+    }
+    function checkPage(needed = 15) {
+      if (y + needed > maxY) {
+        addPage();
+      }
+    }
+    function addWatermark() {
+      doc.setTextColor(31, 138, 91);
+      doc.setFontSize(60);
+      doc.setFont("helvetica", "bold");
+      const txt = "RenewalScope";
+      const txtW = doc.getTextWidth(txt);
+      doc.saveGraphicsState();
+      doc.setGState(new doc.GState({ opacity: 0.03 }));
+      doc.text(txt, (pageW - txtW) / 2, pageH / 2, { angle: -45 });
+      doc.restoreGraphicsState();
+    }
+    function addPageHeader() {
+      if (pageNum === 0) return;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(...forest);
+      doc.text("RenewalScope", margin, 15);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(...muted);
+      doc.text("Procore Renewal Analysis", margin + 45, 15);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(...muted);
+      doc.text(reportId, pageW - margin, 15, { align: "right" });
+      doc.setDrawColor(...green);
+      doc.setLineWidth(0.5);
+      doc.line(margin, 18, pageW - margin, 18);
+      addWatermark();
+    }
+    function addPageFooter(current, total) {
+      const footerY = pageH - 20;
+      doc.setDrawColor(229, 231, 235);
+      doc.setLineWidth(0.3);
+      doc.line(margin, footerY - 5, pageW - margin, footerY - 5);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(8);
+      doc.setTextColor(...forest);
+      doc.text("RenewalScope", margin, footerY);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7);
+      doc.setTextColor(...muted);
+      doc.text("Evidence-backed renewal intelligence.", margin, footerY + 4);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(...muted);
+      if (current > 0) {
+        doc.text(`Page ${current} of ${total}`, pageW - margin, footerY, { align: "right" });
+      }
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(6.5);
+      doc.setTextColor(...muted);
+      doc.text("Independent analysis \xB7 Not affiliated with Procore Technologies, Inc.", pageW / 2, footerY + 4, { align: "center" });
+    }
+    function h1(text) {
+      checkPage(20);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(18);
+      doc.setTextColor(...forest);
+      doc.text(text, margin, y);
+      y += 12;
+    }
+    function h2(text) {
+      checkPage(15);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
+      doc.setTextColor(...green);
+      doc.text(text, margin, y);
+      y += 10;
+    }
+    function h3(text) {
+      checkPage(12);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.setTextColor(...charcoal);
+      doc.text(text, margin, y);
+      y += 8;
+    }
+    function body(text, color = charcoal) {
+      checkPage(10);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9.5);
+      doc.setTextColor(...color);
+      const lines = doc.splitTextToSize(text, contentW);
+      lines.forEach((line) => {
+        checkPage(6);
+        doc.text(line, margin, y);
+        y += 5;
+      });
+    }
+    function badge(text, color) {
+      const colors = {
+        green: { bg: [209, 250, 229], text: [6, 95, 70] },
+        amber: { bg: [254, 243, 199], text: [146, 64, 14] },
+        gray: { bg: [243, 244, 246], text: [75, 85, 99] },
+        red: { bg: [254, 226, 226], text: [153, 27, 27] }
+      };
+      const c = colors[color];
+      doc.setFillColor(...c.bg);
+      doc.setDrawColor(...c.bg);
+      const w = doc.getTextWidth(text) + 6;
+      doc.roundedRect(margin, y - 4, w, 6, 1.5, 1.5, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7);
+      doc.setTextColor(...c.text);
+      doc.text(text, margin + 3, y);
+      y += 6;
+    }
+    function divider() {
+      checkPage(8);
+      doc.setDrawColor(229, 231, 235);
+      doc.setLineWidth(0.3);
+      doc.line(margin, y, pageW - margin, y);
+      y += 6;
+    }
+    function metricCard(label, value, color = "default") {
+      const cardW = 85;
+      const cardH = 28;
+      doc.setFillColor(255, 255, 255);
+      doc.setDrawColor(229, 231, 235);
+      doc.setLineWidth(0.5);
+      doc.roundedRect(margin, y, cardW, cardH, 2, 2, "FD");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7);
+      doc.setTextColor(...muted);
+      doc.text(label.toUpperCase(), margin + 6, y + 8);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      if (color === "green") {
+        doc.setTextColor(...green);
+      } else {
+        doc.setTextColor(...charcoal);
+      }
+      doc.text(value, margin + 6, y + 20);
+      return { w: cardW, h: cardH };
+    }
+    pageNum = 0;
+    doc.setFillColor(...forest);
+    doc.rect(0, 0, pageW, 70, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(32);
+    doc.setTextColor(255, 255, 255);
+    doc.text("RenewalScope", pageW / 2, 35, { align: "center" });
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(234, 247, 240);
+    doc.text("Evidence-backed renewal intelligence.", pageW / 2, 45, { align: "center" });
+    doc.setFillColor(31, 138, 91);
+    doc.saveGraphicsState();
+    doc.setGState(new doc.GState({ opacity: 0.15 }));
+    const points = [[pageW * 0.6, 70], [pageW, 70], [pageW, 120], [pageW * 0.7, 120]];
+    doc.triangle(points[0][0], points[0][1], points[1][0], points[1][1], points[2][0], points[2][1], "F");
+    doc.restoreGraphicsState();
+    y = 95;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(24);
+    doc.setTextColor(...forest);
+    doc.text("Procore Renewal Analysis", pageW / 2, y, { align: "center" });
+    y += 12;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    doc.setTextColor(...muted);
+    doc.text("Evidence-based commercial review & negotiation guidance", pageW / 2, y, { align: "center" });
+    y += 35;
+    const metaX = 45;
+    doc.setFillColor(248, 250, 249);
+    doc.setDrawColor(229, 231, 235);
+    doc.roundedRect(metaX, y, 120, 65, 3, 3, "FD");
+    const metaY = y + 12;
+    const rowH = 10;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(...muted);
+    let my = metaY;
+    doc.text("PREPARED FOR:", metaX + 10, my);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(...charcoal);
+    doc.text("Customer", metaX + 10, my + 5);
+    my += rowH + 3;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(...muted);
+    doc.text("REPORT ID:", metaX + 10, my);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(...charcoal);
+    doc.text(reportId, metaX + 10, my + 5);
+    my += rowH + 3;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(...muted);
+    doc.text("GENERATED:", metaX + 10, my);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(...charcoal);
+    const dateFormatted = (/* @__PURE__ */ new Date()).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+    doc.text(dateFormatted, metaX + 10, my + 5);
+    my += rowH + 3;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(...muted);
+    doc.text("ANALYSIS TYPE:", metaX + 10, my);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(...charcoal);
+    doc.text("Renewal Optimization", metaX + 10, my + 5);
+    my += rowH + 3;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(...muted);
+    doc.text("CONTRACT TERM:", metaX + 10, my);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(...charcoal);
+    const term = String(input["contract_term"] ?? "Annual");
+    doc.text(term.charAt(0).toUpperCase() + term.slice(1), metaX + 10, my + 5);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7.5);
+    doc.setTextColor(...muted);
+    doc.text("Independent analysis \xB7 Not affiliated with Procore Technologies, Inc.", pageW / 2, pageH - 15, { align: "center" });
+    addPageFooter(0, 1);
+    addPage();
+    h1("Executive Summary");
+    y += 5;
+    const fr = output.free_result;
+    if (fr.verdict === "VERIFIED_BEFORE_AFTER" /* VERIFIED_BEFORE_AFTER */) {
+      badge("VERIFIED SAVINGS IDENTIFIED", "green");
+    } else if (fr.verdict === "SAVINGS_IDENTIFIED" /* SAVINGS_IDENTIFIED */) {
+      badge("SAVINGS IDENTIFIED", "green");
+    } else if (fr.verdict === "OPPORTUNITY_NOT_QUANTIFIABLE" /* OPPORTUNITY_NOT_QUANTIFIABLE */) {
+      badge("OPPORTUNITY IDENTIFIED \u2014 SAVINGS NOT QUANTIFIABLE", "amber");
+    } else {
+      badge("NO DEFENSIBLE SAVINGS IDENTIFIED", "gray");
+    }
+    y += 8;
+    const startY = y;
+    metricCard("CURRENT ANNUAL SPEND", fmtUSD(fr.current_spend));
+    if (fr.verdict === "VERIFIED_BEFORE_AFTER" /* VERIFIED_BEFORE_AFTER */ && fr.savings_amount != null && fr.savings_amount > 0) {
+      const card = metricCard("VERIFIED SAVINGS", fmtUSD(fr.savings_amount) + " / year", "green");
+      y = startY;
+      metricCard("CURRENT ANNUAL SPEND", fmtUSD(fr.current_spend));
+      doc.text("", margin + 90, y);
+      y = startY;
+      const origMargin = margin;
+      doc.internal.pageSize.width;
+      doc.text("", 0, 0);
+      const saveY = y;
+      const saveMargin = margin;
+      const offsetX = 95;
+      doc.setFillColor(255, 255, 255);
+      doc.setDrawColor(229, 231, 235);
+      doc.roundedRect(margin + offsetX, y, 85, 28, 2, 2, "FD");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7);
+      doc.setTextColor(...muted);
+      doc.text("VERIFIED SAVINGS", margin + offsetX + 6, y + 8);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
+      doc.setTextColor(...green);
+      doc.text(fmtUSD(fr.savings_amount) + " / year", margin + offsetX + 6, y + 20);
+      y = saveY + 32;
+    } else {
+      y += 32;
+    }
+    const row2Y = y;
+    const candCount = output.candidates?.candidates.length ?? 0;
+    metricCard("OPTIMIZATION CANDIDATES", String(candCount));
+    const blockedCount = output.candidates?.blocked.length ?? 0;
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(229, 231, 235);
+    doc.roundedRect(margin + 95, row2Y, 85, 28, 2, 2, "FD");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7);
+    doc.setTextColor(...muted);
+    doc.text("BLOCKED PRODUCTS", margin + 95 + 6, row2Y + 8);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.setTextColor(...charcoal);
+    doc.text(String(blockedCount), margin + 95 + 6, row2Y + 20);
+    y = row2Y + 35;
+    body(fr.explanation);
+    y += 5;
+    divider();
+    checkPage(60);
+    h2("Commercial Baseline");
+    y += 3;
+    const kv = (label, value) => {
+      checkPage(8);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(8.5);
+      doc.setTextColor(...muted);
+      doc.text(label + ":", margin, y);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9.5);
+      doc.setTextColor(...charcoal);
+      doc.text(value, margin + 55, y);
+      y += 7;
+    };
+    kv("Annual Spend", fmtUSD(fr.current_spend));
+    kv("ACV", fmtUSD(Number(input["acv_usd"] ?? 0)));
+    kv("Contract Term", String(input["contract_term"] ?? "Annual"));
+    if (input["renewal_increase_pct"]) {
+      kv("Renewal Increase", input["renewal_increase_pct"] + "%");
+    }
+    if (input["discount_pct"]) {
+      kv("Discount", input["discount_pct"] + "%");
+    }
+    if (input["bundle_structure"]) {
+      kv("Bundle Structure", String(input["bundle_structure"]).replace(/_/g, " "));
+    }
+    if (fr.effective_rate != null) {
+      kv("Effective Rate", fmtRate(fr.effective_rate) + " per $1M ACV");
+    }
+    if (fr.benchmark_position) {
+      kv("Benchmark Position", fr.benchmark_position.replace(/_/g, " ").toUpperCase());
+    }
+    y += 5;
+    divider();
+    const bm = output.benchmark;
+    if (bm?.min_evidence_count_met) {
+      h2("Benchmark Context");
+      y += 3;
+      body("Directional benchmark from public observations; not an official Procore price list.", muted);
+      y += 5;
+      kv("Your Rate", fmtRate(bm.user_rate) + " per $1M ACV");
+      kv("25th Percentile", fmtRate(bm.stats.p25));
+      kv("Median (50th)", fmtRate(bm.stats.p50));
+      kv("75th Percentile", fmtRate(bm.stats.p75));
+      kv("Observed Range", fmtRate(bm.stats.min) + " - " + fmtRate(bm.stats.max));
+      kv("Evidence Count", String(bm.stats.count));
+      y += 5;
+      divider();
+    }
+    const productInputs = input["product_inputs"] ?? [];
+    if (productInputs.length > 0) {
+      checkPage(40);
+      h2("Product Audit");
+      y += 5;
+      productInputs.forEach((pi) => {
+        checkPage(25);
+        const prod = PRODUCT_CATALOG.find((p) => p.id === pi.product_id);
+        const name = prod?.label ?? pi.product_id;
+        const cs = getCandidateStatus(pi.product_id, output);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10.5);
+        doc.setTextColor(...forest);
+        doc.text(name, margin, y);
+        y += 7;
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8.5);
+        doc.setTextColor(...muted);
+        const details = [
+          `Usage: ${USAGE_LABELS[pi.usage] ?? pi.usage}`,
+          `Requirement: ${REQUIREMENT_LABELS[pi.requirement] ?? pi.requirement}`,
+          `Dependency: ${DEPENDENCY_LABELS[pi.dependency] ?? pi.dependency}`
+        ];
+        if (pi.annual_price_usd != null) {
+          details.push(`Annual Spend: ${fmtUSD(pi.annual_price_usd)}`);
+        }
+        details.push(`Status: ${cs.status}`);
+        const sav = getSavingsStatus(pi.product_id, output);
+        if (sav) {
+          details.push(`Savings: ${sav}`);
+        }
+        details.forEach((d) => {
+          doc.text("  \u2022 " + d, margin + 2, y);
+          y += 5;
+        });
+        y += 3;
+      });
+      divider();
+    }
+    const cfResults = output.counterfactual?.counterfactual_results ?? [];
+    if (cfResults.length > 0) {
+      checkPage(30);
+      h2("Counterfactual Analysis");
+      y += 3;
+      body("Testing alternative configurations against available evidence.", muted);
+      y += 8;
+      cfResults.forEach((cf) => {
+        checkPage(35);
+        const prod = PRODUCT_CATALOG.find((p) => p.id === cf.candidate.product_id);
+        const name = prod?.label ?? cf.candidate.product_id;
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.setTextColor(...green);
+        doc.text(name, margin, y);
+        y += 7;
+        if (cf.result_class === "VERIFIED_BEFORE_AFTER" /* VERIFIED_BEFORE_AFTER */) {
+          badge("VERIFIED QUOTE-TO-QUOTE DIFFERENCE", "green");
+          y += 2;
+        } else if (cf.result_class === "OPPORTUNITY_NOT_QUANTIFIABLE" /* OPPORTUNITY_NOT_QUANTIFIABLE */) {
+          badge("SAVINGS NOT YET QUANTIFIABLE", "amber");
+          y += 2;
+        }
+        body(cf.explanation);
+        y += 3;
+        if (cf.result_class === "VERIFIED_BEFORE_AFTER" /* VERIFIED_BEFORE_AFTER */ && cf.dollar_saving != null && cf.dollar_saving > 0) {
+          doc.setFillColor(...mint);
+          doc.setDrawColor(...green);
+          doc.roundedRect(margin, y, contentW, 12, 2, 2, "FD");
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(10);
+          doc.setTextColor(...green);
+          doc.text("Verified quote-to-quote difference: " + fmtUSD(cf.dollar_saving) + "/year", margin + 6, y + 8);
+          y += 15;
+          doc.setFont("helvetica", "italic");
+          doc.setFontSize(8);
+          doc.setTextColor(...muted);
+          body("Attribution to a specific product is not established from quote amounts alone.", muted);
+        }
+        y += 5;
+      });
+      divider();
+    }
+    const trailIds = output.paid_report.evidence_trail ?? [];
+    const benchIds = output.benchmark?.comparable_evidence_ids ?? [];
+    const allEvidence = [.../* @__PURE__ */ new Set([...trailIds, ...benchIds])];
+    if (allEvidence.length > 0) {
+      checkPage(30);
+      h2("Evidence Trail");
+      y += 3;
+      body("Evidence sources referenced in this analysis.", muted);
+      y += 8;
+      allEvidence.forEach((evidenceId) => {
+        checkPage(18);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9);
+        doc.setTextColor(...charcoal);
+        doc.text(evidenceId, margin, y);
+        y += 6;
+        const sourceType = evidenceId.startsWith("REDDIT-") ? "Customer observation (Reddit)" : evidenceId.startsWith("WEB-") ? "Web/secondary source" : evidenceId.startsWith("PQ-") ? "Public procurement quote" : "Public observation";
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.setTextColor(...muted);
+        doc.text("  Source: " + sourceType, margin + 2, y);
+        y += 5;
+        doc.text("  Supports: Benchmark context and effective rate comparison", margin + 2, y);
+        y += 5;
+        doc.text("  Does not support: Exact post-removal renewal pricing", margin + 2, y);
+        y += 8;
+      });
+      divider();
+    }
+    const qes = output.paid_report.quote_evidence_summary;
+    if (qes && qes.records.length > 0) {
+      checkPage(40);
+      h2("Public Quote Evidence Summary");
+      y += 3;
+      body(
+        `${qes.usable_records} usable public quote observations from public procurement records. ${qes.excluded_records} excluded (pooled structure, incomplete, or commercial-structure-only records). These are PUBLIC QUOTE OBSERVATIONS \u2014 not an official Procore price list. No individual record establishes a universal module price or guaranteed removal saving.`,
+        muted
+      );
+      y += 8;
+      doc.setFillColor(254, 243, 199);
+      doc.setDrawColor(217, 119, 6);
+      doc.roundedRect(margin, y, contentW, 9, 2, 2, "FD");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(8);
+      doc.setTextColor(146, 64, 14);
+      doc.text("CONTEXTUAL EVIDENCE ONLY \u2014 No savings are guaranteed from these observations", margin + 4, y + 5.5);
+      y += 15;
+      const usableRecords = qes.records.filter((r) => !r.exclude_from_calculations && r.quoted_annual_price_usd !== null);
+      const excludedRecords = qes.records.filter((r) => r.exclude_from_calculations);
+      if (usableRecords.length > 0) {
+        h3("Usable Observations");
+        y += 2;
+        usableRecords.forEach((rec) => {
+          checkPage(38);
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(9);
+          doc.setTextColor(...charcoal);
+          doc.text(`${rec.evidence_id}  \xB7  ${rec.normalized_product_id ?? rec.product_reported}`, margin, y);
+          y += 6;
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(8);
+          doc.setTextColor(...muted);
+          doc.text(`Source: ${rec.source_description}`, margin + 2, y);
+          y += 5;
+          const priceStr = rec.quoted_annual_price_usd !== null ? `$${rec.quoted_annual_price_usd.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/year` : "Price not disclosed";
+          doc.text(`Observed price: ${priceStr}   ACV context: ${rec.acv_context}   Term: ${rec.term}`, margin + 2, y);
+          y += 5;
+          if (rec.limitation_flags.length > 0) {
+            doc.setTextColor(...amber);
+            doc.text(`Flags: ${rec.limitation_flags.join(", ")}`, margin + 2, y);
+            doc.setTextColor(...muted);
+            y += 5;
+          }
+          const supLines = doc.splitTextToSize(`Supports: ${rec.what_it_supports}`, contentW - 8);
+          supLines.forEach((line) => {
+            checkPage(5);
+            doc.text(line, margin + 2, y);
+            y += 4.5;
+          });
+          const noSupLines = doc.splitTextToSize(`Does not support: ${rec.what_it_does_not_support}`, contentW - 8);
+          doc.setTextColor(220, 38, 38);
+          noSupLines.forEach((line) => {
+            checkPage(5);
+            doc.text(line, margin + 2, y);
+            y += 4.5;
+          });
+          doc.setTextColor(...muted);
+          y += 5;
+          doc.setDrawColor(229, 231, 235);
+          doc.setLineWidth(0.2);
+          doc.line(margin + 2, y, pageW - margin - 2, y);
+          y += 5;
+        });
+      }
+      if (excludedRecords.length > 0) {
+        checkPage(20);
+        h3("Excluded Records (not used in calculations)");
+        y += 2;
+        excludedRecords.forEach((rec) => {
+          checkPage(14);
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(8);
+          doc.setTextColor(...muted);
+          doc.text(`${rec.evidence_id}  \xB7  ${rec.normalized_product_id ?? rec.product_reported ?? "Platform"}`, margin, y);
+          y += 5;
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(7.5);
+          doc.text(`${rec.source_description}   Flags: ${rec.limitation_flags.join(", ")}`, margin + 2, y);
+          y += 7;
+        });
+      }
+      divider();
+    }
+    if (output.assumptions.length > 0 || output.warnings.length > 0) {
+      checkPage(40);
+      h2("Commercial Assumptions & Notices");
+      y += 5;
+      if (output.assumptions.length > 0) {
+        h3("Assumptions");
+        y += 3;
+        output.assumptions.forEach((assumption) => {
+          checkPage(8);
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(9);
+          doc.setTextColor(...charcoal);
+          const lines = doc.splitTextToSize("  \u2022 " + assumption, contentW - 4);
+          lines.forEach((line) => {
+            checkPage(6);
+            doc.text(line, margin + 2, y);
+            y += 5;
+          });
+        });
+        y += 5;
+      }
+      if (output.warnings.length > 0) {
+        h3("Notices");
+        y += 3;
+        output.warnings.forEach((warning) => {
+          checkPage(8);
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(9);
+          doc.setTextColor(...amber);
+          const lines = doc.splitTextToSize("  \u26A0 " + warning, contentW - 4);
+          lines.forEach((line) => {
+            checkPage(6);
+            doc.text(line, margin + 2, y);
+            y += 5;
+          });
+        });
+        y += 5;
+      }
+      divider();
+    }
+    const neg = output.negotiation;
+    if (neg) {
+      checkPage(50);
+      h2("Negotiation Plan");
+      y += 5;
+      h3("What to Ask");
+      y += 2;
+      body(neg.what_to_ask);
+      y += 5;
+      h3("Why");
+      y += 2;
+      body(neg.why);
+      y += 5;
+      h3("Configuration Requested");
+      y += 2;
+      body(neg.configuration_requested);
+      y += 5;
+      if (neg.target_price != null) {
+        checkPage(18);
+        h3("Negotiation Target");
+        y += 2;
+        doc.setFillColor(...mint);
+        doc.setDrawColor(...green);
+        doc.roundedRect(margin, y, 80, 22, 2, 2, "FD");
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(7);
+        doc.setTextColor(...muted);
+        doc.text("TARGET PRICE", margin + 6, y + 7);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
+        doc.setTextColor(...green);
+        doc.text(fmtUSD(neg.target_price), margin + 6, y + 16);
+        y += 25;
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(7.5);
+        doc.setTextColor(...muted);
+        body("Negotiation target \u2014 not a predicted Procore quote.", muted);
+        y += 3;
+      }
+      if (neg.max_acceptable_price != null) {
+        checkPage(18);
+        h3("Maximum Acceptable Price");
+        y += 2;
+        doc.setFillColor(254, 226, 226);
+        doc.setDrawColor(...red);
+        doc.roundedRect(margin, y, 80, 22, 2, 2, "FD");
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(7);
+        doc.setTextColor(...muted);
+        doc.text("WALK-AWAY PRICE", margin + 6, y + 7);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
+        doc.setTextColor(...red);
+        doc.text(fmtUSD(neg.max_acceptable_price), margin + 6, y + 16);
+        y += 25;
+      }
+      if (neg.confirm_in_writing.length > 0) {
+        h3("Confirm in Writing");
+        y += 3;
+        neg.confirm_in_writing.forEach((item) => {
+          checkPage(8);
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(9);
+          doc.setTextColor(...charcoal);
+          const lines = doc.splitTextToSize("  \u2713 " + item, contentW - 4);
+          lines.forEach((line) => {
+            checkPage(6);
+            doc.text(line, margin + 2, y);
+            y += 5;
+          });
+        });
+        y += 3;
+      }
+      divider();
+    }
+    checkPage(50);
+    h2("Final Decision Framework");
+    y += 5;
+    doc.setFillColor(240, 253, 244);
+    doc.setDrawColor(167, 243, 208);
+    doc.roundedRect(margin, y, contentW, 8, 2, 2, "FD");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(6, 95, 70);
+    doc.text("WHAT WE KNOW", margin + 4, y + 5.5);
+    y += 11;
+    let knownText = "";
+    if (fr.verdict === "VERIFIED_BEFORE_AFTER" /* VERIFIED_BEFORE_AFTER */ && fr.savings_amount) {
+      knownText = `We have a verified $${fr.savings_amount.toLocaleString()}/year quote-to-quote difference.`;
+    } else if (fr.verdict === "OPPORTUNITY_NOT_QUANTIFIABLE" /* OPPORTUNITY_NOT_QUANTIFIABLE */) {
+      knownText = "An optimization candidate was identified, but savings cannot be quantified without additional evidence.";
+    } else {
+      knownText = "No products survived requirement and dependency checks as optimization candidates.";
+    }
+    body(knownText);
+    y += 8;
+    doc.setFillColor(254, 243, 199);
+    doc.setDrawColor(252, 211, 77);
+    doc.roundedRect(margin, y, contentW, 8, 2, 2, "FD");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(146, 64, 14);
+    doc.text("WHAT WE DON'T KNOW", margin + 4, y + 5.5);
+    y += 11;
+    let unknownText = "";
+    if (fr.verdict === "VERIFIED_BEFORE_AFTER" /* VERIFIED_BEFORE_AFTER */) {
+      unknownText = "Whether this difference is specifically attributable to removing any individual product without configuration-mapped quotes.";
+    } else if (fr.verdict === "OPPORTUNITY_NOT_QUANTIFIABLE" /* OPPORTUNITY_NOT_QUANTIFIABLE */) {
+      unknownText = "The resulting Procore renewal price for the proposed configuration.";
+    } else {
+      unknownText = "Whether future configuration changes could produce eligible candidates.";
+    }
+    body(unknownText);
+    y += 8;
+    doc.setFillColor(234, 247, 240);
+    doc.setDrawColor(31, 138, 91);
+    doc.roundedRect(margin, y, contentW, 8, 2, 2, "FD");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(...forest);
+    doc.text("NEXT ACTION", margin + 4, y + 5.5);
+    y += 11;
+    const nextAction = fr.what_to_confirm[0] ?? "Cross-check findings against your actual Procore renewal quote.";
+    body(nextAction);
+    y += 8;
+    divider();
+    checkPage(40);
+    h2("Disclaimer");
+    y += 5;
+    const disclaimers = [
+      "Independent analysis. Not affiliated with Procore Technologies, Inc.",
+      "No savings are guaranteed. All financial calculations are deterministic and evidence-based.",
+      "Benchmark figures are directional context from public observations, not official Procore pricing.",
+      "Always cross-check findings against your actual Procore renewal quote before making decisions.",
+      "This analysis does not constitute legal, financial, or procurement advice. Consult appropriate professionals for specific guidance."
+    ];
+    disclaimers.forEach((disclaimer) => {
+      checkPage(10);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(...muted);
+      const lines = doc.splitTextToSize("\u2022 " + disclaimer, contentW - 2);
+      lines.forEach((line) => {
+        checkPage(6);
+        doc.text(line, margin, y);
+        y += 5;
+      });
+      y += 2;
+    });
+    const totalPages = doc.internal.pages.length - 1;
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      addPageFooter(i - 1, totalPages - 1);
+    }
+    const saveDateStr = (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
+    doc.save(`RenewalScope_Procore_Renewal_Analysis_${saveDateStr}.pdf`);
+  }
+  function renderStatusHero(output) {
+    const container = $("results-status-hero");
+    if (!container) return;
+    const verdict = output.free_result.verdict;
+    const savings = output.free_result.savings_amount;
+    const showSavings = savings != null && savings > 0 && (verdict === "VERIFIED_BEFORE_AFTER" /* VERIFIED_BEFORE_AFTER */ || verdict === "SAVINGS_IDENTIFIED" /* SAVINGS_IDENTIFIED */);
+    let heroClass = "";
+    let badgeClass = "none";
+    let badgeText = "Analysis Complete";
+    let titleText = "Analysis Complete";
+    if (verdict === "VERIFIED_BEFORE_AFTER" /* VERIFIED_BEFORE_AFTER */) {
+      heroClass = "verified";
+      badgeClass = "verified";
+      badgeText = "Verified Savings";
+      titleText = "Verified Savings Identified";
+    } else if (verdict === "SAVINGS_IDENTIFIED" /* SAVINGS_IDENTIFIED */) {
+      heroClass = "verified";
+      badgeClass = "verified";
+      badgeText = "Savings Identified";
+      titleText = "Potential Savings Identified";
+    } else if (verdict === "OPPORTUNITY_NOT_QUANTIFIABLE" /* OPPORTUNITY_NOT_QUANTIFIABLE */) {
+      heroClass = "uncertain";
+      badgeClass = "uncertain";
+      badgeText = "Opportunity Identified";
+      titleText = "Optimization Opportunity";
+    } else if (verdict === "NO_DEFENSIBLE_SAVINGS_IDENTIFIED" /* NO_DEFENSIBLE_SAVINGS_IDENTIFIED */) {
+      heroClass = "none";
+      badgeClass = "none";
+      badgeText = "No Defensible Savings";
+      titleText = "No Defensible Savings Identified";
+    }
+    const savingsLabel = verdict === "VERIFIED_BEFORE_AFTER" /* VERIFIED_BEFORE_AFTER */ ? "Verified Annual Savings" : "Identified Savings";
+    const savingsHTML = showSavings ? `<div class="spend-item"><div class="spend-label">${savingsLabel}</div><div class="spend-value savings">${fmtUSD(savings)}</div></div>` : "";
+    container.innerHTML = `<div class="status-hero ${heroClass}"><div class="status-badge ${badgeClass}">${badgeText}</div><div class="status-title">${titleText}</div><div class="status-subtitle">${output.free_result.explanation}</div><div class="spend-display"><div class="spend-item"><div class="spend-label">Current Annual Spend</div><div class="spend-value">${fmtUSD(output.free_result.current_spend)}</div></div>` + savingsHTML + `</div></div>`;
+  }
+  function getCandidateStatus(productId, output) {
+    const cands = output.candidates;
+    if (!cands) return { status: "Not evaluated", why: "" };
+    if (cands.skipped_product_ids.includes(productId))
+      return { status: "Not a candidate (actively used)", why: "Product is actively used" };
+    const blocked = cands.blocked.find((c) => c.product_id === productId);
+    if (blocked) return { status: "Blocked", why: blocked.blocked_reason ?? "Blocked by requirement or dependency" };
+    const candidate = cands.candidates.find((c) => c.product_id === productId);
+    if (candidate) {
+      if (candidate.blocked_reason) return { status: "Uncertain", why: candidate.blocked_reason };
+      return { status: "Eligible candidate", why: "" };
+    }
+    return { status: "Not evaluated", why: "" };
+  }
+  function getSavingsStatus(productId, output) {
+    if (!output.counterfactual) return "";
+    const cf = output.counterfactual.counterfactual_results.find((r) => r.candidate.product_id === productId);
+    if (!cf) return "";
+    if (cf.result_class === "VERIFIED_BEFORE_AFTER" /* VERIFIED_BEFORE_AFTER */ && cf.dollar_saving != null && cf.dollar_saving > 0)
+      return `Verified quote-to-quote difference: ${fmtUSD(cf.dollar_saving)}/year`;
+    if (cf.result_class === "OPPORTUNITY_NOT_QUANTIFIABLE" /* OPPORTUNITY_NOT_QUANTIFIABLE */)
+      return "Savings not yet quantifiable";
+    return "";
+  }
+  function renderBenchmark(output) {
+    const container = $("results-benchmark");
+    if (!container) return;
+    const bm = output.benchmark;
+    if (!bm || !bm.min_evidence_count_met) {
+      container.innerHTML = "";
+      return;
+    }
+    const range = bm.stats.max - bm.stats.min;
+    const offset = bm.user_rate - bm.stats.min;
+    const pct = range > 0 ? Math.min(100, Math.max(0, offset / range * 100)) : 50;
+    const posMap = {
+      below_p25: "Your rate appears favorable relative to comparable public observations. Confirm any commercial impact in writing before restructuring.",
+      p25_to_p50: "Your rate falls in the lower half of comparable observations.",
+      p50_to_p75: "Your rate is near or above the median of comparable observations.",
+      above_p75: "Your rate is in the upper range of comparable observations."
+    };
+    const posText = posMap[bm.position] ?? "";
+    container.innerHTML = `<div class="card"><div class="card-title">Commercial Context</div><div class="benchmark-card"><div class="benchmark-header">Your Effective Rate</div><div class="rate-display"><span class="rate-value">${fmtRate(bm.user_rate)}</span><span class="rate-label">per $1M ACV</span></div><div class="benchmark-position">${posText}</div><div class="bar-track" style="position:relative;overflow:visible;"><div class="bar-fill" style="width:${pct}%"></div><div class="bar-marker" style="left:${pct}%"></div></div><div class="bar-stats"><span>p25: <strong>${fmtRate(bm.stats.p25)}</strong></span><span>median: <strong>${fmtRate(bm.stats.p50)}</strong></span><span>p75: <strong>${fmtRate(bm.stats.p75)}</strong></span></div><div style="font-size:0.8125rem;color:var(--text-muted);margin-top:12px;"><strong>Evidence:</strong> ${bm.comparable_evidence_ids.join(", ")}</div></div></div>`;
+  }
+  function renderResultsList(output) {
+    const container = $("results-list");
+    if (!container) return;
+    if (output.results.length === 0) {
+      container.innerHTML = `<div class="alert info">No specific findings to report based on the information provided.</div>`;
+      return;
+    }
+    container.innerHTML = output.results.map((r) => {
+      const isCommercialOpp = r.result_type === "SAVINGS_IDENTIFIED" /* SAVINGS_IDENTIFIED */ && (r.dollar_saving == null || r.dollar_saving === 0);
+      const displayType = isCommercialOpp ? "COMMERCIAL_OPPORTUNITY" : r.result_type;
+      const badgeLabel = isCommercialOpp ? "COMMERCIAL OPPORTUNITY" : r.result_type.replace(/_/g, " ");
+      const canShowSaving = r.result_type === "VERIFIED_BEFORE_AFTER" /* VERIFIED_BEFORE_AFTER */ && r.dollar_saving != null && r.dollar_saving > 0;
+      const savingHTML = canShowSaving ? `<div class="result-saving">Verified annual saving: ${fmtUSD(r.dollar_saving)}</div>` : "";
+      const evidenceHTML = r.comparable_evidence.length > 0 ? `<div class="result-evidence">Evidence: ` + r.comparable_evidence.map((id) => `<span class="ev-id">${id}</span>`).join("") + `</div>` : "";
+      return `<div class="result-item ${displayType}"><div class="result-header"><span class="result-badge ${displayType}">${badgeLabel}</span><span class="conf-badge">${r.confidence}</span></div><div class="result-text">${r.recommendation_text}</div>` + (r.explanation ? `<div class="result-explanation">${r.explanation}</div>` : "") + savingHTML + evidenceHTML + `</div>`;
+    }).join("");
+  }
+  function renderWarningsAndAssumptions(output) {
+    const container = $("results-warnings");
+    if (!container) return;
+    let html = "";
+    if (output.warnings.length > 0)
+      html += `<div class="alert warning"><strong>Notices:</strong><br>` + output.warnings.map((w) => `\u2022 ${w}`).join("<br>") + `</div>`;
+    if (output.assumptions.length > 0)
+      html += `<div class="alert info"><strong>Assumptions:</strong><br>` + output.assumptions.map((a) => `\u2022 ${a}`).join("<br>") + `</div>`;
+    container.innerHTML = html;
+  }
+  function renderNegotiation(output) {
+    const container = $("results-negotiation");
+    if (!container) return;
+    const neg = output.negotiation;
+    if (!neg) {
+      container.innerHTML = "";
+      return;
+    }
+    const priceBox = (label, value) => `<div class="price-box"><div class="price-box-label">${label}</div><div class="price-box-value">${fmtUSD(value)}</div><div class="price-box-note">Not a predicted Procore quote</div></div>`;
+    const listSection = (label, items) => items.length === 0 ? "" : `<div class="neg-section"><div class="neg-label">${label}</div><ul class="neg-list">${items.map((i) => `<li>${i}</li>`).join("")}</ul></div>`;
+    let html = `<div class="negotiation-card"><div class="negotiation-title">Negotiation Plan</div><div class="neg-section"><div class="neg-label">What to Ask</div><div class="neg-content">${neg.what_to_ask}</div></div><div class="neg-section"><div class="neg-label">Why</div><div class="neg-content">${neg.why}</div></div><div class="neg-section"><div class="neg-label">Configuration Requested</div><div class="neg-content">${neg.configuration_requested}</div></div>`;
+    if (neg.target_price != null)
+      html += `<div class="neg-section"><div class="neg-label">Target Price</div>${priceBox("Target", neg.target_price)}</div>`;
+    if (neg.max_acceptable_price != null)
+      html += `<div class="neg-section"><div class="neg-label">Max Acceptable Price</div>${priceBox("Walk-away price", neg.max_acceptable_price)}</div>`;
+    html += listSection("Unknowns", neg.unknowns);
+    html += listSection("Risks", neg.risks);
+    html += listSection("Confirm in Writing", neg.confirm_in_writing);
+    html += `</div>`;
+    container.innerHTML = html;
+  }
+  function renderWhatToConfirm(output) {
+    const container = $("results-confirm");
+    if (!container) return;
+    const items = output.free_result.what_to_confirm;
+    if (!items || items.length === 0) {
+      container.innerHTML = "";
+      return;
+    }
+    container.innerHTML = `<div class="card"><div class="card-title">What to Confirm</div><ul class="neg-list">${items.map((item) => `<li>${item}</li>`).join("")}</ul></div>`;
+  }
+  function renderKnownUnknown(output) {
+    const el = $("results-known-unknown");
+    if (!el) return;
+    const verdict = output.free_result.verdict;
+    const savings = output.free_result.savings_amount;
+    let known = "";
+    let unknown2 = "";
+    let needed = "";
+    if (verdict === "VERIFIED_BEFORE_AFTER" /* VERIFIED_BEFORE_AFTER */ && savings) {
+      known = `The two user-supplied quotes differ by $${savings.toLocaleString()}/year.`;
+      unknown2 = "Whether this difference is specifically attributable to removing any individual product.";
+      needed = "A written quote confirming the exact configuration change between the two quotes.";
+    } else if (verdict === "OPPORTUNITY_NOT_QUANTIFIABLE" /* OPPORTUNITY_NOT_QUANTIFIABLE */) {
+      const cand = output.candidates?.candidates[0];
+      known = cand ? `${PRODUCT_CATALOG.find((p) => p.id === cand.product_id)?.label ?? cand.product_id} appears eligible for optimization review.` : "An optimization candidate was identified.";
+      unknown2 = "The resulting Procore renewal price for the proposed configuration.";
+      needed = "A comparable written Procore quote for the proposed configuration.";
+    } else if (verdict === "NO_DEFENSIBLE_SAVINGS_IDENTIFIED" /* NO_DEFENSIBLE_SAVINGS_IDENTIFIED */) {
+      known = "No products survived the requirement and dependency checks as optimization candidates.";
+      unknown2 = "Whether future configuration changes could produce eligible candidates.";
+      needed = "Updated product usage and requirement information.";
+    }
+    if (!known) {
+      el.innerHTML = "";
+      return;
+    }
+    el.innerHTML = `<div class="card">
     <div class="card-title">Evidence Boundaries</div>
     <div class="known-unknown-grid">
-      <div class="ku-item known"><div class="ku-label">What we know</div><div class="ku-text">${s}</div></div>
-      <div class="ku-item unknown"><div class="ku-label">What we don't know</div><div class="ku-text">${i}</div></div>
-      <div class="ku-item needed"><div class="ku-label">Next evidence needed</div><div class="ku-text">${o}</div></div>
+      <div class="ku-item known"><div class="ku-label">What we know</div><div class="ku-text">${known}</div></div>
+      <div class="ku-item unknown"><div class="ku-label">What we don't know</div><div class="ku-text">${unknown2}</div></div>
+      <div class="ku-item needed"><div class="ku-label">Next evidence needed</div><div class="ku-text">${needed}</div></div>
     </div>
-  </div>`}function va(r){ni(r)}function ni(r){oa(r),da(r),ha(r),pa(r),ga(r),ba()}function Gn(r){aa(r),ca(r),la(r),_a(r),fa(r),ma(r)}function ba(){let r=h("pro-preview-section");r&&(r.innerHTML=`
+  </div>`;
+  }
+  function renderResults(output) {
+    renderFreeResult(output);
+  }
+  function renderFreeResult(output) {
+    renderExecutiveSummary(output);
+    renderStatusHero(output);
+    renderBenchmark(output);
+    renderResultsList(output);
+    renderKnownUnknown(output);
+    renderProPreview();
+  }
+  function renderProReport(output) {
+    renderProductAudit(output);
+    renderCounterfactualSection(output);
+    renderEvidenceSection(output);
+    renderWarningsAndAssumptions(output);
+    renderNegotiation(output);
+    renderWhatToConfirm(output);
+  }
+  function renderProPreview() {
+    const container = $("pro-preview-section");
+    if (!container) return;
+    container.innerHTML = `
     <div style="margin-top:48px;padding:48px 32px;background:linear-gradient(135deg, #f8faf9 0%, #ffffff 100%);border:2px solid #d4af37;border-radius:16px;box-shadow:0 4px 12px rgba(212,175,55,0.15);">
       <div style="text-align:center;margin-bottom:40px;">
         <div style="display:inline-flex;align-items:center;gap:12px;margin-bottom:16px;">
@@ -98,4 +10436,493 @@
         </button>
       </div>
     </div>
-  `,h("btn-view-pro-report")?.addEventListener("click",ri))}async function ya(){D("wizard",!0),D("loading",!1),D("results-container",!0);for(let r=0;r<5;r++){let e=h(`ls-${r}`);if(e){e.classList.remove("done");let n=e.querySelector(".check");n&&(n.textContent="")}}try{await ra();let r=sa();ce=r;let e=Ur(r);F=e,D("loading",!0),D("results-container",!1),va(e)}catch(r){D("loading",!0),D("wizard",!1),ae(5);let e=r instanceof Error?r.message:String(r);an("step-5-error",`Analysis failed: ${e}`)}window.scrollTo({top:0,behavior:"smooth"})}function cn(){let r=h("btn-signin"),e=h("btn-signout"),n=h("nav-user-email");if(te.authenticated&&te.user){if(r&&(r.style.display="none"),e&&(e.style.display="inline-block"),n){let t=te.user.email||"",s=t.length>25?t.substring(0,22)+"...":t;n.textContent=s,n.style.display="inline"}}else r&&(r.style.display="inline-block"),e&&(e.style.display="none"),n&&(n.style.display="none")}function zn(){let r=h("auth-modal");r&&(r.hidden=!1)}function Wn(){let r=h("auth-modal");r&&(r.hidden=!0);let e=h("signin-email"),n=h("signin-password"),t=h("signup-email"),s=h("signup-password"),i=h("signup-password-confirm");e&&(e.value=""),n&&(n.value=""),t&&(t.value=""),s&&(s.value=""),i&&(i.value=""),["signin-error","signup-error","signup-success","forgot-error","forgot-success"].forEach(o=>{let c=h(o);c&&(c.hidden=!0)})}function Hn(r){document.querySelectorAll(".auth-tab").forEach(t=>t.classList.remove("active"));let e=document.querySelector(`[data-tab="${r}"]`);e&&e.classList.add("active"),document.querySelectorAll(".auth-form").forEach(t=>t.classList.remove("active"));let n=h(`${r}-form`);n&&n.classList.add("active")}async function Ea(r,e){let n=h("signin-btn"),t=h("signin-error");n&&(n.disabled=!0),t&&(t.hidden=!0);let{user:s,error:i}=await Ms(r,e);if(i){t&&(t.textContent=i.message||"Sign in failed. Please check your credentials.",t.hidden=!1),n&&(n.disabled=!1);return}if(s&&(te={user:s,authenticated:!0,loading:!1},Ue=(await on(s.id,s.email||void 0)).hasProAccess,cn(),Wn(),Ue&&F)){Gn(F);let c=h("pro-preview-section"),a=h("pro-report-section");c&&(c.hidden=!0),a&&(a.hidden=!1),window.scrollTo({top:0,behavior:"smooth"})}n&&(n.disabled=!1)}async function wa(r,e,n){let t=h("signup-btn"),s=h("signup-error"),i=h("signup-success");if(t&&(t.disabled=!0),s&&(s.hidden=!0),i&&(i.hidden=!0),e!==n){s&&(s.textContent="Passwords do not match.",s.hidden=!1),t&&(t.disabled=!1);return}if(e.length<6){s&&(s.textContent="Password must be at least 6 characters.",s.hidden=!1),t&&(t.disabled=!1);return}let{user:o,error:c}=await Bs(r,e);if(c){s&&(s.textContent=c.message||"Sign up failed. Please try again.",s.hidden=!1),t&&(t.disabled=!1);return}if(o){i&&(i.textContent="Account created! Please check your email to confirm your account, then sign in.",i.hidden=!1);let a=h("signup-email"),u=h("signup-password"),l=h("signup-password-confirm");a&&(a.value=""),u&&(u.value=""),l&&(l.value="")}t&&(t.disabled=!1)}async function Ta(r){let e=h("forgot-btn"),n=h("forgot-error"),t=h("forgot-success");e&&(e.disabled=!0),n&&(n.hidden=!0),t&&(t.hidden=!0);let{error:s}=await Vs(r);if(s){n&&(n.textContent=s.message||"Failed to send reset email. Please try again.",n.hidden=!1),e&&(e.disabled=!1);return}t&&(t.textContent="Password reset email sent! Check your inbox.",t.hidden=!1),e&&(e.disabled=!1)}async function Sa(){await qs(),te={user:null,authenticated:!1,loading:!1},Ue=!1,cn();let r=h("pro-report-section"),e=h("pro-preview-section");r&&(r.hidden=!0),e&&(e.hidden=!1)}async function Ys(){ce&&F&&(sessionStorage.setItem("rs_last_input",JSON.stringify(ce)),sessionStorage.setItem("rs_last_output",JSON.stringify(F)));let{error:r}=await Hs();if(r){let e=h("signin-error");e&&(e.textContent=r.message||"Google sign-in failed. Please try again.",e.hidden=!1)}}function Ia(){return te.authenticated?!0:(zn(),!1)}async function ri(){if(ce&&F&&(sessionStorage.setItem("rs_last_input",JSON.stringify(ce)),sessionStorage.setItem("rs_last_output",JSON.stringify(F)),sessionStorage.setItem("rs_intended_action","professional_report")),!Ia())return;F&&Gn(F);let r=h("pro-preview-section"),e=h("pro-report-section");r&&(r.hidden=!0),e&&(e.hidden=!1),window.scrollTo({top:0,behavior:"smooth"})}document.addEventListener("DOMContentLoaded",()=>{let r=document.querySelector('meta[name="robots"]'),e=["auth-modal","wizard","loading","results-container"],n=()=>{let l=e.some(d=>!h(d)?.hidden);r?.setAttribute("content",l?"noindex, nofollow":"index, follow")},t=new MutationObserver(n);e.forEach(l=>{let d=h(l);d&&t.observe(d,{attributes:!0,attributeFilter:["hidden"]})}),n();let s=h("hamburger"),i=h("mobile-menu");s?.addEventListener("click",()=>{i&&(i.hidden=!i.hidden)}),window.addEventListener("resize",()=>{window.innerWidth>900&&i&&(i.hidden=!0)}),document.addEventListener("keydown",l=>{l.key==="Escape"&&i&&!i.hidden&&(i.hidden=!0)}),document.querySelectorAll(".mobile-nav-link").forEach(l=>{l.addEventListener("click",()=>{i&&(i.hidden=!0)})}),document.querySelectorAll('a[href^="#"]').forEach(l=>{l.addEventListener("click",d=>{let p=l.getAttribute("href");if(p&&p!=="#"){d.preventDefault();let m=document.querySelector(p);m&&(m.scrollIntoView({behavior:"smooth",block:"start"}),i&&(i.hidden=!0))}})}),document.querySelectorAll(".faq-q").forEach(l=>{l.addEventListener("click",()=>{let p=l.parentElement?.querySelector(".faq-a"),m=l.classList.contains("open");document.querySelectorAll(".faq-q").forEach(g=>g.classList.remove("open")),document.querySelectorAll(".faq-a").forEach(g=>g.classList.remove("open")),!m&&p&&(l.classList.add("open"),p.classList.add("open"))})}),(async()=>{let l=await js();te={user:l,authenticated:!!l,loading:!1},l&&(Ue=(await on(l.id,l.email||void 0)).hasProAccess),cn();let d=sessionStorage.getItem("rs_last_input"),p=sessionStorage.getItem("rs_last_output"),m=sessionStorage.getItem("rs_intended_action");if(d&&p&&m==="professional_report")try{if(ce=JSON.parse(d),F=JSON.parse(p),sessionStorage.removeItem("rs_last_input"),sessionStorage.removeItem("rs_last_output"),sessionStorage.removeItem("rs_intended_action"),te.authenticated&&F&&Ue){D("landing",!0),D("wizard",!0),D("results-container",!1),ni(F),Gn(F);let g=h("pro-preview-section"),E=h("pro-report-section");g&&(g.hidden=!0),E&&(E.hidden=!1),window.scrollTo({top:0,behavior:"smooth"})}}catch(g){console.error("Error restoring session:",g)}})(),zs(async(l,d)=>{d?.user?(te={user:d.user,authenticated:!0,loading:!1},Ue=(await on(d.user.id,d.user.email||void 0)).hasProAccess):(te={user:null,authenticated:!1,loading:!1},Ue=!1),cn()}),document.querySelectorAll(".auth-tab").forEach(l=>{l.addEventListener("click",()=>{let d=l.getAttribute("data-tab");Hn(d)})}),h("auth-modal-close")?.addEventListener("click",Wn),h("auth-modal")?.addEventListener("click",l=>{l.target===l.currentTarget&&Wn()}),h("btn-signin")?.addEventListener("click",zn),h("btn-signout")?.addEventListener("click",Sa),h("signin-form")?.addEventListener("submit",l=>{l.preventDefault();let d=h("signin-email")?.value,p=h("signin-password")?.value;d&&p&&Ea(d,p)}),h("signup-form")?.addEventListener("submit",l=>{l.preventDefault();let d=h("signup-email")?.value,p=h("signup-password")?.value,m=h("signup-password-confirm")?.value;d&&p&&m&&wa(d,p,m)}),h("google-signin-btn")?.addEventListener("click",Ys),h("google-signup-btn")?.addEventListener("click",Ys),h("forgot-password-link")?.addEventListener("click",()=>{Hn("forgot")}),h("back-to-signin")?.addEventListener("click",()=>{Hn("signin")}),h("forgot-form")?.addEventListener("submit",l=>{l.preventDefault();let d=h("forgot-email")?.value;d&&Ta(d)}),h("btn-view-pro")?.addEventListener("click",ri);let o=()=>{D("landing",!0),D("wizard",!1),ae(1),window.scrollTo({top:0,behavior:"smooth"})};h("btn-start")?.addEventListener("click",o),h("btn-start-nav")?.addEventListener("click",o),h("btn-start-mobile")?.addEventListener("click",()=>{i&&(i.hidden=!0),o()}),h("btn-start-final")?.addEventListener("click",o);let c=()=>{let l=document.querySelector("#how-it-works");l&&(D("landing",!1),l.scrollIntoView({behavior:"smooth",block:"start"}))};h("btn-see-how")?.addEventListener("click",c),h("btn-hero-how")?.addEventListener("click",c),h("btn-next")?.addEventListener("click",()=>{Vn("step-1-error");let l=Qo();if(l){an("step-1-error",l);return}Yo(),Ko(),ae(2)}),h("btn-back-2")?.addEventListener("click",()=>ae(1)),h("btn-next-2")?.addEventListener("click",()=>{Vn("step-2-error");let l=Jo();if(l){an("step-2-error",l);return}Zo(),ae(3)}),h("btn-back-3")?.addEventListener("click",()=>ae(2)),h("btn-next-3")?.addEventListener("click",()=>{Vn("step-3-error");let l=Xo();if(l){an("step-3-error",l);return}ea(),ae(4)}),h("discount_status")?.addEventListener("change",Gs),Gs(),h("btn-back-4")?.addEventListener("click",()=>ae(3)),h("btn-next-4")?.addEventListener("click",()=>{ta(),na(),ae(5)});let a=h("btn-back-5");a&&a.addEventListener("click",()=>ae(4));let u=h("btn-analyze");u&&u.addEventListener("click",()=>{ya()}),h("btn-new-analysis")?.addEventListener("click",()=>{_=Ks(),D("results-container",!0),D("loading",!0),D("wizard",!0),D("landing",!1),window.scrollTo({top:0,behavior:"smooth"})}),h("btn-download-pdf")?.addEventListener("click",()=>{if(!te.authenticated){alert("Please sign in to download the Professional Report PDF."),zn();return}F&&ce&&ua(F,ce)}),h("btn-new-analysis")?.addEventListener("click",()=>{ce=null,F=null,sessionStorage.removeItem("rs_last_input"),sessionStorage.removeItem("rs_last_output"),window.location.reload()})});})();
+  `;
+    $("btn-view-pro-report")?.addEventListener("click", handleViewProReport);
+  }
+  async function runAnalysis() {
+    setHidden("wizard", true);
+    setHidden("loading", false);
+    setHidden("results-container", true);
+    for (let i = 0; i < 5; i++) {
+      const li = $(`ls-${i}`);
+      if (li) {
+        li.classList.remove("done");
+        const check = li.querySelector(".check");
+        if (check) check.textContent = "";
+      }
+    }
+    try {
+      await runLoadingAnimation();
+      const raw = buildEngineInput();
+      lastInput = raw;
+      const output = runEngine(raw);
+      lastOutput = output;
+      setHidden("loading", true);
+      setHidden("results-container", false);
+      renderResults(output);
+    } catch (err) {
+      setHidden("loading", true);
+      setHidden("wizard", false);
+      goToStep(5);
+      const msg = err instanceof Error ? err.message : String(err);
+      showError("step-5-error", `Analysis failed: ${msg}`);
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  function updateNavbar() {
+    const btnSignin = $("btn-signin");
+    const btnSignout = $("btn-signout");
+    const navUserEmail = $("nav-user-email");
+    if (authState.authenticated && authState.user) {
+      if (btnSignin) btnSignin.style.display = "none";
+      if (btnSignout) btnSignout.style.display = "inline-block";
+      if (navUserEmail) {
+        const email = authState.user.email || "";
+        const truncated = email.length > 25 ? email.substring(0, 22) + "..." : email;
+        navUserEmail.textContent = truncated;
+        navUserEmail.style.display = "inline";
+      }
+    } else {
+      if (btnSignin) btnSignin.style.display = "inline-block";
+      if (btnSignout) btnSignout.style.display = "none";
+      if (navUserEmail) navUserEmail.style.display = "none";
+    }
+  }
+  function showAuthModal() {
+    const modal = $("auth-modal");
+    if (modal) modal.hidden = false;
+  }
+  function hideAuthModal() {
+    const modal = $("auth-modal");
+    if (modal) modal.hidden = true;
+    const signinEmail = $("signin-email");
+    const signinPassword = $("signin-password");
+    const signupEmail = $("signup-email");
+    const signupPassword = $("signup-password");
+    const signupPasswordConfirm = $("signup-password-confirm");
+    if (signinEmail) signinEmail.value = "";
+    if (signinPassword) signinPassword.value = "";
+    if (signupEmail) signupEmail.value = "";
+    if (signupPassword) signupPassword.value = "";
+    if (signupPasswordConfirm) signupPasswordConfirm.value = "";
+    ["signin-error", "signup-error", "signup-success", "forgot-error", "forgot-success"].forEach((id) => {
+      const el = $(id);
+      if (el) el.hidden = true;
+    });
+  }
+  function switchAuthTab(tab) {
+    document.querySelectorAll(".auth-tab").forEach((t) => t.classList.remove("active"));
+    const tabButton = document.querySelector(`[data-tab="${tab}"]`);
+    if (tabButton) tabButton.classList.add("active");
+    document.querySelectorAll(".auth-form").forEach((f) => f.classList.remove("active"));
+    const form = $(`${tab}-form`);
+    if (form) form.classList.add("active");
+  }
+  async function handleSignIn(email, password) {
+    const btn = $("signin-btn");
+    const errorEl = $("signin-error");
+    if (btn) btn.disabled = true;
+    if (errorEl) errorEl.hidden = true;
+    const { user, error } = await signIn(email, password);
+    if (error) {
+      if (errorEl) {
+        errorEl.textContent = error.message || "Sign in failed. Please check your credentials.";
+        errorEl.hidden = false;
+      }
+      if (btn) btn.disabled = false;
+      return;
+    }
+    if (user) {
+      authState = { user, authenticated: true, loading: false };
+      const entitlement = await checkEntitlement(user.id, user.email || void 0);
+      hasProAccess = entitlement.hasProAccess;
+      updateNavbar();
+      hideAuthModal();
+      if (hasProAccess && lastOutput) {
+        renderProReport(lastOutput);
+        const previewSection = $("pro-preview-section");
+        const proSection = $("pro-report-section");
+        if (previewSection) previewSection.hidden = true;
+        if (proSection) proSection.hidden = false;
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }
+    if (btn) btn.disabled = false;
+  }
+  async function handleSignUp(email, password, passwordConfirm) {
+    const btn = $("signup-btn");
+    const errorEl = $("signup-error");
+    const successEl = $("signup-success");
+    if (btn) btn.disabled = true;
+    if (errorEl) errorEl.hidden = true;
+    if (successEl) successEl.hidden = true;
+    if (password !== passwordConfirm) {
+      if (errorEl) {
+        errorEl.textContent = "Passwords do not match.";
+        errorEl.hidden = false;
+      }
+      if (btn) btn.disabled = false;
+      return;
+    }
+    if (password.length < 6) {
+      if (errorEl) {
+        errorEl.textContent = "Password must be at least 6 characters.";
+        errorEl.hidden = false;
+      }
+      if (btn) btn.disabled = false;
+      return;
+    }
+    const { user, error } = await signUp(email, password);
+    if (error) {
+      if (errorEl) {
+        errorEl.textContent = error.message || "Sign up failed. Please try again.";
+        errorEl.hidden = false;
+      }
+      if (btn) btn.disabled = false;
+      return;
+    }
+    if (user) {
+      if (successEl) {
+        successEl.textContent = "Account created! Please check your email to confirm your account, then sign in.";
+        successEl.hidden = false;
+      }
+      const emailInput = $("signup-email");
+      const passwordInput = $("signup-password");
+      const confirmInput = $("signup-password-confirm");
+      if (emailInput) emailInput.value = "";
+      if (passwordInput) passwordInput.value = "";
+      if (confirmInput) confirmInput.value = "";
+    }
+    if (btn) btn.disabled = false;
+  }
+  async function handleForgotPassword(email) {
+    const btn = $("forgot-btn");
+    const errorEl = $("forgot-error");
+    const successEl = $("forgot-success");
+    if (btn) btn.disabled = true;
+    if (errorEl) errorEl.hidden = true;
+    if (successEl) successEl.hidden = true;
+    const { error } = await resetPassword(email);
+    if (error) {
+      if (errorEl) {
+        errorEl.textContent = error.message || "Failed to send reset email. Please try again.";
+        errorEl.hidden = false;
+      }
+      if (btn) btn.disabled = false;
+      return;
+    }
+    if (successEl) {
+      successEl.textContent = "Password reset email sent! Check your inbox.";
+      successEl.hidden = false;
+    }
+    if (btn) btn.disabled = false;
+  }
+  async function handleSignOut() {
+    await signOut();
+    authState = { user: null, authenticated: false, loading: false };
+    hasProAccess = false;
+    updateNavbar();
+    const proSection = $("pro-report-section");
+    const previewSection = $("pro-preview-section");
+    if (proSection) proSection.hidden = true;
+    if (previewSection) previewSection.hidden = false;
+  }
+  async function handleGoogleSignIn() {
+    if (lastInput && lastOutput) {
+      sessionStorage.setItem("rs_last_input", JSON.stringify(lastInput));
+      sessionStorage.setItem("rs_last_output", JSON.stringify(lastOutput));
+    }
+    const { error } = await signInWithGoogle();
+    if (error) {
+      const errorEl = $("signin-error");
+      if (errorEl) {
+        errorEl.textContent = error.message || "Google sign-in failed. Please try again.";
+        errorEl.hidden = false;
+      }
+    }
+  }
+  function requireAuth() {
+    if (!authState.authenticated) {
+      showAuthModal();
+      return false;
+    }
+    return true;
+  }
+  async function handleViewProReport() {
+    if (lastInput && lastOutput) {
+      sessionStorage.setItem("rs_last_input", JSON.stringify(lastInput));
+      sessionStorage.setItem("rs_last_output", JSON.stringify(lastOutput));
+      sessionStorage.setItem("rs_intended_action", "professional_report");
+    }
+    if (!requireAuth()) {
+      return;
+    }
+    if (lastOutput) {
+      renderProReport(lastOutput);
+    }
+    const previewSection = $("pro-preview-section");
+    const proSection = $("pro-report-section");
+    if (previewSection) previewSection.hidden = true;
+    if (proSection) proSection.hidden = false;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  document.addEventListener("DOMContentLoaded", () => {
+    const robotsMeta = document.querySelector('meta[name="robots"]');
+    const privateViewIds = ["auth-modal", "wizard", "loading", "results-container"];
+    const syncRobotsForVisibleView = () => {
+      const privateViewIsVisible = privateViewIds.some((id) => !$(id)?.hidden);
+      robotsMeta?.setAttribute("content", privateViewIsVisible ? "noindex, nofollow" : "index, follow");
+    };
+    const privateViewObserver = new MutationObserver(syncRobotsForVisibleView);
+    privateViewIds.forEach((id) => {
+      const view = $(id);
+      if (view) privateViewObserver.observe(view, { attributes: true, attributeFilter: ["hidden"] });
+    });
+    syncRobotsForVisibleView();
+    const hamburger = $("hamburger");
+    const mobileMenu = $("mobile-menu");
+    hamburger?.addEventListener("click", () => {
+      if (mobileMenu) {
+        mobileMenu.hidden = !mobileMenu.hidden;
+      }
+    });
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > 900 && mobileMenu) {
+        mobileMenu.hidden = true;
+      }
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && mobileMenu && !mobileMenu.hidden) {
+        mobileMenu.hidden = true;
+      }
+    });
+    document.querySelectorAll(".mobile-nav-link").forEach((link) => {
+      link.addEventListener("click", () => {
+        if (mobileMenu) mobileMenu.hidden = true;
+      });
+    });
+    document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+      anchor.addEventListener("click", (e) => {
+        const href = anchor.getAttribute("href");
+        if (href && href !== "#") {
+          e.preventDefault();
+          const target = document.querySelector(href);
+          if (target) {
+            target.scrollIntoView({ behavior: "smooth", block: "start" });
+            if (mobileMenu) mobileMenu.hidden = true;
+          }
+        }
+      });
+    });
+    document.querySelectorAll(".faq-q").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const item = btn.parentElement;
+        const answer = item?.querySelector(".faq-a");
+        const isOpen = btn.classList.contains("open");
+        document.querySelectorAll(".faq-q").forEach((b) => b.classList.remove("open"));
+        document.querySelectorAll(".faq-a").forEach((a) => a.classList.remove("open"));
+        if (!isOpen && answer) {
+          btn.classList.add("open");
+          answer.classList.add("open");
+        }
+      });
+    });
+    (async () => {
+      const user = await getCurrentUser();
+      authState = {
+        user,
+        authenticated: !!user,
+        loading: false
+      };
+      if (user) {
+        const entitlement = await checkEntitlement(user.id, user.email || void 0);
+        hasProAccess = entitlement.hasProAccess;
+      }
+      updateNavbar();
+      const savedInput = sessionStorage.getItem("rs_last_input");
+      const savedOutput = sessionStorage.getItem("rs_last_output");
+      const intendedAction = sessionStorage.getItem("rs_intended_action");
+      if (savedInput && savedOutput && intendedAction === "professional_report") {
+        try {
+          lastInput = JSON.parse(savedInput);
+          lastOutput = JSON.parse(savedOutput);
+          sessionStorage.removeItem("rs_last_input");
+          sessionStorage.removeItem("rs_last_output");
+          sessionStorage.removeItem("rs_intended_action");
+          if (authState.authenticated && lastOutput && hasProAccess) {
+            setHidden("landing", true);
+            setHidden("wizard", true);
+            setHidden("results-container", false);
+            renderFreeResult(lastOutput);
+            renderProReport(lastOutput);
+            const previewSection = $("pro-preview-section");
+            const proSection = $("pro-report-section");
+            if (previewSection) previewSection.hidden = true;
+            if (proSection) proSection.hidden = false;
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }
+        } catch (e) {
+          console.error("Error restoring session:", e);
+        }
+      }
+    })();
+    onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        authState = {
+          user: session.user,
+          authenticated: true,
+          loading: false
+        };
+        const entitlement = await checkEntitlement(session.user.id, session.user.email || void 0);
+        hasProAccess = entitlement.hasProAccess;
+      } else {
+        authState = {
+          user: null,
+          authenticated: false,
+          loading: false
+        };
+        hasProAccess = false;
+      }
+      updateNavbar();
+    });
+    document.querySelectorAll(".auth-tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const tabName = tab.getAttribute("data-tab");
+        switchAuthTab(tabName);
+      });
+    });
+    $("auth-modal-close")?.addEventListener("click", hideAuthModal);
+    $("auth-modal")?.addEventListener("click", (e) => {
+      if (e.target === e.currentTarget) {
+        hideAuthModal();
+      }
+    });
+    $("btn-signin")?.addEventListener("click", showAuthModal);
+    $("btn-signout")?.addEventListener("click", handleSignOut);
+    $("signin-form")?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const email = $("signin-email")?.value;
+      const password = $("signin-password")?.value;
+      if (email && password) {
+        handleSignIn(email, password);
+      }
+    });
+    $("signup-form")?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const email = $("signup-email")?.value;
+      const password = $("signup-password")?.value;
+      const passwordConfirm = $("signup-password-confirm")?.value;
+      if (email && password && passwordConfirm) {
+        handleSignUp(email, password, passwordConfirm);
+      }
+    });
+    $("google-signin-btn")?.addEventListener("click", handleGoogleSignIn);
+    $("google-signup-btn")?.addEventListener("click", handleGoogleSignIn);
+    $("forgot-password-link")?.addEventListener("click", () => {
+      switchAuthTab("forgot");
+    });
+    $("back-to-signin")?.addEventListener("click", () => {
+      switchAuthTab("signin");
+    });
+    $("forgot-form")?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const email = $("forgot-email")?.value;
+      if (email) {
+        handleForgotPassword(email);
+      }
+    });
+    $("btn-view-pro")?.addEventListener("click", handleViewProReport);
+    const startWizard = () => {
+      setHidden("landing", true);
+      setHidden("wizard", false);
+      goToStep(1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+    $("btn-start")?.addEventListener("click", startWizard);
+    $("btn-start-nav")?.addEventListener("click", startWizard);
+    $("btn-start-mobile")?.addEventListener("click", () => {
+      if (mobileMenu) mobileMenu.hidden = true;
+      startWizard();
+    });
+    $("btn-start-final")?.addEventListener("click", startWizard);
+    const scrollToHow = () => {
+      const target = document.querySelector("#how-it-works");
+      if (target) {
+        setHidden("landing", false);
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    };
+    $("btn-see-how")?.addEventListener("click", scrollToHow);
+    $("btn-hero-how")?.addEventListener("click", scrollToHow);
+    $("btn-next")?.addEventListener("click", () => {
+      clearError("step-1-error");
+      const err = validateStep1();
+      if (err) {
+        showError("step-1-error", err);
+        return;
+      }
+      saveStep1();
+      renderProductCards();
+      goToStep(2);
+    });
+    $("btn-back-2")?.addEventListener("click", () => goToStep(1));
+    $("btn-next-2")?.addEventListener("click", () => {
+      clearError("step-2-error");
+      const err = validateStep2();
+      if (err) {
+        showError("step-2-error", err);
+        return;
+      }
+      renderProductDetails();
+      goToStep(3);
+    });
+    $("btn-back-3")?.addEventListener("click", () => goToStep(2));
+    $("btn-next-3")?.addEventListener("click", () => {
+      clearError("step-3-error");
+      const err = validateStep3();
+      if (err) {
+        showError("step-3-error", err);
+        return;
+      }
+      saveStep3();
+      goToStep(4);
+    });
+    $("discount_status")?.addEventListener("change", updateDiscountFields);
+    updateDiscountFields();
+    $("btn-back-4")?.addEventListener("click", () => goToStep(3));
+    $("btn-next-4")?.addEventListener("click", () => {
+      saveStep4();
+      renderReview();
+      goToStep(5);
+    });
+    const step5Back = $("btn-back-5");
+    if (step5Back) step5Back.addEventListener("click", () => goToStep(4));
+    const btnAnalyze = $("btn-analyze");
+    if (btnAnalyze) btnAnalyze.addEventListener("click", () => {
+      void runAnalysis();
+    });
+    $("btn-new-analysis")?.addEventListener("click", () => {
+      state = makeInitialState();
+      setHidden("results-container", true);
+      setHidden("loading", true);
+      setHidden("wizard", true);
+      setHidden("landing", false);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+    $("btn-download-pdf")?.addEventListener("click", () => {
+      if (!authState.authenticated) {
+        alert("Please sign in to download the Professional Report PDF.");
+        showAuthModal();
+        return;
+      }
+      if (lastOutput && lastInput) generatePDF(lastOutput, lastInput);
+    });
+    $("btn-new-analysis")?.addEventListener("click", () => {
+      lastInput = null;
+      lastOutput = null;
+      sessionStorage.removeItem("rs_last_input");
+      sessionStorage.removeItem("rs_last_output");
+      window.location.reload();
+    });
+  });
+})();

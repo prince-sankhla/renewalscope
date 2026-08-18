@@ -75,14 +75,12 @@
       height: 100%; display: flex; align-items: center; gap: 0;
     }
     .nav-logo {
-      display: flex; align-items: center; gap: 10px;
+      display: flex; align-items: center;
       text-decoration: none; flex-shrink: 0; margin-right: 40px;
+      background: #fff; border-radius: 7px; padding: 4px 8px;
     }
-    .nav-logo-text { display: flex; flex-direction: column; }
-    .nav-wordmark { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
-    .nav-renewal { color: #fff; }
-    .nav-scope { color: #4ADE80; }
-    .nav-tagline-sm { font-size: 0.625rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.55); margin-top: 1px; }
+    .brand-logo { display: block; width: auto; height: auto; }
+    .nav-logo .brand-logo { height: 54px; }
     .nav-links { display: flex; align-items: center; gap: 4px; flex: 1; }
     .nav-link {
       color: rgba(255,255,255,0.82); text-decoration: none;
@@ -132,6 +130,10 @@
     }
     @media (min-width: 901px) {
       .mobile-menu { display: none !important; }
+    }
+    @media (max-width: 500px) {
+      .nav-logo { margin-right: 12px; padding: 3px 6px; }
+      .nav-logo .brand-logo { height: 46px; }
     }
 
     /* ── HERO SECTION ── */
@@ -324,10 +326,8 @@
     .site-footer { background: var(--forest); color: rgba(255,255,255,0.72); padding: 60px 0 32px; }
     .footer-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
     .footer-top { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
-    .footer-brand-col .footer-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-    .footer-brand-text { font-size: 1.125rem; font-weight: 800; }
-    .footer-brand-renewal { color: #fff; }
-    .footer-brand-scope { color: #4ADE80; }
+    .footer-brand-col .footer-brand { display: inline-block; background: #fff; border-radius: 6px; padding: 4px 7px; margin-bottom: 14px; }
+    .footer-brand .brand-logo { height: 44px; }
     .footer-tagline { font-size: 0.875rem; color: rgba(255,255,255,0.6); line-height: 1.6; max-width: 240px; }
     .footer-col-title { font-size: 0.8125rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.9); margin-bottom: 16px; }
     .footer-links { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; }
@@ -342,8 +342,8 @@
     /* ── WIZARD WRAPPER ── */
     .wizard-wrap { max-width: 800px; margin: 0 auto; padding: 40px 24px 80px; }
     .wizard-header { display: flex; align-items: center; gap: 16px; padding: 20px 24px; background: var(--forest); border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 0; }
-    .wizard-brand { font-size: 1.125rem; font-weight: 800; color: #fff; }
-    .wizard-brand-scope { color: #4ADE80; }
+    .wizard-brand { display: inline-block; background: #fff; border-radius: 5px; padding: 3px 5px; }
+    .wizard-brand .brand-logo { height: 30px; }
     .wizard-sub { font-size: 0.8125rem; color: rgba(255,255,255,0.6); margin-left: auto; }
     .wizard-body { max-width: 800px; margin: 0 auto; padding: 40px 24px 80px; }
     .progress-row { margin-bottom: 32px; }
@@ -393,8 +393,8 @@
 
     /* ── LOADING ── */
     .loading-wrap { max-width: 480px; margin: 80px auto; padding: 0 24px; text-align: center; }
-    .loading-logo { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 32px; }
-    .loading-brand { font-size: 1.25rem; font-weight: 800; }
+    .loading-logo { display: flex; align-items: center; justify-content: center; margin-bottom: 32px; }
+    .loading-logo .brand-logo { height: 54px; }
     .loading-title { font-size: 1.375rem; font-weight: 700; color: var(--forest); margin-bottom: 8px; }
     .loading-sub { font-size: 0.9375rem; color: var(--muted); margin-bottom: 40px; }
     .loading-steps { list-style: none; padding: 0; text-align: left; }
@@ -407,8 +407,8 @@
     /* ── RESULTS WRAP ── */
     .results-wrap { max-width: 900px; margin: 0 auto; padding: 40px 24px 80px; }
     .results-header { background: var(--forest); padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; }
-    .results-header-brand { font-size: 1.125rem; font-weight: 800; color: #fff; }
-    .results-header-brand-scope { color: #4ADE80; }
+    .results-header-brand { display: inline-block; background: #fff; border-radius: 5px; padding: 3px 5px; }
+    .results-header-brand .brand-logo { height: 30px; }
     .results-header-sub { font-size: 0.875rem; color: rgba(255,255,255,0.65); }
 
     /* ── STATUS HERO ── */
@@ -567,8 +567,8 @@
       padding: 32px 32px 24px; border-bottom: 1px solid var(--border);
       text-align: center;
     }
-    .auth-modal-logo { font-size: 1.5rem; font-weight: 800; color: var(--forest); margin-bottom: 8px; }
-    .auth-modal-logo-scope { color: var(--green); }
+    .auth-modal-logo { margin-bottom: 12px; }
+    .auth-modal-logo .brand-logo { height: 64px; margin: 0 auto; }
     .auth-modal-subtitle { font-size: 0.9375rem; color: var(--muted); }
     .auth-tabs {
       display: flex; border-bottom: 1px solid var(--border);
@@ -690,17 +690,7 @@
 <nav id="navbar" class="navbar" aria-label="Primary navigation">
   <div class="nav-inner">
     <a href="#" class="nav-logo" id="nav-logo-link">
-      <svg width="36" height="36" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="120" height="120" rx="12" fill="#123B2A"/>
-        <path d="M30 35 L30 85 L35 85 L35 45 L50 45 L50 50 L40 50 L40 85 L45 85 L45 55 L55 55 L55 85 L60 85 L60 40 L35 40 L35 35 Z" fill="#4ADE80"/>
-        <circle cx="75" cy="55" r="18" stroke="#1F8A5B" stroke-width="3" fill="none"/>
-        <path d="M84 64 L95 75" stroke="#1F8A5B" stroke-width="3" stroke-linecap="round"/>
-        <path d="M70 50 L75 55 L82 48" stroke="#4ADE80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <div class="nav-logo-text">
-        <div class="nav-wordmark"><span class="nav-renewal">Renewal</span><span class="nav-scope">Scope</span></div>
-        <div class="nav-tagline-sm">Evidence-Backed Intelligence</div>
-      </div>
+      <img class="brand-logo" src="renewalscope-logo.png" width="2172" height="724" alt="RenewalScope" />
     </a>
     <div class="nav-links" id="nav-links">
       <a href="#how-it-works" class="nav-link">How It Works</a>
@@ -1093,7 +1083,7 @@
 <!-- WIZARD -->
 <div id="wizard" hidden>
   <div class="wizard-header">
-    <div class="wizard-brand">Renewal<span class="wizard-brand-scope">Scope</span></div>
+    <div class="wizard-brand"><img class="brand-logo" src="renewalscope-logo.png" width="2172" height="724" alt="RenewalScope" /></div>
     <div class="wizard-sub">Procore Renewal Analysis</div>
   </div>
   <div class="wizard-body">
@@ -1302,14 +1292,7 @@
 <div id="loading" hidden>
   <div class="loading-wrap">
     <div class="loading-logo">
-      <svg width="32" height="32" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="120" height="120" rx="12" fill="#123B2A"/>
-        <path d="M30 35 L30 85 L35 85 L35 45 L50 45 L50 50 L40 50 L40 85 L45 85 L45 55 L55 55 L55 85 L60 85 L60 40 L35 40 L35 35 Z" fill="#4ADE80"/>
-        <circle cx="75" cy="55" r="18" stroke="#1F8A5B" stroke-width="3" fill="none"/>
-        <path d="M84 64 L95 75" stroke="#1F8A5B" stroke-width="3" stroke-linecap="round"/>
-        <path d="M70 50 L75 55 L82 48" stroke="#4ADE80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <span class="loading-brand" style="color:#123B2A;">Renewal<span style="color:#1F8A5B;">Scope</span></span>
+      <img class="brand-logo" src="renewalscope-logo.png" width="2172" height="724" alt="RenewalScope" />
     </div>
     <div class="loading-title">Analyzing Your Renewal…</div>
     <div class="loading-sub">This will take just a moment.</div>
@@ -1327,7 +1310,7 @@
 <!-- RESULTS -->
 <div id="results-container" hidden>
   <div class="results-header">
-    <div class="results-header-brand">Renewal<span class="results-header-brand-scope">Scope</span></div>
+    <div class="results-header-brand"><img class="brand-logo" src="renewalscope-logo.png" width="2172" height="724" alt="RenewalScope" /></div>
     <div class="results-header-sub">Procore Renewal Analysis</div>
   </div>
   <div class="results-wrap">
@@ -1404,16 +1387,7 @@
     <div class="footer-top">
       <div class="footer-brand-col">
         <div class="footer-brand">
-          <svg width="28" height="28" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="120" height="120" rx="12" fill="#1F8A5B"/>
-            <path d="M30 35 L30 85 L35 85 L35 45 L50 45 L50 50 L40 50 L40 85 L45 85 L45 55 L55 55 L55 85 L60 85 L60 40 L35 40 L35 35 Z" fill="#fff"/>
-            <circle cx="75" cy="55" r="18" stroke="#fff" stroke-width="3" fill="none"/>
-            <path d="M84 64 L95 75" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
-            <path d="M70 50 L75 55 L82 48" stroke="#4ADE80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          <div class="footer-brand-text">
-            <span class="footer-brand-renewal">Renewal</span><span class="footer-brand-scope">Scope</span>
-          </div>
+          <img class="brand-logo" src="renewalscope-logo.png" width="2172" height="724" alt="RenewalScope" />
         </div>
         <p class="footer-tagline">Evidence-backed renewal intelligence. Independent analysis, transparent methodology.</p>
       </div>
@@ -1459,7 +1433,7 @@
   <div class="auth-modal" style="position:relative;">
     <button class="auth-modal-close" id="auth-modal-close" aria-label="Close">×</button>
     <div class="auth-modal-header">
-      <div class="auth-modal-logo">Renewal<span class="auth-modal-logo-scope">Scope</span></div>
+      <div class="auth-modal-logo"><img class="brand-logo" src="renewalscope-logo.png" width="2172" height="724" alt="RenewalScope" /></div>
       <div class="auth-modal-subtitle">Evidence-backed renewal intelligence</div>
     </div>
     <div class="auth-tabs">
