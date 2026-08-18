@@ -7,6 +7,7 @@ import type { ProductInput, EngineResult } from './types.js';
 import { PRODUCT_CATALOG } from './products.js';
 import { getCurrentUser, signIn, signUp, signOut, resetPassword, onAuthStateChange, signInWithGoogle, type AuthState } from './auth.js';
 import { checkEntitlement } from './entitlements.js';
+import { isNoDefensibleSavingsResult, shouldShowProfessionalUpgrade } from './freemium.js';
 
 // ── Auth State ────────────────────────────────────────────────────────────────
 
@@ -425,28 +426,28 @@ function verdictLabel(v: ResultType): string {
   }
 }
 
-function renderExecutiveSummary(output: EngineOutput): void {
+function renderExecutiveSummary(output: EngineOutput, isNoDefensibleSavings: boolean): void {
   const container = $('results-executive-summary');
   if (!container) return;
   const fr = output.free_result;
-  const isVerified = fr.verdict === ResultType.VERIFIED_BEFORE_AFTER;
-  const showSavings = isVerified && fr.savings_amount != null && fr.savings_amount > 0;
+  const showSavings = (fr.verdict === ResultType.VERIFIED_BEFORE_AFTER || fr.verdict === ResultType.SAVINGS_IDENTIFIED) &&
+    fr.savings_amount != null && fr.savings_amount > 0;
   const candidateCount = output.candidates?.candidates.length ?? 0;
   const blockedCount = output.candidates?.blocked.length ?? 0;
   const stat = (label: string, value: string, cls = '') =>
     `<div class="exec-stat"><div class="exec-stat-label">${label}</div>` +
     `<div class="exec-stat-value${cls ? ' ' + cls : ''}">${value}</div></div>`;
   let statsHtml = stat('Current Annual Spend', fmtUSD(fr.current_spend));
-  if (showSavings) statsHtml += stat('Verified Savings', fmtUSD(fr.savings_amount!), 'green');
+  if (showSavings) statsHtml += stat('Potential Defensible Savings', `${fmtUSD(fr.savings_amount!)}/year`, 'green');
   statsHtml += stat('Optimization Candidates', String(candidateCount));
-  statsHtml += stat('Blocked Products', String(blockedCount));
+  if (!isNoDefensibleSavings) statsHtml += stat('Blocked Products', String(blockedCount));
   statsHtml += stat('Verdict', verdictLabel(fr.verdict));
   let noticesHtml = '';
-  const topWarnings = output.warnings.slice(0, 2);
+  const topWarnings = isNoDefensibleSavings ? [] : output.warnings.slice(0, 2);
   if (topWarnings.length > 0)
     noticesHtml += `<div class="alert warning" style="margin-top:16px;"><strong>Notices:</strong><br>` +
       topWarnings.map(w => `• ${w}`).join('<br>') + `</div>`;
-  const topAssumptions = output.assumptions.slice(0, 2);
+  const topAssumptions = isNoDefensibleSavings ? [] : output.assumptions.slice(0, 2);
   if (topAssumptions.length > 0)
     noticesHtml += `<div class="alert info" style="margin-top:12px;"><strong>Commercial Assumptions:</strong><br>` +
       topAssumptions.map(a => `• ${a}`).join('<br>') + `</div>`;
@@ -1599,7 +1600,7 @@ function renderStatusHero(output: EngineOutput): void {
     badgeText = 'No Defensible Savings'; titleText = 'No Defensible Savings Identified';
   }
 
-  const savingsLabel = verdict === ResultType.VERIFIED_BEFORE_AFTER ? 'Verified Annual Savings' : 'Identified Savings';
+  const savingsLabel = verdict === ResultType.VERIFIED_BEFORE_AFTER ? 'Verified Annual Savings' : 'Potential Defensible Savings';
   const savingsHTML = showSavings
     ? `<div class="spend-item"><div class="spend-label">${savingsLabel}</div>` +
       `<div class="spend-value savings">${fmtUSD(savings!)}</div></div>` : '';
@@ -1607,7 +1608,9 @@ function renderStatusHero(output: EngineOutput): void {
   container.innerHTML = `<div class="status-hero ${heroClass}">` +
     `<div class="status-badge ${badgeClass}">${badgeText}</div>` +
     `<div class="status-title">${titleText}</div>` +
-    `<div class="status-subtitle">${output.free_result.explanation}</div>` +
+    `<div class="status-subtitle">${isNoDefensibleSavingsResult(output)
+      ? 'Based on the information provided, RenewalScope could not identify a defensible savings opportunity.'
+      : output.free_result.explanation}</div>` +
     `<div class="spend-display">` +
     `<div class="spend-item"><div class="spend-label">Current Annual Spend</div>` +
     `<div class="spend-value">${fmtUSD(output.free_result.current_spend)}</div></div>` +
@@ -1710,6 +1713,13 @@ function renderResultsList(output: EngineOutput): void {
       (r.explanation ? `<div class="result-explanation">${r.explanation}</div>` : '') +
       savingHTML + evidenceHTML + `</div>`;
   }).join('');
+}
+
+function renderFreeSummary(output: EngineOutput): void {
+  const container = $('results-list');
+  if (!container) return;
+  const summary = output.free_result.main_opportunity ?? output.free_result.explanation;
+  container.innerHTML = `<div class="alert info">${summary}</div>`;
 }
 
 // ── Results: Warnings & Assumptions ──────────────────────────────────────────
@@ -1820,14 +1830,28 @@ function renderResults(output: EngineOutput): void {
 }
 
 function renderFreeResult(output: EngineOutput): void {
-  renderExecutiveSummary(output);
+  const noDefensibleSavings = isNoDefensibleSavingsResult(output);
+  const canShowProfessionalUpgrade = shouldShowProfessionalUpgrade(output);
+  const resultsListCard = $('results-list')?.parentElement;
+  const proSection = $('pro-report-section');
+
+  renderExecutiveSummary(output, noDefensibleSavings);
   renderStatusHero(output);
   renderBenchmark(output);
-  renderResultsList(output);
-  renderKnownUnknown(output);
+  if (resultsListCard) resultsListCard.hidden = noDefensibleSavings;
+  if (noDefensibleSavings) {
+    const knownUnknown = $('results-known-unknown');
+    if (knownUnknown) knownUnknown.innerHTML = '';
+  } else {
+    renderFreeSummary(output);
+    const knownUnknown = $('results-known-unknown');
+    if (knownUnknown) knownUnknown.innerHTML = '';
+  }
 
-  // Show Pro preview/CTA
-  renderProPreview();
+  // A new analysis always starts at the free-result boundary.
+  if (proSection) proSection.hidden = true;
+
+  renderProPreview(canShowProfessionalUpgrade);
 }
 
 function renderProReport(output: EngineOutput): void {
@@ -1839,9 +1863,13 @@ function renderProReport(output: EngineOutput): void {
   renderWhatToConfirm(output);
 }
 
-function renderProPreview(): void {
+function renderProPreview(showProfessionalUpgrade: boolean): void {
   const container = $('pro-preview-section');
   if (!container) return;
+  if (!showProfessionalUpgrade) {
+    container.innerHTML = '';
+    return;
+  }
 
   container.innerHTML = `
     <div style="margin-top:48px;padding:48px 32px;background:linear-gradient(135deg, #f8faf9 0%, #ffffff 100%);border:2px solid #d4af37;border-radius:16px;box-shadow:0 4px 12px rgba(212,175,55,0.15);">
@@ -2067,12 +2095,15 @@ async function handleSignIn(email: string, password: string) {
     hideAuthModal();
 
     // If we were trying to view pro report, show it now
-    if (hasProAccess && lastOutput) {
+    if (hasProAccess && lastOutput &&
+      sessionStorage.getItem('rs_intended_action') === 'professional_report' &&
+      shouldShowProfessionalUpgrade(lastOutput)) {
       renderProReport(lastOutput);
       const previewSection = $('pro-preview-section');
       const proSection = $('pro-report-section');
       if (previewSection) previewSection.hidden = true;
       if (proSection) proSection.hidden = false;
+      sessionStorage.removeItem('rs_intended_action');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
@@ -2174,7 +2205,7 @@ async function handleSignOut() {
   const proSection = $('pro-report-section');
   const previewSection = $('pro-preview-section');
   if (proSection) proSection.hidden = true;
-  if (previewSection) previewSection.hidden = false;
+  if (previewSection) previewSection.hidden = !lastOutput || !shouldShowProfessionalUpgrade(lastOutput);
 }
 
 async function handleGoogleSignIn() {
@@ -2208,8 +2239,10 @@ function requireAuth() {
 }
 
 async function handleViewProReport() {
+  if (!lastOutput || !shouldShowProfessionalUpgrade(lastOutput)) return;
+
   // Preserve current analysis in session storage
-  if (lastInput && lastOutput) {
+  if (lastInput) {
     sessionStorage.setItem('rs_last_input', JSON.stringify(lastInput));
     sessionStorage.setItem('rs_last_output', JSON.stringify(lastOutput));
     sessionStorage.setItem('rs_intended_action', 'professional_report');
@@ -2222,9 +2255,7 @@ async function handleViewProReport() {
 
   // In beta, all authenticated users have Pro access
   // Render Pro content immediately
-  if (lastOutput) {
-    renderProReport(lastOutput);
-  }
+  renderProReport(lastOutput);
 
   // Hide preview, show Pro section
   const previewSection = $('pro-preview-section');
@@ -2350,7 +2381,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sessionStorage.removeItem('rs_intended_action');
 
         // User was trying to access Pro report, restore and continue
-        if (authState.authenticated && lastOutput && hasProAccess) {
+        if (authState.authenticated && lastOutput && hasProAccess && shouldShowProfessionalUpgrade(lastOutput)) {
           // Show results container and render free result first
           setHidden('landing', true);
           setHidden('wizard', true);
