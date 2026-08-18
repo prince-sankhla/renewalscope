@@ -2239,6 +2239,22 @@ async function handleViewProReport() {
 // ── Init ──────────────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
+  // This single-page app keeps the public landing page and private states in one
+  // document. Keep the homepage indexable, but mark active authentication,
+  // analysis, and report states as non-indexable without changing their URLs.
+  const robotsMeta = document.querySelector('meta[name="robots"]');
+  const privateViewIds = ['auth-modal', 'wizard', 'loading', 'results-container'];
+  const syncRobotsForVisibleView = () => {
+    const privateViewIsVisible = privateViewIds.some(id => !$(id)?.hidden);
+    robotsMeta?.setAttribute('content', privateViewIsVisible ? 'noindex, nofollow' : 'index, follow');
+  };
+  const privateViewObserver = new MutationObserver(syncRobotsForVisibleView);
+  privateViewIds.forEach(id => {
+    const view = $(id);
+    if (view) privateViewObserver.observe(view, { attributes: true, attributeFilter: ['hidden'] });
+  });
+  syncRobotsForVisibleView();
+
   // Mobile nav toggle
   const hamburger = $('hamburger');
   const mobileMenu = $('mobile-menu');
@@ -2553,4 +2569,3 @@ document.addEventListener('DOMContentLoaded', () => {
     window.location.reload();
   });
 });
-
