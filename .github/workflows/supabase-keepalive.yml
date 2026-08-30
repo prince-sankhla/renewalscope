@@ -10,9 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Ping Supabase
+        env:
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
           curl --fail --silent --show-error \
-            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "authorization: Bearer $SUPABASE_ANON_KEY" \
             "https://qzunabrdemvyruvaozer.supabase.co/rest/v1/" \
             -o /dev/null
