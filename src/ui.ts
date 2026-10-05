@@ -408,7 +408,7 @@ function buildEngineInput(): Record<string, unknown> {
   const input: Record<string, unknown> = {
     annual_cost_usd: state.annual_cost_usd,
     acv_usd: state.acv_usd,
-    contract_term: state.contract_term === 'other' ? 'annual' : state.contract_term,
+    contract_term: state.contract_term,
     products: state.selected_products,
     product_inputs: state.product_inputs,
   };
