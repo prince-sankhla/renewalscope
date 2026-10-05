@@ -5,7 +5,7 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "npm run build:ui && tsc",
     "build:ui": "esbuild src/ui.ts --bundle --outfile=public/bundle.js --platform=browser --target=es2020 --minify",
     "dev": "esbuild src/ui.ts --bundle --outfile=public/bundle.js --platform=browser --target=es2020 --watch",
     "test": "tsc && node --test dist/tests/*.test.js"
