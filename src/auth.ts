@@ -20,9 +20,9 @@ export function getAuthRedirectUrl(): string {
 
   return PRODUCTION_AUTH_REDIRECT_URL;
 }
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6dW5hYnJkZW12eXJ1dmFvemVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5NDU3MDgsImV4cCI6MjEwMjUyMTcwOH0.cE3JVKZt0Y0EO5nS1SdEimVljdudfzKhS2mHhoH0wng';
+const SUPABASE_PUBLISHABLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6dW5hYnJkZW12eXJ1dmFvemVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5NDU3MDgsImV4cCI6MjEwMjUyMTcwOH0.cE3JVKZt0Y0EO5nS1SdEimVljdudfzKhS2mHhoH0wng';
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
