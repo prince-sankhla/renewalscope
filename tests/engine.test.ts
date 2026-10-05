@@ -433,6 +433,12 @@ describe('ruleRateProtection', () => {
     assert.equal(r!.result_type, ResultType.SAVINGS_IDENTIFIED);
   });
 
+  it('fires conservatively when contract term is other/unknown', () => {
+    const r = ruleRateProtection({ ...baseInput, contract_term: 'other' });
+    assert.ok(r);
+    assert.equal(r!.result_type, ResultType.SAVINGS_IDENTIFIED);
+  });
+
   it('fires when rate_protection_status is unclear even on multi_year term', () => {
     const r = ruleRateProtection({ ...baseInput, contract_term: 'multi_year', rate_protection_status: 'unclear' });
     assert.ok(r);
