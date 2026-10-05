@@ -3,4 +3,4 @@ Allow: /
 
 # RenewalScope has no dedicated public URLs for authentication, analyses, or reports.
 # Those views are client-side state and are marked noindex while active.
-Sitemap: https://renewalscope.princesankhala670.workers.dev/sitemap.xml
+Sitemap: https://renewalscope.vercel.app/sitemap.xml
