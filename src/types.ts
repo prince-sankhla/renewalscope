@@ -179,7 +179,7 @@ export interface UserInput {
   acv_usd: number;
   /** Flat list derived from product_inputs; kept for backward compat with benchmark matching */
   products: string[];
-  contract_term: 'annual' | 'multi_year';
+  contract_term: 'annual' | 'multi_year' | 'other';
 
   // Structured per-product inputs (replaces the flat products[] for engine logic)
   product_inputs?: ProductInput[];
