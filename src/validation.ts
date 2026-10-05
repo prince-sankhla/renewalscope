@@ -195,6 +195,8 @@ export function validateUserInput(input: unknown): ValidationResult {
   if (u.credits_usd !== undefined) {
     if (typeof u.credits_usd !== 'number' || u.credits_usd < 0) {
       hardErrors.push(invalid('credits_usd', 'Must be a non-negative number'));
+    } else if (typeof u.annual_cost_usd === 'number' && u.credits_usd > u.annual_cost_usd) {
+      hardErrors.push(invalid('credits_usd', 'Cannot exceed current annual spend'));
     }
   }
 
