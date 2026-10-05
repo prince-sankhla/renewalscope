@@ -390,6 +390,12 @@ describe('renewal and optional field validation', () => {
     assert.equal(r.valid, false);
   });
 
+  it('rejects credits_usd above annual spend', () => {
+    const r = validateUserInput(minValid({ annual_cost_usd: 10000, credits_usd: 10001 }));
+    assert.equal(r.valid, false);
+    assert.ok(r.errors.some((e) => e.field === 'credits_usd'));
+  });
+
   it('accepts credits_usd of 0', () => {
     const r = validateUserInput(minValid({ credits_usd: 0 }));
     assert.equal(r.valid, true);
