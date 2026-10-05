@@ -81,7 +81,7 @@ export function ruleAcvGrowth(input: UserInput): RuleResult | null {
  */
 export function ruleRateProtection(input: UserInput): RuleResult | null {
   const noProtection =
-    input.contract_term === 'annual' ||
+    (input.contract_term === 'annual' || input.contract_term === 'other') ||
     input.rate_protection_status === 'unclear' ||
     input.rate_protection_status === 'none';
 
