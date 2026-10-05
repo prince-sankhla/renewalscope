@@ -2629,16 +2629,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnAnalyze = $('btn-analyze');
   if (btnAnalyze) btnAnalyze.addEventListener('click', () => { void runAnalysis(); });
 
-  // New analysis
-  $('btn-new-analysis')?.addEventListener('click', () => {
-    state = makeInitialState();
-    setHidden('results-container', true);
-    setHidden('loading', true);
-    setHidden('wizard', true);
-    setHidden('landing', false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-
   // PDF download
   $('btn-download-pdf')?.addEventListener('click', () => {
     // In beta: Enforce authentication only (all authenticated users have Pro access)
