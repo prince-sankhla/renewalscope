@@ -4,7 +4,7 @@ import { createClient, type User, type Session, type AuthChangeEvent, type AuthE
 
 // Browser-safe public credentials (anon key, not service-role)
 const SUPABASE_URL = 'https://qzunabrdemvyruvaozer.supabase.co';
-const PRODUCTION_AUTH_REDIRECT_URL = 'https://renewalscope.princesankhala670.workers.dev';
+const PRODUCTION_AUTH_REDIRECT_URL = 'https://renewalscope.vercel.app/';
 
 /**
  * Keeps authentication callbacks on the current local development server while
@@ -14,7 +14,7 @@ export function getAuthRedirectUrl(): string {
   if (typeof window !== 'undefined') {
     const { hostname, origin } = window.location;
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return origin;
+      return origin.endsWith('/') ? origin : `${origin}/`;
     }
   }
 
@@ -64,10 +64,10 @@ export async function getSession(): Promise<Session | null> {
   }
 }
 
-export async function signUp(email: string, password: string): Promise<{ user: User | null; error: AuthError | null }> {
+export async function signUp(email: string, password: string): Promise<{ user: User | null; session: Session | null; error: AuthError | null }> {
   try {
     const { data, error } = await supabase.auth.signUp({
-      email,
+      email: email.trim().toLowerCase(),
       password,
       options: {
         emailRedirectTo: getAuthRedirectUrl(),
@@ -76,15 +76,16 @@ export async function signUp(email: string, password: string): Promise<{ user: U
 
     if (error) {
       console.error('signUp error:', error);
-      return { user: null, error };
+      return { user: null, session: null, error };
     }
 
-    return { user: data.user, error: null };
+    return { user: data.user, session: data.session, error: null };
   } catch (err) {
     console.error('signUp exception:', err);
     const errorMessage = err instanceof Error ? err.message : 'Network error: Failed to connect to authentication server';
     return {
       user: null,
+      session: null,
       error: {
         message: errorMessage,
         name: 'NetworkError',
@@ -97,7 +98,7 @@ export async function signUp(email: string, password: string): Promise<{ user: U
 export async function signIn(email: string, password: string): Promise<{ user: User | null; error: AuthError | null }> {
   try {
     const { data, error } = await supabase.auth.signInWithPassword({
-      email,
+      email: email.trim().toLowerCase(),
       password,
     });
 
@@ -142,7 +143,7 @@ export async function signOut(): Promise<{ error: AuthError | null }> {
 
 export async function resetPassword(email: string): Promise<{ error: AuthError | null }> {
   try {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
       redirectTo: getAuthRedirectUrl(),
     });
 
