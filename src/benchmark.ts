@@ -7,8 +7,12 @@ import { ALL_EVIDENCE_ROWS } from './evidence.js';
 import { PUBLIC_QUOTE_ROWS } from './data/procore_public_quotes.js';
 
 export function calcEffectiveRate(annual_cost_usd: number, acv_usd: number, credits_usd?: number): number {
+  if (annual_cost_usd < 0) throw new Error('annual_cost_usd must be non-negative');
   if (acv_usd <= 0) throw new Error('acv_usd must be positive');
-  const netCost = annual_cost_usd - (credits_usd ?? 0);
+  const credits = credits_usd ?? 0;
+  if (credits < 0) throw new Error('credits_usd must be non-negative');
+  if (credits > annual_cost_usd) throw new Error('credits_usd cannot exceed annual_cost_usd');
+  const netCost = annual_cost_usd - credits;
   return (netCost / acv_usd) * 1_000_000;
 }
 
